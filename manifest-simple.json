@@ -1,0 +1,14 @@
+{
+  "name": "AthletiXApp Simple",
+  "short_name": "AthletiX",
+  "description": "Aplikacja treningowa dla trenerów personalnych — Sigma AthletiX",
+  "start_url": "./athletix-simple.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0b0b",
+  "theme_color": "#0b0b0b",
+  "icons": [
+    {"src": "icon-simple-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-simple-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

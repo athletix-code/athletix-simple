@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0b0b">
+<meta name="apple-mobile-web-app-title" content="AthletiX">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>AthletiX Simple — Sigma AthletiX</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+
+<!-- ════ SETTINGS ════ -->
+<div id="settings">
+<div class="s-inner">
+
+<div class="hdr">
+  <div class="hdr-app" style="white-space:nowrap;">A<span style="color:#ef4444;">X</span> <span class="hdr-sub-text" style="margin-top:0;font-size:9px;">Simple · Sigma Athleti<span style="color:#ef4444;">X</span></span></div>
+  <div style="display:flex;gap:4px;align-items:center;">
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" style="margin-top:0;padding:4px 8px;font-size:14px;min-height:32px;min-width:32px;">☀️</button>
+    <button onclick="logout()" style="background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);padding:4px 8px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;color:var(--muted);min-height:32px;display:flex;align-items:center;gap:3px;">🚪 Wyloguj</button>
+  </div>
+</div>
+
+<!-- ══ ATHLETE QUICK-SELECT BAR ══ -->
+<div id="athlete-bar" style="display:none;background:linear-gradient(90deg,#0f172a,#1e293b,#0f172a);border-bottom:2px solid #3b82f6;padding:4px 10px;align-items:center;justify-content:space-between;flex-wrap:nowrap;">
+  <div id="athlete-bar-buttons" style="display:flex;gap:8px;align-items:center;flex:1;"></div>
+  <button onclick="openAthleteBarSelector()" title="Zmień skład" style="flex-shrink:0;background:transparent;border:1px solid rgba(255,255,255,.18);border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:12px;color:rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;margin-left:8px;">✎</button>
+</div>
+
+<!-- ══ MAIN NAV ══ -->
+<div style="background:var(--s1);border-bottom:1px solid var(--border);padding:4px 10px 0;display:flex;flex-direction:column;gap:0;flex-shrink:0;">
+  <button onclick="openAthleteBarSelector()" style="position:relative;width:100%;min-height:36px;background:linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 50%,#1e3a5f 100%);border:none;border-radius:var(--r-xs);padding:4px 10px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:5px;">
+    <span style="font-size:11px;">👥</span>
+    <span>MY ATHLETI<span style="color:#ef4444;">X</span> TEAM</span>
+    <span style="position:absolute;right:10px;font-size:10px;color:rgba(255,255,255,.55);font-weight:700;" id="athlete-bar-count"></span>
+  </button>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding-bottom:3px;">
+    <button class="mtab on" id="mt-tempo" onclick="setMode('tempo')"><span style="font-size:13px;line-height:1;display:block;">⏱</span>Tempo</button>
+    <button class="mtab" id="mt-reactive" onclick="setMode('reactive')"><span style="font-size:13px;line-height:1;display:block;">👁</span>Reactive</button>
+    <button class="mtab" id="mt-interval" onclick="setMode('interval')"><span style="font-size:13px;line-height:1;display:block;">🔥</span>Interwały</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;padding-bottom:4px;">
+    <button class="mtab mgmt" id="mt-diary" onclick="setMode('diary')"><span style="font-size:13px;line-height:1;display:block;">📋</span>Sesja</button>
+    <button class="mtab mgmt" id="mt-athletes" onclick="setMode('athletes')"><span style="font-size:13px;line-height:1;display:block;">👤</span>Zawodnicy</button>
+    <button class="mtab mgmt" id="mt-plans" onclick="setMode('plans')"><span style="font-size:13px;line-height:1;display:block;">📅</span>Plany</button>
+    <button class="mtab mgmt" id="mt-data" onclick="setMode('data')"><span style="font-size:13px;line-height:1;display:block;">💾</span>Dane</button>
+  </div>
+</div>
+
+<div class="tab-scroll">
+
+<!-- ══ TEMPO ══ -->
+<div id="tab-tempo">
+  <div class="sec-label">Dźwięk</div>
+  <div class="sound-row">
+    <button class="sound-btn on" id="tb-off" onclick="setSnd('off')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 005.12 2.12L9 9z"/><path d="M15 9.34V4a3 3 0 00-5.94-.6L15 9.34zM17 16.95A7 7 0 015.05 8M12 19v3M8 19h8"/></svg>
+      Wyciszony
+    </button>
+    <button class="sound-btn" id="tb-met" onclick="setSnd('met')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Metronom
+    </button>
+    <button class="sound-btn" id="tb-voice" onclick="setSnd('voice')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+      Głos
+    </button>
+    <button class="sound-btn" id="tb-int" onclick="setSnd('int')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Sygnały
+    </button>
+  </div>
+
+  <div class="sec-label">Fazy ruchu</div>
+  <div class="phase-grid">
+    <div class="phase-card red">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;">
+        <div class="pc-label">Ekscentryka</div>
+        <svg width="13" height="22" viewBox="0 0 13 22" fill="none"><line x1="6.5" y1="1" x2="6.5" y2="17" stroke="#fca5a5" stroke-width="2" stroke-linecap="round"/><path d="M1 12L6.5 19L12 12" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="pc-sub">Mięsień się wydłuża</div>
+      <div class="pc-val" id="vl-dn">3 s</div>
+      <div class="chips" id="c-dn"></div>
+      <div class="custom-row">
+        <button class="cadj" onpointerdown="startAdj('dn',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button>
+        <div class="cval" id="cv-dn" style="color:var(--red-text);">3 s</div>
+        <button class="cadj" onpointerdown="startAdj('dn',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button>
+      </div>
+    </div>
+    <div class="phase-card green">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;">
+        <div class="pc-label">Koncentryka</div>
+        <svg width="13" height="22" viewBox="0 0 13 22" fill="none"><line x1="6.5" y1="21" x2="6.5" y2="5" stroke="#86efac" stroke-width="2" stroke-linecap="round"/><path d="M1 10L6.5 3L12 10" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="pc-sub">Mięsień się skraca</div>
+      <div class="pc-val" id="vl-up">2 s</div>
+      <div class="chips" id="c-up"></div>
+      <div class="custom-row">
+        <button class="cadj" onpointerdown="startAdj('up',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button>
+        <div class="cval" id="cv-up" style="color:var(--green-text);">2 s</div>
+        <button class="cadj" onpointerdown="startAdj('up',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+    <div class="param-card" style="margin-bottom:0;">
+      <div class="param-top"><div><div class="pc-label">Pauza</div><div class="pc-sub" style="margin-top:2px;">Zatrzymanie w dole</div></div><div class="param-val-display" id="vl-pa">1 s</div></div>
+      <div class="param-controls"><button class="adj" onclick="adj('pa',-1)">−</button><input type="range" min="0" max="5" step="1" value="1" id="sl-pa" oninput="syncV('pa',this.value)"><button class="adj" onclick="adj('pa',1)">+</button></div>
+    </div>
+    <div class="param-card" style="margin-bottom:0;">
+      <div class="param-top"><div><div class="pc-label">Odpoczynek</div><div class="pc-sub" style="margin-top:2px;">Przerwa między pow.</div></div><div class="param-val-display" id="vl-rs">2 s</div></div>
+      <div class="param-controls"><button class="adj" onclick="adj('rs',-1)">−</button><input type="range" min="0" max="10" step="1" value="2" id="sl-rs" oninput="syncV('rs',this.value)"><button class="adj" onclick="adj('rs',1)">+</button></div>
+    </div>
+  </div>
+  <div class="param-card">
+    <div class="param-top"><div><div class="pc-label">Przygotowanie</div><div class="pc-sub" style="margin-top:2px;">Odliczanie przed startem</div></div><div class="param-val-display" id="vl-gr">5 s</div></div>
+    <div class="param-controls"><button class="adj" onclick="adj('gr',-1)">−</button><input type="range" min="1" max="15" step="1" value="5" id="sl-gr" oninput="syncV('gr',this.value)"><button class="adj" onclick="adj('gr',1)">+</button></div>
+  </div>
+
+  <div class="reps-card">
+    <div class="reps-header"><div><div class="pc-label">Powtórzenia</div><div class="pc-sub" style="margin-top:2px;">Liczba powtórzeń w serii</div></div><div class="reps-val-display" id="vl-rp" style="color:#1d4ed8;">8</div></div>
+    <div class="chips" id="c-rp" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;"></div>
+    <div class="custom-row">
+      <button class="cadj" onpointerdown="startAdj('rp',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button>
+      <div class="cval" id="cv-rp" style="color:#1d4ed8;">8</div>
+      <button class="cadj" onpointerdown="startAdj('rp',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REACTIVE ══ -->
+<div id="tab-reactive">
+  <div class="sec-label">Tryb</div>
+  <div class="sub-tabs">
+    <button class="stab on" id="st-colors" onclick="setRcSub('colors')">Kolory</button>
+    <button class="stab" id="st-arrows" onclick="setRcSub('arrows')">Strzałki</button>
+    <button class="stab" id="st-balance" onclick="setRcSub('balance')">Balance</button>
+  </div>
+  <div class="rc-panel show" id="rcp-colors"><div class="sec-label">Wybierz kolory</div><div class="color-grid" id="color-grid"></div></div>
+  <div class="rc-panel" id="rcp-arrows"><div class="sec-label">Wybierz strzałki</div><div class="arrow-grid-sel" id="arrow-grid"></div></div>
+
+  <!-- ══ BALANCE SETTINGS ══ -->
+  <div class="rc-panel" id="rcp-balance">
+    <div class="sec-label">Kierunek ruchu</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:7px;">
+      <button class="stab on" id="bal-dir-lr" onclick="setBalDir('lr')">↔ Prawo-Lewo</button>
+      <button class="stab" id="bal-dir-ud" onclick="setBalDir('ud')">↕ Góra-Dół</button>
+      <button class="stab" id="bal-dir-2d" onclick="setBalDir('2d')">⊕ 2D</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px;">
+      <button class="stab" id="bal-dir-zoom" onclick="setBalDir('zoom')" style="text-align:left;padding:8px 12px;">
+        <span style="font-weight:900;">🔍 Zoom</span><br><span style="font-size:9px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted);">Powiększanie i pomniejszanie</span>
+      </button>
+      <button class="stab" id="bal-dir-3d" onclick="setBalDir('3d')" style="text-align:left;padding:8px 12px;">
+        <span style="font-weight:900;">🌀 3D</span><br><span style="font-size:9px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted);">Ruch + zoom jednocześnie</span>
+      </button>
+    </div>
+
+    <div class="sec-label">Prędkość</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:5px;margin-bottom:14px;">
+      <button class="stab" id="bal-spd-1" onclick="setBalSpeed(1)">B. wolno</button>
+      <button class="stab" id="bal-spd-2" onclick="setBalSpeed(2)">Wolno</button>
+      <button class="stab on" id="bal-spd-3" onclick="setBalSpeed(3)">Średnio</button>
+      <button class="stab" id="bal-spd-4" onclick="setBalSpeed(4)">Szybko</button>
+      <button class="stab" id="bal-spd-5" onclick="setBalSpeed(5)">B. szybko</button>
+    </div>
+
+    <div class="sec-label">Wzorzec ruchu</div>
+    <div style="display:grid;grid-template-columns:1fr;gap:7px;margin-bottom:14px;">
+      <button class="stab on" id="bal-pat-const" onclick="setBalPattern('constant')" style="text-align:left;padding:10px 14px;">
+        <span style="font-weight:900;">Jednostajny</span><br><span style="font-size:9px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted);">Stałe tempo, ruch od krawędzi do krawędzi</span>
+      </button>
+      <button class="stab" id="bal-pat-ranspd" onclick="setBalPattern('randomSpeed')" style="text-align:left;padding:10px 14px;">
+        <span style="font-weight:900;">Losowe tempo</span><br><span style="font-size:9px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted);">Ruch od krawędzi do krawędzi, losowa prędkość</span>
+      </button>
+      <button class="stab" id="bal-pat-randir" onclick="setBalPattern('randomDir')" style="text-align:left;padding:10px 14px;">
+        <span style="font-weight:900;">Losowy kierunek</span><br><span style="font-size:9px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted);">Stałe tempo, zmiana kierunku w losowym momencie</span>
+      </button>
+      <button class="stab" id="bal-pat-full" onclick="setBalPattern('fullRandom')" style="text-align:left;padding:10px 14px;">
+        <span style="font-weight:900;">Pełny losowy</span><br><span style="font-size:9px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted);">Losowy kierunek + losowe tempo przemieszczania</span>
+      </button>
+    </div>
+
+    <div class="sec-label">Rozmiar kulki</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:14px;">
+      <button class="stab" id="bal-sz-s" onclick="setBalSize('s')">Mała</button>
+      <button class="stab on" id="bal-sz-m" onclick="setBalSize('m')">Średnia</button>
+      <button class="stab" id="bal-sz-l" onclick="setBalSize('l')">Duża</button>
+      <button class="stab" id="bal-sz-xl" onclick="setBalSize('xl')">B. duża</button>
+    </div>
+  </div>
+
+  <!-- Colors/Arrows only settings -->
+  <div id="rc-stim-settings" style="">
+  <div class="toggle-card" style="margin-top:12px;">
+    <div class="toggle-row"><div class="toggle-info"><div class="pc-label">Bez powtórzeń</div><div class="pc-sub" style="margin-top:2px;">Ten sam bodziec nie pojawi się dwa razy z rzędu</div></div><div style="display:flex;flex-direction:column;align-items:center;gap:2px;"><button class="tog" id="tog-norepeat" onclick="toggleOpt('norepeat')"></button><div class="tog-label" id="lbl-norepeat">Wył</div></div></div>
+  </div>
+  <div class="toggle-card">
+    <div class="toggle-row"><div class="toggle-info"><div class="pc-label">Ekran bazowy</div><div class="pc-sub" style="margin-top:2px;">Krótki powrót do ekranu neutralnego między bodźcami</div></div><div style="display:flex;flex-direction:column;align-items:center;gap:2px;"><button class="tog" id="tog-base" onclick="toggleOpt('base')"></button><div class="tog-label" id="lbl-base">Wył</div></div></div>
+    <div class="sub-param" id="base-time-row"><div class="sub-param-label">Czas bazowy</div><button class="tsp-adj" onpointerdown="startRcAdj('base',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button><div class="sub-param-val" id="rc-base-val">0.5 s</div><button class="tsp-adj" onpointerdown="startRcAdj('base',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button></div>
+  </div>
+  <div style="margin-top:4px;">
+    <div class="sec-label">Czas wyświetlania bodźca</div>
+    <div class="time-mode-row"><button class="tmbtn on" id="tm-fixed" onclick="setTimeMode('fixed')">Stały</button><button class="tmbtn" id="tm-random" onclick="setTimeMode('random')">Losowy przedział</button></div>
+    <div class="param-card" style="margin-bottom:0;">
+      <div class="time-panel show" id="tp-fixed"><div class="tsp-row" style="margin-bottom:0;"><div class="tsp-label">Czas</div><button class="tsp-adj" onpointerdown="startRcAdj('fixed',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button><div class="tsp-val" id="rc-fixed-val">1.0 s</div><button class="tsp-adj" onpointerdown="startRcAdj('fixed',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button></div></div>
+      <div class="time-panel" id="tp-random"><div class="tsp-row"><div class="tsp-label">Min</div><button class="tsp-adj" onpointerdown="startRcAdj('min',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button><div class="tsp-val" id="rc-min-val">0.5 s</div><button class="tsp-adj" onpointerdown="startRcAdj('min',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button></div><div class="tsp-row" style="margin-bottom:0;"><div class="tsp-label">Max</div><button class="tsp-adj" onpointerdown="startRcAdj('max',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button><div class="tsp-val" id="rc-max-val">2.0 s</div><button class="tsp-adj" onpointerdown="startRcAdj('max',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button></div></div>
+    </div>
+  </div>
+  </div>
+  <!-- SESSION MODE -->
+  <div style="margin-top:12px;">
+    <div class="sec-label">Tryb sesji</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button id="rcmode-time" onclick="setRcSessionMode('time')" style="flex:1;padding:9px;border-radius:var(--r-xs);border:2px solid var(--accent);background:var(--accent-bg);color:var(--accent);font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;cursor:pointer;">⏱ Czas sesji</button>
+      <button id="rcmode-int" onclick="setRcSessionMode('int')" style="flex:1;padding:9px;border-radius:var(--r-xs);border:2px solid var(--border2);background:var(--s2);color:var(--muted);font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;cursor:pointer;">🔁 Interwały</button>
+    </div>
+    <div id="rc-sess-time-panel">
+      <div class="session-chips-wrap" id="sess-chips-wrap"></div>
+      <div class="param-card" id="sess-custom-row" style="display:none;margin-bottom:0;">
+        <div class="tsp-row" style="margin-bottom:0;"><div class="tsp-label" style="width:auto;min-width:32px;">Min</div><button class="tsp-adj" onpointerdown="startRcAdj('sess',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button><div class="tsp-val" id="rc-sess-val">4 min</div><button class="tsp-adj" onpointerdown="startRcAdj('sess',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button></div>
+      </div>
+    </div>
+    <div id="rc-sess-int-panel" style="display:none;">
+      <div class="param-card" style="margin-bottom:8px;">
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+          <div style="flex:1;"><div class="sec-label" style="margin-bottom:4px;font-size:10px;">Praca</div><div style="display:flex;align-items:center;gap:6px;"><button class="tsp-adj" onpointerdown="startRcIntAdj('work',-1)" onpointerup="rcIntStopAdj()" onpointerleave="rcIntStopAdj()">−</button><div class="tsp-val" id="rci-work-val" style="min-width:40px;text-align:center;">20 s</div><button class="tsp-adj" onpointerdown="startRcIntAdj('work',1)" onpointerup="rcIntStopAdj()" onpointerleave="rcIntStopAdj()">+</button></div></div>
+          <div style="flex:1;"><div class="sec-label" style="margin-bottom:4px;font-size:10px;">Przerwa</div><div style="display:flex;align-items:center;gap:6px;"><button class="tsp-adj" onpointerdown="startRcIntAdj('rest',-1)" onpointerup="rcIntStopAdj()" onpointerleave="rcIntStopAdj()">−</button><div class="tsp-val" id="rci-rest-val" style="min-width:40px;text-align:center;">10 s</div><button class="tsp-adj" onpointerdown="startRcIntAdj('rest',1)" onpointerup="rcIntStopAdj()" onpointerleave="rcIntStopAdj()">+</button></div></div>
+          <div style="flex:1;"><div class="sec-label" style="margin-bottom:4px;font-size:10px;">Rundy</div><div style="display:flex;align-items:center;gap:6px;"><button class="tsp-adj" onpointerdown="startRcIntAdj('rounds',-1)" onpointerup="rcIntStopAdj()" onpointerleave="rcIntStopAdj()">−</button><div class="tsp-val" id="rci-rounds-val" style="min-width:32px;text-align:center;">6</div><button class="tsp-adj" onpointerdown="startRcIntAdj('rounds',1)" onpointerup="rcIntStopAdj()" onpointerleave="rcIntStopAdj()">+</button></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INTERVAL TIMER ══ -->
+<div id="tab-interval">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div class="sec-label" style="margin-bottom:0;">Dźwięk interwałów</div>
+    <button id="int-snd-setting" onclick="toggleIntSndSetting()" style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:6px 14px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;">🔕 Wyciszony</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <button onclick="openHistory()" style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:7px 13px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:5px;"><span>📊</span> Historia</button>
+  </div>
+  <div class="sec-label">Rodzaj timera</div>
+  <div class="int-sub-tabs" style="grid-template-columns:1fr 1fr 1fr;">
+    <button class="istab on" id="it-emom" onclick="setIntSub('emom')">EMOM</button>
+    <button class="istab" id="it-custom" onclick="setIntSub('custom')">Własny</button>
+    <button class="istab" id="it-stoper" onclick="setIntSub('stoper')">Stoper</button>
+  </div>
+
+  <div class="int-panel show" id="itp-emom">
+    <div class="int-block">
+      <div class="int-block-hdr"><div class="int-block-label">Liczba minut</div><div class="int-block-val" id="vl-emom-min" style="color:#b45309;">10</div></div>
+      <div class="chips" id="c-emom" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;"></div>
+      <div class="custom-row">
+        <button class="cadj" onpointerdown="startIntAdj('emom',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button>
+        <div class="cval" id="cv-emom" style="color:#fdba74;">10</div>
+        <button class="cadj" onpointerdown="startIntAdj('emom',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="int-panel" id="itp-custom">
+    <div class="sec-label">Szybkie presety</div>
+    <div class="preset-row">
+      <button class="preset-btn" data-key="tabata" onclick="applyPreset('tabata')"><span class="pb-name">Tabata</span><span class="pb-vals">20s / 10s / 8</span></button>
+      <button class="preset-btn" data-key="hiit4020" onclick="applyPreset('hiit4020')"><span class="pb-name">HIIT</span><span class="pb-vals">10s / 20s / 8</span></button>
+      <button class="preset-btn" data-key="power3015" onclick="applyPreset('power3015')"><span class="pb-name">Power</span><span class="pb-vals">6s / 30s / 8</span></button>
+    </div>
+    <div class="preset-row" id="custom-preset-row">
+      <button class="preset-btn" id="cpreset-0" onclick="handleCustomPresetClick(0)"><span class="pb-name" id="cpname-0" style="color:var(--dim);">+ Własny 1</span><span class="pb-vals" id="cpvals-0">— / — / —</span></button>
+      <button class="preset-btn" id="cpreset-1" onclick="handleCustomPresetClick(1)"><span class="pb-name" id="cpname-1" style="color:var(--dim);">+ Własny 2</span><span class="pb-vals" id="cpvals-1">— / — / —</span></button>
+      <button class="preset-btn" id="cpreset-2" onclick="handleCustomPresetClick(2)"><span class="pb-name" id="cpname-2" style="color:var(--dim);">+ Własny 3</span><span class="pb-vals" id="cpvals-2">— / — / —</span></button>
+    </div>
+    <div class="int-block">
+      <div class="int-block-hdr"><div class="int-block-label">Czas pracy</div><div class="int-block-val" id="vl-work" style="color:var(--green-text);">30 s</div></div>
+      <div class="chips" id="c-work"></div>
+      <div class="time-select-wrap"><select class="time-select" id="sel-work" onchange="selectIntTime('work',this.value)"></select></div>
+    </div>
+    <div class="int-block">
+      <div class="int-block-hdr"><div class="int-block-label">Czas przerwy</div><div class="int-block-val" id="vl-rest-int" style="color:var(--red-text);">15 s</div></div>
+      <div class="chips" id="c-rest-int"></div>
+      <div class="time-select-wrap"><select class="time-select" id="sel-rest" onchange="selectIntTime('rest',this.value)"></select></div>
+    </div>
+    <div class="int-block">
+      <div class="int-block-hdr"><div class="int-block-label">Liczba rund</div><div class="int-block-val" id="vl-rounds" style="color:#1d4ed8;">8</div></div>
+      <div class="chips" id="c-rounds" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;"></div>
+      <div class="custom-row">
+        <button class="cadj" onpointerdown="startIntAdj('rounds',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button>
+        <div class="cval" id="cv-rounds" style="color:#1d4ed8;">8</div>
+        <button class="cadj" onpointerdown="startIntAdj('rounds',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="int-panel" id="itp-stoper">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
+      <button id="stoper-mode-down" onclick="setStoperMode('down')" class="istab on">⬇ Odliczanie</button>
+      <button id="stoper-mode-up" onclick="setStoperMode('up')" class="istab">⬆ W górę</button>
+    </div>
+    <div id="stoper-down-config">
+      <div class="int-block">
+        <div class="int-block-hdr"><div class="int-block-label">Szybkie presety</div><div class="int-block-val" id="vl-stoper" style="color:#fdba74;">30 s</div></div>
+        <div class="chips" id="c-stoper" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:12px;"></div>
+        <div class="sec-label" style="margin-bottom:8px;">Własny czas</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><div class="pc-label" style="margin-bottom:6px;">Minuty</div><select class="time-select" id="sel-stoper-min" onchange="updateStoperTime()"></select></div>
+          <div><div class="pc-label" style="margin-bottom:6px;">Sekundy</div><select class="time-select" id="sel-stoper-sec" onchange="updateStoperTime()"></select></div>
+        </div>
+      </div>
+    </div>
+    <div id="stoper-up-config" style="display:none;">
+      <div class="int-block" style="text-align:center;padding:20px 16px;">
+        <div style="font-size:36px;font-weight:900;color:#7e22ce;letter-spacing:-.02em;margin-bottom:6px;">∞</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;">Stoper odlicza w górę.<br>Naciśnij <strong>Stop</strong> kiedy chcesz.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="int-block" style="margin-bottom:12px;">
+    <div class="int-block-hdr"><div class="int-block-label">Przygotowanie</div></div>
+    <div class="custom-row" style="margin-top:4px;padding-top:0;border-top:none;">
+      <button class="cadj" onpointerdown="startIntAdj('prep',-1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">−</button>
+      <div class="cval" id="vl-int-prep" style="color:rgba(251,146,60,.9);">5 s</div>
+      <button class="cadj" onpointerdown="startIntAdj('prep',1)" onpointerup="stopAdj()" onpointerleave="stopAdj()">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DZIENNIK PROSTY ══ -->
+<div id="tab-diary" style="display:none;">
+  <!-- Plan selector for session -->
+  <div id="session-plan-bar" style="display:none;background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(168,85,247,.08));border:1px solid var(--accent);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);">📅 Realizacja planu</div>
+      <button onclick="closeSessionPlan()" style="background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--muted);padding:2px 6px;">✕</button>
+    </div>
+    <div id="session-plan-name" style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:4px;"></div>
+    <textarea id="session-plan-text" rows="6" style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;outline:none;resize:vertical;line-height:1.5;box-sizing:border-box;margin-bottom:6px;"></textarea>
+    <div style="display:flex;gap:6px;">
+      <button id="plan-save-close-btn" style="flex:1;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:var(--r-xs);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">💾 Zapisz na dziś i zamknij</button>
+      <button id="plan-archive-btn" style="padding:8px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--dim);cursor:pointer;">📦 Archiwizuj</button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:10px;">
+    <button onclick="openPlanSelector()" style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:7px 14px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:5px;">📅 Wybierz plan</button>
+    <button onclick="printSimpleReport()" style="background:#1d4ed8;border:none;border-radius:var(--r-xs);padding:7px 14px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;color:#fff;display:flex;align-items:center;gap:5px;">🖨 Raport</button>
+  </div>
+
+  <!-- Simple notepad form -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;">
+    <div style="display:flex;gap:6px;margin-bottom:12px;">
+      <button id="diary-mode-strength" onclick="setSimpleDiaryMode('strength')" style="flex:1;padding:8px;border-radius:var(--r-xs);border:2px solid var(--accent);background:var(--accent-bg);color:var(--accent);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">💪 TRENING</button>
+      <button id="diary-mode-test" onclick="setSimpleDiaryMode('test')" style="flex:1;padding:8px;border-radius:var(--r-xs);border:2px solid var(--border2);background:var(--s2);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">🧪 TEST</button>
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Zawodnik</div>
+      <select class="crm-input" id="note-athlete" style="margin-bottom:0;">
+        <option value="">Wybierz...</option>
+      </select>
+    </div>
+
+    <!-- TRENING notepad -->
+    <div id="diary-note-form">
+      <div style="margin-bottom:8px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Wpis treningowy</div>
+        <textarea id="note-text" rows="3" placeholder="Nazwa ćwiczenia, serie, powtórzenia, ciężar..." style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:'Montserrat',sans-serif;font-size:14px;font-weight:600;outline:none;resize:vertical;line-height:1.5;"></textarea>
+      </div>
+      <button onclick="saveNote()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">+ Zapisz wpis</button>
+    </div>
+
+    <!-- TEST structured form -->
+    <div id="diary-test-form" style="display:none;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Kategoria testu</div>
+      <div id="test-cat-btns" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;"></div>
+
+      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Ćwiczenie</div>
+      <div id="test-exercise-wrap">
+        <select class="crm-input" id="test-exercise-sel" style="margin-bottom:0;" onchange="onTestExSelect()">
+          <option value="">Wybierz kategorię...</option>
+        </select>
+      </div>
+
+      <div id="test-value-section" style="display:none;margin-top:10px;">
+        <div style="display:grid;grid-template-columns:1fr 80px;gap:8px;margin-bottom:8px;">
+          <div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">Wynik</div>
+            <input class="crm-input" id="test-value-input" type="text" inputmode="decimal" placeholder="np. 120" style="margin-bottom:0;font-size:16px;font-weight:800;"/>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">Jednostka</div>
+            <input class="crm-input" id="test-unit-display" type="text" readonly style="margin-bottom:0;color:var(--muted);text-align:center;"/>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">Notatka (opcjonalnie)</div>
+          <input class="crm-input" id="test-note-input" type="text" placeholder="np. po rozgrzewce, z asekuracją..." style="margin-bottom:0;"/>
+        </div>
+        <button onclick="saveTestResult()" style="width:100%;padding:12px;background:#a855f7;color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">🧪 Zapisz wynik testu</button>
+      </div>
+
+      <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">
+        <button onclick="openAddCustomTest()" style="background:transparent;border:1px dashed var(--border2);border-radius:var(--r-xs);width:100%;padding:8px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--muted);">+ Dodaj własne ćwiczenie testowe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar -->
+  <div class="cal-wrap">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="calPrev()">‹</button>
+      <div class="cal-month" id="cal-month-label"></div>
+      <button class="cal-nav-btn" onclick="calNext()">›</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+
+  <!-- Day entries -->
+  <div id="day-detail" style="display:none;">
+    <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px;" id="day-detail-title"></div>
+    <div id="day-entries"></div>
+  </div>
+</div>
+
+<!-- ══ ZAWODNICY ══ -->
+<div id="tab-athletes" style="display:none;">
+  <div class="crm-add-form">
+    <div class="pc-label" style="margin-bottom:8px;">Dodaj zawodnika</div>
+    <input class="crm-input" id="crm-name" placeholder="Imię i nazwisko" type="text"/>
+    <input class="crm-input" id="crm-notes" placeholder="Notatki (opcjonalnie)" type="text" style="margin-bottom:0;"/>
+    <button class="go-btn" style="margin-top:10px;margin-bottom:0;padding:12px;" onclick="addAthlete()">Dodaj</button>
+  </div>
+  <div class="sec-label">Lista zawodników</div>
+  <div id="athlete-list"></div>
+</div>
+
+<!-- ══ PLANY ══ -->
+<div id="tab-plans" style="display:none;">
+  <!-- Create new plan -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Nowy plan</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div>
+        <div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Zawodnik</div>
+        <select class="crm-input" id="plan-athlete" style="margin-bottom:0;"></select>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Nazwa planu</div>
+        <input class="crm-input" id="plan-name" type="text" placeholder="np. Plan A, Czwartek siła..." style="margin-bottom:0;"/>
+      </div>
+    </div>
+    <textarea id="plan-text" rows="4" placeholder="Treść planu — ćwiczenia, serie, uwagi..." style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;outline:none;resize:vertical;line-height:1.5;margin-bottom:8px;box-sizing:border-box;"></textarea>
+    <button onclick="createPlan()" style="width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.06em;">📅 Utwórz plan</button>
+  </div>
+
+  <!-- Filter -->
+  <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);">Filtruj:</div>
+    <select class="crm-input" id="plan-filter" onchange="renderPlans()" style="margin-bottom:0;flex:1;padding:6px 10px;font-size:12px;">
+      <option value="all">Wszyscy zawodnicy</option>
+    </select>
+    <select class="crm-input" id="plan-status-filter" onchange="renderPlans()" style="margin-bottom:0;width:auto;padding:6px 10px;font-size:12px;">
+      <option value="active">Aktywne</option>
+      <option value="done">Zakończone</option>
+      <option value="all">Wszystkie</option>
+    </select>
+  </div>
+
+  <!-- Plans list -->
+  <div id="plans-list"></div>
+</div>
+
+<!-- ══ DANE ══ -->
+<div id="tab-data" style="display:none;">
+
+  <!-- EXPORT -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Eksport danych</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;">Pobierz plik ze wszystkimi danymi: zawodnicy, sesje, wpisy, ustawienia.</div>
+    <button onclick="exportAllData()" style="width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">💾 Eksportuj dane</button>
+    <div id="export-status" style="font-size:11px;color:var(--green-text);margin-top:6px;text-align:center;display:none;"></div>
+  </div>
+
+  <!-- IMPORT -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Import danych</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5;">Wczytaj dane z pliku. <strong style="color:var(--red-text);">Obecne dane zostaną nadpisane.</strong></div>
+    <label style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:var(--s2);border:2px dashed var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:var(--text);">
+      📂 Wybierz plik JSON
+      <input type="file" id="import-file" accept=".json" onchange="importDataFile(this)" style="display:none;"/>
+    </label>
+    <div id="import-status" style="font-size:11px;margin-top:6px;text-align:center;display:none;"></div>
+  </div>
+
+  <!-- AUTO-BACKUP -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Automatyczne przypomnienie o backupie</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.4;">Aplikacja przypomni o eksporcie danych. Ręczny eksport tworzy nowy plik z datą.</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:5px;">
+      <button class="stab" id="ab-off" onclick="setAutoBackup(0)">Wył</button>
+      <button class="stab" id="ab-1" onclick="setAutoBackup(1)">Co 1h</button>
+      <button class="stab" id="ab-3" onclick="setAutoBackup(3)">Co 3h</button>
+      <button class="stab" id="ab-8" onclick="setAutoBackup(8)">Co 8h</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;">
+      <button class="stab" id="ab-12" onclick="setAutoBackup(12)">Co 12h</button>
+      <button class="stab" id="ab-24" onclick="setAutoBackup(24)">Co 24h</button>
+      <button class="stab" id="ab-72" onclick="setAutoBackup(72)">Co 3 dni</button>
+      <button class="stab" id="ab-168" onclick="setAutoBackup(168)">Co 7 dni</button>
+    </div>
+    <div id="ab-status" style="font-size:11px;color:var(--muted);text-align:center;"></div>
+  </div>
+
+  <!-- DATA STATS -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;">Stan danych</div>
+    <div id="data-stats" style="font-size:12px;color:var(--muted);line-height:1.8;"></div>
+  </div>
+
+  <!-- DANGER ZONE -->
+  <div style="background:var(--s1);border:1px solid rgba(220,38,38,.2);border-radius:var(--r);padding:16px;margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red-text);margin-bottom:8px;">Strefa zagrożenia</div>
+    <button onclick="confirmClearAllData()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(220,38,38,.3);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--red-text);">🗑 Usuń wszystkie dane</button>
+  </div>
+
+  <!-- Konto -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Konto</div>
+    <div id="account-info" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="openChangePassword()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);">🔑 Zmień hasło</button>
+      <button onclick="logout()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);">🚪 Wyloguj</button>
+    </div>
+  </div>
+
+  <div style="text-align:center;font-size:9px;color:var(--dim);padding:10px 0;">AthletiXApp Simple v1.0 · Paweł Łydek · Sigma AthletiX</div>
+</div>
+
+</div><!-- /tab-scroll -->
+
+<div class="go-row" id="go-row-wrap" style="padding-left:0;padding-right:0;">
+  <button class="go-btn" id="go-btn-main" onclick="goMain()" style="margin-bottom:0;display:block;">Rozpocznij</button>
+  <div id="go-btn-interval" style="gap:8px;">
+    <button class="go-btn" onclick="goMain()" style="margin-bottom:0;flex:1;background:#fb923c;padding:12px;">📋 Z zapisem</button>
+    <button class="go-btn" onclick="goFast()" style="margin-bottom:0;flex:1;background:var(--s3);border:1px solid var(--border2);color:var(--text);letter-spacing:.1em;padding:12px;">⚡ Szybki Start</button>
+  </div>
+  <div style="text-align:center;margin-top:6px;padding-bottom:10px;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);">AX Simple v1.0 · Sigma AthletiX</div>
+</div>
+
+</div><!-- /s-inner -->
+</div><!-- /settings -->
+
+<!-- HISTORY -->
+<div id="history-overlay">
+  <div class="hist-inner">
+    <div class="hist-hdr">
+      <button class="crm-back" onclick="closeHistory()">← Wróć</button>
+      <div class="crm-title">Historia sesji</div>
+    </div>
+    <div id="hist-content"></div>
+  </div>
+</div>
+
+<!-- PRE-SESSION -->
+<div id="presession-modal">
+  <div class="presession-sheet">
+    <div class="presession-title">Dane sesji</div>
+    <div class="presession-section">Zawodnik</div>
+    <div id="ps-athletes"></div>
+    <input class="crm-input" id="ps-custom-name" placeholder="lub wpisz imię ręcznie..." style="margin-top:4px;"/>
+    <div class="presession-section">Ćwiczenie</div>
+    <div id="ps-exercises"></div>
+    <input class="crm-input" id="ps-custom-exercise" placeholder="lub wpisz ćwiczenie ręcznie..." style="margin-top:4px;margin-bottom:0;"/>
+    <button class="presession-start" onclick="confirmPresession()">Rozpocznij sesję</button>
+    <button onclick="skipPresession()" style="width:100%;padding:11px;background:transparent;color:var(--muted);border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px;">Pomiń — uruchom bez danych</button>
+    <button onclick="el('presession-modal').classList.remove('show')" style="width:100%;padding:11px;background:transparent;color:var(--red-text);border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:2px;">← Wróć do ustawień</button>
+  </div>
+</div>
+
+<!-- INTERVAL DATA -->
+<div id="interval-data-modal">
+  <div class="data-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="data-sheet-title" id="data-sheet-title" style="margin-bottom:0;">Dane interwału #1</div>
+      <div id="data-elapsed-wrap" style="display:none;text-align:right;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);">czas od końca</div>
+        <div id="data-elapsed-timer" style="font-size:28px;font-weight:900;color:#ef4444;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;">0s</div>
+      </div>
+    </div>
+    <div class="data-row">
+      <div class="data-field"><div class="data-label">Moc max (W)</div><input class="data-input" id="d-power" type="number" inputmode="numeric" placeholder="—"/></div>
+      <div class="data-field"><div class="data-label">Prędkość max</div><input class="data-input" id="d-speed" type="text" placeholder="—"/></div>
+    </div>
+    <div class="data-row">
+      <div class="data-field"><div class="data-label">Dystans (m)</div><input class="data-input" id="d-dist" type="number" inputmode="numeric" placeholder="—"/></div>
+      <div class="data-field"><div class="data-label">Tętno (bpm)</div><input class="data-input" id="d-hr" type="number" inputmode="numeric" placeholder="—"/></div>
+    </div>
+    <button class="data-save" onclick="saveIntervalData()">Zapisz i kontynuuj</button>
+    <button class="data-skip" onclick="skipIntervalData()">Pomiń</button>
+  </div>
+</div>
+
+<!-- HR DROP -->
+<div id="hrdrop-modal">
+  <div class="hrdrop-card" id="hrdrop-card">
+    <div class="hrdrop-title">Mierzyć spadek tętna?</div>
+    <div class="hrdrop-sub">Pomiar tętna po 30s i 60s od zakończenia interwału.</div>
+    <button class="hrdrop-yes" onclick="startHRDrop()">Tak — mierzę</button>
+    <button class="hrdrop-no" onclick="closeHRDrop()">Nie, dziękuję</button>
+  </div>
+</div>
+
+<!-- ATHLETE PROFILE OVERLAY -->
+<div class="ap-overlay" id="athlete-profile-overlay">
+  <div style="max-width:500px;margin:0 auto;padding:16px 14px 40px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+      <button onclick="closeAthleteProfile()" style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:7px 12px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);">← Wróć</button>
+      <div style="font-size:16px;font-weight:900;color:var(--text);" id="ap-name-header"></div>
+    </div>
+    <div id="ap-content"></div>
+  </div>
+</div>
+
+<!-- LOCK -->
+<div id="lock-overlay">
+  <div id="lock-bar">
+    <div id="lock-bar-fill"></div>
+    <div id="lock-bar-text">🔒 Przytrzymaj aby odblokować</div>
+  </div>
+</div>
+
+<!-- TEMPO WORKOUT -->
+<div id="workout">
+  <div id="fill"></div>
+  <div class="wo-wrap">
+    <div class="wo-top"><div class="wo-badge" id="wo-badge">Przygotowanie</div><div style="display:flex;gap:8px;align-items:center;"><button class="pause-btn" id="pause-btn-w" onclick="togglePauseW()">⏸</button><button class="lock-btn" onclick="lockScreen()">🔒</button><button class="wo-stop" onclick="stopW()">Stop</button></div></div>
+    <div class="wo-rep-section">
+      <div class="rep-eyebrow" id="rep-eyebrow">Powtórzenie</div>
+      <div class="rep-row"><div class="rep-number" id="rep-number">—</div><div class="rep-total" id="rep-total">z 8</div></div>
+    </div>
+    <div class="wo-main">
+      <div class="phase-block">
+        <div class="wo-phase-name" id="wo-phase-name">Przygotuj się</div>
+        <div class="wo-countdown" id="wo-countdown">5</div>
+        <div class="wo-phase-sub" id="wo-phase-sub">get ready</div>
+      </div>
+    </div>
+    <div class="wo-progress" id="wo-dots"></div>
+  </div>
+</div>
+
+<!-- REACTIVE ACTIVE -->
+<div id="rc-active">
+  <div class="rc-bg" id="rc-bg"></div>
+  <div class="rc-inner">
+    <div class="rc-topbar" id="rc-topbar-normal"><div class="rc-session-time" id="rc-session-time"></div><div class="rc-counter" id="rc-counter">#1</div><div style="display:flex;gap:8px;"><button class="lock-btn" onclick="lockScreen()">🔒</button><button class="rc-stop" onclick="stopRC()">Stop</button></div></div>
+    <div class="rc-center"><div class="rc-arrow-wrap" id="rc-arrow-wrap"></div></div>
+    <div class="rc-bar-wrap"><div class="rc-bar" id="rc-bar"></div></div>
+  </div>
+</div>
+
+<!-- RC INTERVAL HUD -->
+<div id="rc-int-hud" style="display:none;position:fixed;top:0;left:0;right:0;z-index:400;padding:10px 14px 8px;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);">
+  <div style="display:flex;align-items:center;gap:14px;max-width:480px;margin:0 auto;">
+    <div style="position:relative;width:72px;height:72px;flex-shrink:0;">
+      <svg viewBox="0 0 72 72" style="width:72px;height:72px;transform:rotate(-90deg);">
+        <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="5"/>
+        <circle id="rc-int-ring" cx="36" cy="36" r="30" fill="none" stroke="#4ade80" stroke-width="5" stroke-dasharray="188.5" stroke-dashoffset="0" stroke-linecap="round" style="transition:stroke-dashoffset 1s linear, stroke .4s ease;"/>
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;font-family:Montserrat,sans-serif;line-height:1;" id="rc-int-cnt">—</div>
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;color:rgba(255,255,255,.6);" id="rc-int-phase-label">PRACA</div>
+      <div style="font-size:16px;font-weight:900;color:#fff;font-family:Montserrat,sans-serif;" id="rc-int-round-label">Runda 1 / 6</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="lock-btn" onclick="lockScreen()">🔒</button>
+      <button class="rc-stop" onclick="stopRC()" style="padding:8px 14px;">Stop</button>
+    </div>
+  </div>
+</div>
+
+<!-- INTERVAL ACTIVE -->
+<div id="int-active">
+  <div class="int-bg" id="int-bg"></div>
+  <div class="int-inner">
+    <div class="int-topbar"><div style="display:flex;gap:8px;"><button class="pause-btn" id="int-snd-btn" onclick="toggleIntSnd()" style="font-size:16px;padding:5px 10px;">🔔</button><button class="pause-btn" id="pause-btn-i" onclick="togglePauseInt()">⏸</button><button class="lock-btn" onclick="lockScreen()">🔒</button><button class="int-stop" onclick="intSubMode==='stoper'&&_stoperMode==='up'&&intRunning?stopStoperUp():stopInt()">Stop</button></div></div>
+    <div class="int-main">
+      <div class="int-ring-wrap">
+        <svg viewBox="0 0 200 200"><circle class="int-ring-track" cx="100" cy="100" r="90"/><circle class="int-ring-fill" id="int-ring" cx="100" cy="100" r="90"/></svg>
+        <div class="int-ring-center" id="int-main"></div>
+      </div>
+    </div>
+    <div class="int-prog-wrap" id="int-prog"></div>
+    <div id="pause-overlay" style="display:none;position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.62);backdrop-filter:blur(2px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;pointer-events:all;">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.45);">zatrzymano</div>
+      <div style="font-size:56px;font-weight:900;color:#fbbf24;letter-spacing:-.03em;line-height:1;text-shadow:0 0 30px rgba(251,191,36,.4);">PAUZA</div>
+      <button onclick="togglePauseInt()" style="background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);border-radius:50px;padding:12px 32px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:900;color:#fff;letter-spacing:.08em;margin-top:8px;">▶ WZNÓW</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="js/storage.js"></script>
+<script src="js/core.js"></script>
+<script src="js/timers.js"></script>
+<script src="js/athletes.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/status.js"></script>
+<script src="js/diary.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/plans.js"></script>
+<script src="js/data.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/sync.js"></script>
+
+</body>
+</html>

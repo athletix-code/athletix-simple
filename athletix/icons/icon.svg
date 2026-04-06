@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0b0b0b"/>
+  <text x="256" y="220" font-family="system-ui,sans-serif" font-size="160" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="-5">A</text>
+  <text x="328" y="220" font-family="system-ui,sans-serif" font-size="160" font-weight="900" fill="#ef4444" text-anchor="middle" letter-spacing="-5">X</text>
+  <text x="256" y="340" font-family="system-ui,sans-serif" font-size="56" font-weight="700" fill="rgba(255,255,255,0.4)" text-anchor="middle" letter-spacing="6">SIMPLE</text>
+  <text x="256" y="420" font-family="system-ui,sans-serif" font-size="40" font-weight="700" fill="rgba(255,255,255,0.2)" text-anchor="middle" letter-spacing="12">SIGMA</text>
+</svg>

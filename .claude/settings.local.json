@@ -2,7 +2,31 @@
   "permissions": {
     "allow": [
       "Bash(node -e ':*)",
-      "Bash(/usr/bin/python3:*)"
+      "Bash(/usr/bin/python3:*)",
+      "Bash(qlmanage -t -s 512 -o . icon-simple.svg)",
+      "Bash(cp icon-simple.svg.png icon-simple-512.png)",
+      "Bash(sips -z 192 192 icon-simple.svg.png --out icon-simple-192.png)",
+      "Bash(ls -la manifest-simple.json sw-simple.js icon-simple*.*)",
+      "Bash(sort -t':' -k2 -n)",
+      "Bash(sed -n '1013,1081p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(sed -n '1731,1774p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(sed -n '1083,1730p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(sed -n '1775,1842p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(sed -n '1843,2541p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(sed -n '2542,2974p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(sed -n '2975,3275p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(sed -n '3276,3534p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(sed -n '3535,3631p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(sed -n '1,14p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(sed -n '368,1011p' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix-simple.html\")",
+      "Bash(grep -c '^function ' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix/js/\"*.js)",
+      "Bash(grep -ch '^function ' \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix/js/\"*.js)",
+      "Bash(bc)",
+      "Bash(open:*)",
+      "Bash(python3 -m http.server 8080)",
+      "Bash(ls \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix/js/\"*.js)",
+      "Bash(ipconfig getifaddr:*)",
+      "Bash(npm list:*)"
     ]
   }
 }
