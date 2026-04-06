@@ -104,7 +104,7 @@ function openStatusChange(id, status){
       +'<div><div style="font-size:12px;font-weight:700;color:var(--text);">Brak informacji</div>'
       +'<div style="font-size:10px;color:var(--dim);margin-top:1px;">Nie mam jasnej informacji — do kontaktu</div></div></div>'
       +'<div style="margin-bottom:14px;"><div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">Powód</div>'
-      +'<textarea id="status-note" rows="2" placeholder="np. Wakacje, sesja egzaminacyjna, sprawy rodzinne..." style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;resize:vertical;box-sizing:border-box;">'+(a.breakNote||'')+'</textarea></div>'
+      +'<textarea id="status-note" rows="4" placeholder="np. Wakacje, sesja egzaminacyjna, sprawy rodzinne..." style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;resize:vertical;box-sizing:border-box;line-height:1.5;">'+(a.breakNote||'')+'</textarea></div>'
       +'<div style="display:flex;gap:8px;">'
       +'<button id="status-save-btn" style="flex:1;padding:12px;background:#71717a;color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Zapisz</button>'
       +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
@@ -162,10 +162,10 @@ function openInjuryModal(id){
     +'<input id="inj-date" type="date" value="'+(inj.date||today)+'" style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;box-sizing:border-box;max-width:200px;"/></div>'
     // Description
     +'<div style="margin-bottom:10px;"><div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">Opis kontuzji</div>'
-    +'<textarea id="inj-desc" rows="2" placeholder="np. Naderwanie mięśnia czworogłowego, lewa noga..." style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;resize:vertical;box-sizing:border-box;">'+(inj.description||'')+'</textarea></div>'
+    +'<textarea id="inj-desc" rows="4" placeholder="np. Naderwanie mięśnia czworogłowego, lewa noga..." style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;resize:vertical;box-sizing:border-box;line-height:1.5;">'+(inj.description||'')+'</textarea></div>'
     // Recommendations
     +'<div style="margin-bottom:10px;"><div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">Zalecenia</div>'
-    +'<textarea id="inj-reco" rows="2" placeholder="np. Fizjoterapia 2x/tyg, unikać obciążeń osiowych..." style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;resize:vertical;box-sizing:border-box;">'+(inj.recommendations||'')+'</textarea></div>'
+    +'<textarea id="inj-reco" rows="4" placeholder="np. Fizjoterapia 2x/tyg, unikać obciążeń osiowych..." style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;resize:vertical;box-sizing:border-box;line-height:1.5;">'+(inj.recommendations||'')+'</textarea></div>'
     // Contact
     +'<div style="margin-bottom:14px;"><div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">Osoba kontaktowa (lekarz / fizjoterapeuta)</div>'
     +'<input id="inj-contact" type="text" value="'+(inj.contact||'')+'" placeholder="np. dr Kowalski, tel. 600-100-200" style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;box-sizing:border-box;"/></div>'
@@ -229,13 +229,11 @@ function renderAthleteList(){
       +(a.notes?'<div class="athlete-meta" style="margin-top:2px;">'+a.notes+'</div>':'')
       +(total?'<div class="athlete-meta" style="margin-top:3px;color:var(--accent);">'+sessCnt+' sesji · '+notesCnt+' wpisów</div>':'<div class="athlete-meta" style="margin-top:3px;">Brak historii</div>')
       +_walletBadge(a)
-      +statusButtons(a)
-      +statusDetailHtml(a)
       +'</div>'
-      +'<div style="display:flex;align-items:flex-start;gap:6px;flex-shrink:0;">'
-      +(total?'<span style="color:var(--muted);font-size:14px;transition:transform .2s;margin-top:6px;'+(isOpen?'transform:rotate(180deg)':'')+'">▼</span>':'')
+      +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
       +'<button onclick="event.stopPropagation();openAthleteProfile('+a.id+')" style="background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);min-width:44px;min-height:44px;justify-content:center;"><span style="font-size:14px;">👤</span><span style="font-size:9px;font-weight:700;letter-spacing:.06em;font-family:Montserrat,sans-serif;">PROFIL</span></button>'
       +'<button onclick="deleteAthlete('+i+',event)" style="background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);min-width:44px;min-height:44px;justify-content:center;"><span style="font-size:14px;">🗑</span><span style="font-size:9px;font-weight:700;letter-spacing:.06em;font-family:Montserrat,sans-serif;">USUŃ</span></button>'
+      +(total?'<span style="color:var(--muted);font-size:14px;transition:transform .2s;'+(isOpen?'transform:rotate(180deg)':'')+'">▼</span>':'')
       +'</div>';
     if(total){ card.onclick=function(){ _expandedAthlete=(_expandedAthlete===a.name)?null:a.name; loadCRM(); renderAthleteList(); }; }
     wrap.appendChild(card);
@@ -244,6 +242,10 @@ function renderAthleteList(){
       var hist=document.createElement('div');
       hist.style.cssText='background:var(--s1);border:1px solid var(--accent);border-top:none;border-radius:0 0 var(--r) var(--r);padding:12px 14px;margin-top:-6px;';
       var contentHtml='';
+      // Status controls + details (moved from card to expanded section)
+      contentHtml+=statusButtons(a);
+      contentHtml+=statusDetailHtml(a);
+      contentHtml+='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);"></div>';
 
       // Collect all days: sessions + notes
       var byDay={};
