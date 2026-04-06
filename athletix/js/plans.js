@@ -275,13 +275,13 @@ function buildAthletePlansHtml(athleteName){
   if(active.length){
     active.forEach(function(p){
       var preview=(p.text||'').substring(0,60).replace(/\n/g,' ');
-      html+='<div style="background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--r-xs);padding:8px 10px;margin-bottom:6px;cursor:pointer;" onclick="startSessionWithPlan('+p.id+')">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;">'
-        +'<div style="font-size:13px;font-weight:800;color:var(--text);">'+p.name+'</div>'
-        +'<span style="font-size:9px;font-weight:800;color:var(--accent);">▶ REALIZUJ</span>'
-        +'</div>'
-        +(preview?'<div style="font-size:11px;color:var(--muted);margin-top:3px;">'+preview+'</div>':'')
-        +'</div>';
+      html+='<div style="background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--r-xs);padding:8px 10px;margin-bottom:6px;">'
+        +'<div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px;">'+p.name+'</div>'
+        +(preview?'<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">'+preview+'</div>':'')
+        +'<div style="display:flex;gap:6px;">'
+        +'<button onclick="openEditPlan('+p.id+')" style="flex:1;padding:6px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--text);">✏️ Edytuj</button>'
+        +'<button onclick="startSessionWithPlan('+p.id+')" style="flex:1;padding:6px;background:var(--accent);border:none;border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:800;color:#fff;">▶ Realizuj</button>'
+        +'</div></div>';
     });
   } else {
     html+='<div style="font-size:11px;color:var(--dim);margin-bottom:4px;">Brak aktywnych planów</div>';
@@ -318,6 +318,44 @@ function buildAthleteActivePlans(athleteName){
       +'</div>';
   });
   return html;
+}
+
+// ── QUICK PLAN ACCESS (from athlete list + profile) ──
+function openQuickPlan(athleteName){
+  loadPlans();
+  var active=plans.filter(function(p){ return p.athlete===athleteName&&p.status==='active'; });
+  var ov=_ensureOverlay();
+  if(!active.length){
+    ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:340px;width:100%;padding:22px 18px 24px;text-align:center;">'
+      +'<div style="font-size:20px;margin-bottom:8px;">📅</div>'
+      +'<div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:6px;">Brak aktywnych planów</div>'
+      +'<div style="font-size:12px;color:var(--muted);margin-bottom:14px;">'+athleteName+'</div>'
+      +'<button id="_qp-create" style="width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:8px;">+ Utwórz plan</button>'
+      +'<button id="_qp-close" style="width:100%;padding:9px;background:transparent;color:var(--muted);border:none;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Anuluj</button></div>';
+    ov.style.display='flex';
+    document.getElementById('_qp-create').onclick=function(){ _closeOverlay(); setMode('plans'); setTimeout(function(){ var s=el('plan-athlete'); if(s) s.value=athleteName; el('plan-name').focus(); },200); };
+    document.getElementById('_qp-close').onclick=function(){ _closeOverlay(); };
+    return;
+  }
+  var listHtml=active.map(function(p){
+    var preview=(p.text||'').substring(0,40).replace(/\n/g,' ');
+    return '<div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:10px 12px;margin-bottom:6px;">'
+      +'<div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px;">'+p.name+'</div>'
+      +(preview?'<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">'+preview+'</div>':'')
+      +'<div style="display:flex;gap:6px;">'
+      +'<button data-pid="'+p.id+'" class="_qp-edit" style="flex:1;padding:8px;background:var(--s1);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:var(--text);">✏️ Edytuj</button>'
+      +'<button data-pid="'+p.id+'" class="_qp-run" style="flex:1;padding:8px;background:var(--accent);border:none;border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:#fff;">▶ Realizuj</button>'
+      +'</div></div>';
+  }).join('');
+  ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:380px;width:100%;padding:22px 18px 24px;max-height:80vh;overflow-y:auto;">'
+    +'<div style="font-size:14px;font-weight:900;color:var(--text);margin-bottom:4px;">📅 Plany</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-bottom:14px;">'+athleteName+'</div>'
+    +listHtml
+    +'<button id="_qp-close" style="width:100%;padding:9px;background:transparent;color:var(--muted);border:none;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px;">Zamknij</button></div>';
+  ov.style.display='flex';
+  document.querySelectorAll('._qp-edit').forEach(function(btn){ btn.onclick=function(){ var pid=parseInt(btn.getAttribute('data-pid')); _closeOverlay(); openEditPlan(pid); }; });
+  document.querySelectorAll('._qp-run').forEach(function(btn){ btn.onclick=function(){ var pid=parseInt(btn.getAttribute('data-pid')); _closeOverlay(); startSessionWithPlan(pid); }; });
+  document.getElementById('_qp-close').onclick=function(){ _closeOverlay(); };
 }
 
 // ── INIT ──

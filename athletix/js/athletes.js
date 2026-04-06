@@ -98,7 +98,7 @@ function renderAthleteBar(){
     btns.appendChild(btn);
     // Profile shortcut button
     var profBtn=document.createElement('button');
-    profBtn.style.cssText='display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);cursor:pointer;flex-shrink:0;margin-left:-6px;margin-bottom:4px;font-size:10px;color:rgba(255,255,255,.5);';
+    profBtn.style.cssText='display:flex;align-items:center;justify-content:center;width:'+cs+'px;height:'+cs+'px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);cursor:pointer;flex-shrink:0;margin-left:-4px;margin-bottom:4px;font-size:'+(many?'10':'12')+'px;color:rgba(255,255,255,.6);';
     profBtn.textContent='👤';
     profBtn.title='Profil '+name;
     (function(n){ profBtn.onclick=function(e){
@@ -107,17 +107,6 @@ function renderAthleteBar(){
       if(ath) openAthleteProfile(ath.id);
     }; })(name);
     btns.appendChild(profBtn);
-    // Test results shortcut button
-    var testBtn=document.createElement('button');
-    testBtn.style.cssText='display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);cursor:pointer;flex-shrink:0;margin-left:-6px;margin-bottom:4px;font-size:10px;color:rgba(255,255,255,.5);';
-    testBtn.textContent='📈';
-    testBtn.title='Wyniki testów '+name;
-    (function(n){ testBtn.onclick=function(e){
-      e.stopPropagation();
-      loadCRM(); var ath=athletes.find(function(x){ return x.name===n; });
-      if(ath){ openAthleteProfile(ath.id); setTimeout(function(){ openTestHistory(n); },200); }
-    }; })(name);
-    btns.appendChild(testBtn);
   });
 }
 
