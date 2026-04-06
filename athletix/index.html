@@ -24,7 +24,7 @@
   <div style="display:flex;gap:4px;align-items:center;">
     <button id="undo-header-btn" onclick="toggleUndoDropdown()" style="background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);padding:4px 8px;cursor:pointer;font-size:13px;color:var(--muted);min-height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;position:relative;" title="Cofnij / Ponów">↩</button>
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" style="margin-top:0;padding:4px 8px;font-size:14px;min-height:32px;min-width:32px;">☀️</button>
-    <button onclick="logout()" style="background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);padding:4px 8px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;color:var(--muted);min-height:32px;display:flex;align-items:center;gap:3px;">🚪</button>
+    <button onclick="logout()" style="background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);padding:4px 8px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;color:var(--muted);min-height:32px;display:flex;align-items:center;letter-spacing:.04em;">Wyloguj</button>
   </div>
 </div>
 
@@ -59,7 +59,7 @@
 <!-- ══ TEMPO ══ -->
 <div id="tab-tempo">
   <div class="sec-label">Dźwięk</div>
-  <div class="sound-row">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
     <button class="sound-btn on" id="tb-off" onclick="setSnd('off')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 005.12 2.12L9 9z"/><path d="M15 9.34V4a3 3 0 00-5.94-.6L15 9.34zM17 16.95A7 7 0 015.05 8M12 19v3M8 19h8"/></svg>
       Wyciszony
@@ -67,14 +67,6 @@
     <button class="sound-btn" id="tb-met" onclick="setSnd('met')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
       Metronom
-    </button>
-    <button class="sound-btn" id="tb-voice" onclick="setSnd('voice')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
-      Głos
-    </button>
-    <button class="sound-btn" id="tb-int" onclick="setSnd('int')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Sygnały
     </button>
   </div>
 
@@ -361,7 +353,7 @@
   <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;">
     <div style="display:flex;gap:6px;margin-bottom:12px;">
       <button id="diary-mode-strength" onclick="setSimpleDiaryMode('strength')" style="flex:1;padding:8px;border-radius:var(--r-xs);border:2px solid var(--accent);background:var(--accent-bg);color:var(--accent);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">💪 TRENING</button>
-      <button id="diary-mode-test" onclick="setSimpleDiaryMode('test')" style="flex:1;padding:8px;border-radius:var(--r-xs);border:2px solid var(--border2);background:var(--s2);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">🧪 TEST</button>
+      <button id="diary-mode-test" onclick="setSimpleDiaryMode('test')" style="flex:1;padding:8px;border-radius:var(--r-xs);border:2px solid var(--border2);background:var(--s2);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">📈 TEST</button>
     </div>
 
     <div style="margin-bottom:8px;">
@@ -407,7 +399,7 @@
           <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">Notatka (opcjonalnie)</div>
           <input class="crm-input" id="test-note-input" type="text" placeholder="np. po rozgrzewce, z asekuracją..." style="margin-bottom:0;"/>
         </div>
-        <button onclick="saveTestResult()" style="width:100%;padding:12px;background:#a855f7;color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">🧪 Zapisz wynik testu</button>
+        <button onclick="saveTestResult()" style="width:100%;padding:12px;background:#a855f7;color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">📈 Zapisz wynik testu</button>
       </div>
 
       <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">
@@ -538,9 +530,13 @@
   <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;">
     <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Konto</div>
     <div id="account-info" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
-    <div style="display:flex;gap:8px;">
-      <button onclick="openChangePassword()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);">🔑 Zmień hasło</button>
-      <button onclick="logout()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);">🚪 Wyloguj</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button onclick="openChangeName()" style="padding:10px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:var(--muted);">✏️ Zmień nazwę</button>
+      <button onclick="openChangeEmail()" style="padding:10px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:var(--muted);">📧 Zmień email</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button onclick="openChangePassword()" style="padding:10px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:var(--muted);">🔑 Zmień hasło</button>
+      <button onclick="logout()" style="padding:10px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:var(--muted);">🚪 Wyloguj</button>
     </div>
   </div>
 

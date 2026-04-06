@@ -110,7 +110,7 @@ function renderAthleteBar(){
     // Test results shortcut button
     var testBtn=document.createElement('button');
     testBtn.style.cssText='display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);cursor:pointer;flex-shrink:0;margin-left:-6px;margin-bottom:4px;font-size:10px;color:rgba(255,255,255,.5);';
-    testBtn.textContent='🧪';
+    testBtn.textContent='📈';
     testBtn.title='Wyniki testów '+name;
     (function(n){ testBtn.onclick=function(e){
       e.stopPropagation();
@@ -427,7 +427,7 @@ function openTestHistory(athleteName){
 
     html+='<div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-      +'<div style="font-size:14px;font-weight:800;color:var(--text);">'+(cat.icon||'🧪')+' '+name+'</div>'
+      +'<div style="font-size:14px;font-weight:800;color:var(--text);">'+(cat.icon||'📈')+' '+name+'</div>'
       +'<div style="text-align:right;">'
       +'<div style="font-size:18px;font-weight:900;color:'+(cat.color||'#7e22ce')+';">'+latest.value+' <span style="font-size:11px;font-weight:600;color:var(--muted);">'+latest.unit+'</span></div>'
       +(diffFirst!==null?'<div style="font-size:10px;font-weight:700;color:'+(diffFirst>=0?'var(--green-text)':'var(--red-text)')+';margin-top:2px;">'
@@ -571,7 +571,7 @@ function deleteTestResult(id, athleteName){
     saveTests();
     // Remove matching note entry if exists
     loadNotes();
-    var noteMatch='🧪 '+t.testName+': '+t.value+' '+t.unit;
+    var noteMatch='📈 '+t.testName+': '+t.value+' '+t.unit;
     notes=notes.filter(function(n){ return !(n.date===t.date&&n.athlete===t.athlete&&n.text.indexOf(noteMatch)===0); });
     saveNotes();
     ov.style.display='none';
@@ -696,7 +696,7 @@ function openCompareChart(athleteName, testName){
     b.style.cssText='padding:10px 14px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--text);text-align:left;';
     var oResults=testResults.filter(function(t){ return t.athlete===athleteName&&t.testName===other; });
     var cat2=TEST_LIBRARY[oResults[0].category]||{};
-    b.innerHTML=(cat2.icon||'🧪')+' '+other+' <span style="color:var(--dim);">('+oResults.length+' wyników)</span>';
+    b.innerHTML=(cat2.icon||'📈')+' '+other+' <span style="color:var(--dim);">('+oResults.length+' wyników)</span>';
     b.onclick=function(){
       var cv=document.getElementById('compare-canvas'); cv.style.display='block';
       var oSorted=oResults.sort(function(a,b2){ return a.date>b2.date?1:-1; });

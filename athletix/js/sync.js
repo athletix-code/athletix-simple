@@ -23,7 +23,8 @@ function initSync(){
 
   // Update account info
   var info = el('account-info');
-  if(info) info.innerHTML = '📧 '+currentTrainer.email;
+  var userName=(currentTrainer.user_metadata&&currentTrainer.user_metadata.name)?currentTrainer.user_metadata.name:'';
+  if(info) info.innerHTML = (userName?'👤 '+userName+'<br>':'')+'📧 '+currentTrainer.email;
 }
 
 function syncNow(){

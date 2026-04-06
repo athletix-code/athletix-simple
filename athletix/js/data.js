@@ -75,7 +75,7 @@ function refreshDataStats(){
   s.innerHTML='<div>👤 Zawodnicy: <strong>'+athletes.length+'</strong></div>'
     +'<div>📋 Wpisy notatnika: <strong>'+notes.length+'</strong></div>'
     +'<div>⏱ Sesje interwałowe: <strong>'+sessions.length+'</strong></div>'
-    +'<div>🧪 Wyniki testów: <strong>'+testResults.length+'</strong></div>'
+    +'<div>📈 Wyniki testów: <strong>'+testResults.length+'</strong></div>'
     +'<div>👥 Grupy: <strong>'+teamGroups.length+'</strong></div>'
     +'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">💾 Rozmiar danych: <strong>'+kb+' KB</strong></div>'
     +'<div>📅 Ostatni backup: <strong>'+lastBk+'</strong></div>';

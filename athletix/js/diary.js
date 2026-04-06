@@ -70,7 +70,7 @@ function saveTestResult(){
   saveTests();
   // 2. Save as note entry (for day view / reports) — same date
   loadNotes();
-  var noteText='🧪 '+_selTestName+': '+value+' '+_selTestUnit+(testNote?' — '+testNote:'');
+  var noteText='📈 '+_selTestName+': '+value+' '+_selTestUnit+(testNote?' — '+testNote:'');
   notes.push({id:Date.now()+1, date:saveDay, athlete:athlete, text:noteText, type:'test', time:hh+':'+mm});
   saveNotes();
   el('test-value-input').value=''; el('test-note-input').value='';

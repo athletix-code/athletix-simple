@@ -62,7 +62,6 @@ function setMode(m){
     if(btn) btn.classList.toggle('on',x===m);
     if(tab) tab.style.display=x===m?'block':'none';
   });
-  var plBtn=el('mt-plans'); if(plBtn) plBtn.style.opacity=m==='plans'?'1':'0.5';
   var isInt=m==='interval';
   el('go-btn-main').style.display=(isInt||m==='diary'||m==='athletes'||m==='plans'||m==='data')?'none':'block';
   el('go-btn-interval').classList.toggle('show',isInt);
@@ -102,8 +101,8 @@ function goFS(){ try{ var d=document.documentElement; (d.requestFullscreen||d.we
 function exitFS(){ try{ if(document.fullscreenElement||document.webkitFullscreenElement){ (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document); } }catch(e){} }
 
 // ══ THEME ══
-function toggleTheme(){ var html=document.documentElement; var isDark=html.getAttribute('data-theme')==='dark'; html.setAttribute('data-theme',isDark?'light':'dark'); el('theme-btn').textContent=isDark?'🌙':'☀️'; try{ localStorage.setItem('ct_theme',isDark?'light':'dark'); }catch(e){} }
-(function(){ var t=localStorage.getItem('ct_theme'); if(t&&t!=='dark'){ document.documentElement.setAttribute('data-theme','light'); el('theme-btn').textContent='🌙'; } })();
+function toggleTheme(){ var html=document.documentElement; var isDark=html.getAttribute('data-theme')==='dark'; html.setAttribute('data-theme',isDark?'light':'dark'); el('theme-btn').textContent=isDark?'🌑':'☀️'; try{ localStorage.setItem('ct_theme',isDark?'light':'dark'); }catch(e){} }
+(function(){ var t=localStorage.getItem('ct_theme'); if(t&&t!=='dark'){ document.documentElement.setAttribute('data-theme','light'); el('theme-btn').textContent='🌑'; } })();
 
 // ══ LOCK SCREEN ══
 function lockScreen(){ var ov=el('lock-overlay'); el('lock-bar-fill').style.transition='none'; el('lock-bar-fill').style.transform='scaleX(0)'; el('lock-bar-text').textContent='🔒  Przytrzymaj aby odblokować'; ov.style.opacity='0'; ov.style.display='block'; ov.offsetHeight; ov.style.opacity='1'; }

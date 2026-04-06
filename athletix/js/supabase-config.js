@@ -156,6 +156,62 @@ function useOfflineMode(){
   _renderUndoBar();
 }
 
+function openChangeName(){
+  var ov=_ensureOverlay();
+  var currentName=currentTrainer&&currentTrainer.user_metadata?currentTrainer.user_metadata.name||'':'';
+  ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:340px;width:100%;padding:22px 18px 24px;">'
+    +'<div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:14px;">✏️ Zmień nazwę</div>'
+    +'<div style="margin-bottom:14px;"><div style="font-size:10px;color:var(--dim);margin-bottom:4px;">Imię i nazwisko</div>'
+    +'<input id="new-name" type="text" value="'+currentName+'" placeholder="Twoje imię i nazwisko" style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:600;box-sizing:border-box;"/></div>'
+    +'<div id="name-msg" style="display:none;font-size:11px;font-weight:700;margin-bottom:10px;"></div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button id="name-save" style="flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Zapisz</button>'
+    +'<button id="name-cancel" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
+  ov.style.display='flex';
+  setTimeout(function(){ el('new-name').focus(); },100);
+  document.getElementById('name-save').onclick=function(){
+    var name=(el('new-name').value||'').trim();
+    if(!name) return;
+    var msg=el('name-msg');
+    sb.auth.updateUser({data:{name:name}}).then(function(res){
+      if(res.error){ msg.textContent=res.error.message; msg.style.color='var(--red-text)'; msg.style.display='block'; }
+      else {
+        if(currentTrainer) currentTrainer.user_metadata={name:name};
+        sb.from('trainers').update({name:name}).eq('id',currentTrainer.id).then(function(){});
+        var info=el('account-info'); if(info) info.innerHTML='👤 '+name+'<br>📧 '+currentTrainer.email;
+        msg.textContent='✓ Nazwa zmieniona!'; msg.style.color='var(--green-text)'; msg.style.display='block';
+        setTimeout(function(){ _closeOverlay(); },1200);
+      }
+    });
+  };
+  document.getElementById('name-cancel').onclick=function(){ _closeOverlay(); };
+}
+
+function openChangeEmail(){
+  var ov=_ensureOverlay();
+  ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:340px;width:100%;padding:22px 18px 24px;">'
+    +'<div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:4px;">📧 Zmień email</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Obecny: '+(currentTrainer?currentTrainer.email:'')+'</div>'
+    +'<div style="margin-bottom:14px;"><div style="font-size:10px;color:var(--dim);margin-bottom:4px;">Nowy adres email</div>'
+    +'<input id="new-email" type="email" placeholder="nowy@email.com" style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:600;box-sizing:border-box;"/></div>'
+    +'<div id="email-msg" style="display:none;font-size:11px;font-weight:700;margin-bottom:10px;"></div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button id="email-save" style="flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Zmień email</button>'
+    +'<button id="email-cancel" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
+  ov.style.display='flex';
+  setTimeout(function(){ el('new-email').focus(); },100);
+  document.getElementById('email-save').onclick=function(){
+    var email=(el('new-email').value||'').trim();
+    if(!email){ return; }
+    var msg=el('email-msg');
+    sb.auth.updateUser({email:email}).then(function(res){
+      if(res.error){ msg.textContent=res.error.message; msg.style.color='var(--red-text)'; msg.style.display='block'; }
+      else { msg.textContent='✓ Link potwierdzający wysłany na '+email; msg.style.color='var(--green-text)'; msg.style.display='block'; }
+    });
+  };
+  document.getElementById('email-cancel').onclick=function(){ _closeOverlay(); };
+}
+
 function openChangePassword(){
   var ov=_ensureOverlay();
   ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:360px;width:100%;padding:22px 18px 24px;">'
@@ -194,7 +250,31 @@ function openChangePassword(){
 }
 
 function logout(){
-  if(window.sb) sb.auth.signOut();
-  currentTrainer = null;
-  showAuthScreen();
+  var ov=_ensureOverlay();
+  ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:340px;width:100%;padding:22px 18px 24px;text-align:center;">'
+    +'<div style="font-size:20px;margin-bottom:8px;">🚪</div>'
+    +'<div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:6px;">Wylogować się?</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.5;">Dane lokalne pozostaną na urządzeniu.<br>Możesz też pobrać backup przed wylogowaniem.</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px;">'
+    +'<button id="logout-export" style="width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💾 Pobierz backup i wyloguj</button>'
+    +'<button id="logout-now" style="width:100%;padding:11px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Wyloguj bez backupu</button>'
+    +'<button id="logout-cancel" style="width:100%;padding:9px;background:transparent;color:var(--muted);border:none;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Anuluj</button>'
+    +'</div></div>';
+  ov.style.display='flex';
+  document.getElementById('logout-export').onclick=function(){
+    exportAllData();
+    setTimeout(function(){
+      if(window.sb) sb.auth.signOut();
+      currentTrainer=null;
+      _closeOverlay();
+      showAuthScreen();
+    },500);
+  };
+  document.getElementById('logout-now').onclick=function(){
+    if(window.sb) sb.auth.signOut();
+    currentTrainer=null;
+    _closeOverlay();
+    showAuthScreen();
+  };
+  document.getElementById('logout-cancel').onclick=function(){ _closeOverlay(); };
 }
