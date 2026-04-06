@@ -1,0 +1,88 @@
+/* ═══════════════════════════════════════
+   DESKTOP LAYOUT (min-width: 768px only)
+   Nie dotyka mobile — bezpieczne do usunięcia
+   ═══════════════════════════════════════ */
+
+@media (min-width: 768px) {
+
+  /* Wider container */
+  .s-inner {
+    max-width: 900px;
+  }
+
+  /* ── SESJA: calendar left, form right ── */
+  #tab-diary {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  #tab-diary > *:first-child { /* session-plan-bar or report buttons */
+    grid-column: 1 / -1;
+  }
+  #tab-diary > .cal-wrap {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  #tab-diary > #day-detail {
+    grid-column: 1;
+    grid-row: 4;
+  }
+
+  /* ── PLANY: form left, list right ── */
+  #tab-plans {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  #tab-plans > div:first-child { /* create form */
+    grid-column: 1;
+  }
+  #tab-plans > div:nth-child(2) { /* filter */
+    grid-column: 2;
+    grid-row: 1;
+  }
+  #tab-plans > #plans-list {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  /* ── ZAWODNICY: wider cards, 2 columns ── */
+  #athlete-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  #athlete-list > div {
+    break-inside: avoid;
+  }
+
+  /* ── TEMPO/REACTIVE/INTERVAL: center content, limit width ── */
+  #tab-tempo, #tab-reactive, #tab-interval {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* ── DANE: 2 columns ── */
+  #tab-data {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  #tab-data > div:last-child { /* footer */
+    grid-column: 1 / -1;
+  }
+
+  /* ── Profile overlay: wider ── */
+  .ap-overlay > div {
+    max-width: 700px;
+  }
+
+  /* ── Wider GO buttons row ── */
+  #go-row-wrap {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+}
