@@ -22,8 +22,9 @@
 <div class="hdr">
   <div class="hdr-app" style="white-space:nowrap;">A<span style="color:#ef4444;">X</span> <span class="hdr-sub-text" style="margin-top:0;font-size:9px;">Simple · Sigma Athleti<span style="color:#ef4444;">X</span></span></div>
   <div style="display:flex;gap:4px;align-items:center;">
+    <button id="undo-header-btn" onclick="toggleUndoDropdown()" style="background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);padding:4px 8px;cursor:pointer;font-size:13px;color:var(--muted);min-height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;position:relative;" title="Cofnij / Ponów">↩</button>
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" style="margin-top:0;padding:4px 8px;font-size:14px;min-height:32px;min-width:32px;">☀️</button>
-    <button onclick="logout()" style="background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);padding:4px 8px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;color:var(--muted);min-height:32px;display:flex;align-items:center;gap:3px;">🚪 Wyloguj</button>
+    <button onclick="logout()" style="background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);padding:4px 8px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;color:var(--muted);min-height:32px;display:flex;align-items:center;gap:3px;">🚪</button>
   </div>
 </div>
 
@@ -554,7 +555,7 @@
     <button class="go-btn" onclick="goMain()" style="margin-bottom:0;flex:1;background:#fb923c;padding:12px;">📋 Z zapisem</button>
     <button class="go-btn" onclick="goFast()" style="margin-bottom:0;flex:1;background:var(--s3);border:1px solid var(--border2);color:var(--text);letter-spacing:.1em;padding:12px;">⚡ Szybki Start</button>
   </div>
-  <div style="text-align:center;margin-top:6px;padding-bottom:10px;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);">AX Simple v1.0 · Sigma AthletiX</div>
+  <div style="text-align:center;margin-top:2px;font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);">AX Simple · Sigma AthletiX</div>
 </div>
 
 </div><!-- /s-inner -->
@@ -563,7 +564,7 @@
 <!-- HISTORY -->
 <div id="history-overlay">
   <div class="hist-inner">
-    <div class="hist-hdr">
+    <div class="hist-hdr" style="padding-top:calc(env(safe-area-inset-top,8px) + 6px);">
       <button class="crm-back" onclick="closeHistory()">← Wróć</button>
       <div class="crm-title">Historia sesji</div>
     </div>
@@ -622,12 +623,13 @@
 
 <!-- ATHLETE PROFILE OVERLAY -->
 <div class="ap-overlay" id="athlete-profile-overlay">
-  <div style="max-width:500px;margin:0 auto;padding:16px 14px 40px;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-      <button onclick="closeAthleteProfile()" style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:7px 12px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);">← Wróć</button>
-      <div style="font-size:16px;font-weight:900;color:var(--text);" id="ap-name-header"></div>
+  <div style="max-width:500px;margin:0 auto;padding:0 14px env(safe-area-inset-bottom,10px);">
+    <div style="padding-top:calc(env(safe-area-inset-top,8px) + 6px);padding-bottom:8px;display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--border);">
+      <button onclick="closeAthleteProfile()" style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:7px 12px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;">← Wróć</button>
+      <div style="font-size:14px;font-weight:900;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="ap-name-header"></div>
+      <span style="font-size:10px;font-weight:700;color:var(--dim);flex-shrink:0;">A<span style="color:#ef4444;">X</span></span>
     </div>
-    <div id="ap-content"></div>
+    <div id="ap-content" style="padding-top:12px;"></div>
   </div>
 </div>
 

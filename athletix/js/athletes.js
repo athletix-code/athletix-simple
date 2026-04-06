@@ -295,14 +295,14 @@ function renderAthleteProfile(a, allSess){
     +'<input id="ap-name" type="text" value="'+a.name+'" style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;box-sizing:border-box;"/></div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
     +'<div><div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Data urodzenia</div>'
-    +'<input id="ap-birthdate" type="date" value="'+(a.birthDate||'')+'" style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;box-sizing:border-box;height:40px;"/></div>'
+    +'<input id="ap-birthdate" type="date" value="'+(a.birthDate||'')+'" style="width:100%;padding:6px 8px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;box-sizing:border-box;height:36px;max-height:36px;-webkit-appearance:none;appearance:none;"/></div>'
     +'<div><div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Kategoria</div>'
-    +'<select id="ap-category" style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;box-sizing:border-box;height:40px;"><option value="">—</option>'+catOpts+'</select></div></div>'
+    +'<select id="ap-category" style="width:100%;padding:6px 8px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;box-sizing:border-box;height:36px;-webkit-appearance:none;appearance:none;"><option value="">—</option>'+catOpts+'</select></div></div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
     +'<div><div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Dyscyplina</div>'
-    +'<select id="ap-discipline" style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;box-sizing:border-box;height:40px;"><option value="">—</option>'+discOpts+'</select></div>'
+    +'<select id="ap-discipline" style="width:100%;padding:6px 8px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;box-sizing:border-box;height:36px;-webkit-appearance:none;appearance:none;"><option value="">—</option>'+discOpts+'</select></div>'
     +'<div><div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Klub</div>'
-    +'<input id="ap-club" type="text" value="'+(a.club||'')+'" placeholder="Nazwa klubu" style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;box-sizing:border-box;height:40px;"/></div></div>'
+    +'<input id="ap-club" type="text" value="'+(a.club||'')+'" placeholder="Nazwa klubu" style="width:100%;padding:6px 8px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;box-sizing:border-box;height:36px;"/></div></div>'
     +'<div><div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Notatki</div>'
     +'<textarea id="ap-notes" rows="2" placeholder="Dowolne notatki..." style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;resize:vertical;box-sizing:border-box;">'+(a.notes||'')+'</textarea></div>'
     +'<button onclick="saveAthleteProfile()" style="width:100%;margin-top:10px;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Zapisz dane</button></div>'
@@ -502,45 +502,42 @@ function redoLast(){
   loadCRM(); loadTests(); loadNotes(); loadGroups();
 }
 function _renderUndoBar(){
-  var bar=document.getElementById('undo-bar');
-  // Hide during active timer sessions
-  var timerActive=(typeof active!=='undefined'&&active)||(typeof rcRunning!=='undefined'&&rcRunning)||(typeof intRunning!=='undefined'&&intRunning);
-  if(timerActive){ if(bar) bar.style.display='none'; return; }
-  if(bar) bar.style.display='flex';
-  if(!bar){
-    bar=document.createElement('div'); bar.id='undo-bar';
-    bar.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9950;color:#fff;padding:8px 12px calc(env(safe-area-inset-bottom,6px) + 8px);display:flex;align-items:center;gap:8px;font-family:Montserrat,sans-serif;border-top:1px solid rgba(255,255,255,.1);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);background:rgba(30,41,59,.92);';
-    document.body.appendChild(bar);
+  // Update header button indicator
+  var hdrBtn=el('undo-header-btn');
+  if(hdrBtn){
+    var hasU=_undoStack.length>0;
+    hdrBtn.style.color=hasU?'var(--accent)':'var(--muted)';
+    hdrBtn.style.borderColor=hasU?'var(--accent)':'var(--border2)';
   }
-  var lastUndo=_undoStack.length?_undoStack[_undoStack.length-1]:null;
-  var hasU=_undoStack.length>0, hasR=_redoStack.length>0;
-  var undoLabel=lastUndo?lastUndo.label:'';
-  bar.innerHTML=
-    '<button onclick="_undoBarAction(\'undo\')" style="padding:5px 10px;background:'+(hasU?'rgba(255,255,255,.12)':'rgba(255,255,255,.04)')+';border:1px solid rgba(255,255,255,.15);border-radius:var(--r-xs);cursor:pointer;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;'+(hasU?'':'opacity:.3;pointer-events:none;')+'">↩ Cofnij</button>'
-    +'<div style="flex:1;min-width:0;font-size:9px;color:rgba(255,255,255,.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(hasU?undoLabel:'—')+'</div>'
-    +'<button onclick="_undoBarAction(\'redo\')" style="padding:5px 10px;background:'+(hasR?'rgba(255,255,255,.12)':'rgba(255,255,255,.04)')+';border:1px solid rgba(255,255,255,.15);border-radius:var(--r-xs);cursor:pointer;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;'+(hasR?'':'opacity:.3;pointer-events:none;')+'">Ponów ↪</button>';
 }
-function _undoBarAction(type){
+function toggleUndoDropdown(){
+  var existing=document.getElementById('undo-dropdown');
+  if(existing){ existing.remove(); return; }
+  var btn=el('undo-header-btn'); if(!btn) return;
+  var rect=btn.getBoundingClientRect();
+  var dd=document.createElement('div'); dd.id='undo-dropdown';
+  dd.style.cssText='position:fixed;top:'+(rect.bottom+6)+'px;right:12px;z-index:9960;background:var(--s1);border:1px solid var(--border2);border-radius:var(--r);padding:10px;min-width:240px;max-width:320px;box-shadow:0 8px 30px rgba(0,0,0,.4);font-family:Montserrat,sans-serif;';
+  var hasU=_undoStack.length>0, hasR=_redoStack.length>0;
+  var lastUndo=hasU?_undoStack[_undoStack.length-1]:null;
+  var lastRedo=hasR?_redoStack[_redoStack.length-1]:null;
+  dd.innerHTML='<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Cofnij / Ponów</div>'
+    +'<button onclick="_undoDropdownAction(\'undo\')" style="width:100%;padding:10px 12px;background:'+(hasU?'var(--s2)':'var(--s2)')+';border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:'+(hasU?'var(--text)':'var(--dim)')+';text-align:left;margin-bottom:6px;display:flex;align-items:center;gap:8px;'+(hasU?'':'opacity:.4;pointer-events:none;')+'">'
+    +'<span style="font-size:16px;">↩</span><div><div>Cofnij</div>'+(hasU?'<div style="font-size:10px;color:var(--muted);margin-top:1px;">'+lastUndo.label+'</div>':'')+'</div></button>'
+    +'<button onclick="_undoDropdownAction(\'redo\')" style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:'+(hasR?'var(--text)':'var(--dim)')+';text-align:left;display:flex;align-items:center;gap:8px;'+(hasR?'':'opacity:.4;pointer-events:none;')+'">'
+    +'<span style="font-size:16px;">↪</span><div><div>Ponów</div>'+(hasR?'<div style="font-size:10px;color:var(--muted);margin-top:1px;">'+lastRedo.label+'</div>':'')+'</div></button>';
+  document.body.appendChild(dd);
+  // Close on outside click
+  setTimeout(function(){
+    document.addEventListener('click',function _closeDD(e){
+      if(!dd.contains(e.target)&&e.target!==btn){ dd.remove(); document.removeEventListener('click',_closeDD); }
+    });
+  },50);
+}
+function _undoDropdownAction(type){
+  var dd=document.getElementById('undo-dropdown'); if(dd) dd.remove();
   if(type==='undo') undoLast(); else redoLast();
   _renderUndoBar();
-
-  // Refresh profile overlay in-place if open
-  var profileOv=el('athlete-profile-overlay');
-  if(profileOv&&profileOv.style.display==='block'&&_currentProfileId){
-    var sc=profileOv.scrollTop;
-    loadCRM(); loadTests();
-    var allSess=[]; try{ allSess=JSON.parse(localStorage.getItem(SESSION_KEY)||'[]'); }catch(e){}
-    var a=athletes.find(function(x){ return String(x.id)===String(_currentProfileId); });
-    if(a){
-      var hasCharts=!!el('ap-content').querySelector('canvas');
-      var hasHistoryText=el('ap-content').innerHTML.indexOf('Wyniki testów')>=0;
-      if(hasCharts||hasHistoryText) openTestHistory(a.name);
-      else renderAthleteProfile(a,allSess);
-    }
-    requestAnimationFrame(function(){ profileOv.scrollTop=sc; });
-  }
-
-  // Refresh main tab
+  // Refresh current view
   var tabScroll=document.querySelector('.tab-scroll');
   var savedScroll=tabScroll?tabScroll.scrollTop:0;
   if(_currentMode==='diary'){ renderCal(); if(selectedDay) renderDayDetail(selectedDay); }
@@ -548,6 +545,8 @@ function _undoBarAction(type){
   else if(_currentMode==='data') refreshDataStats();
   if(tabScroll) requestAnimationFrame(function(){ tabScroll.scrollTop=savedScroll; });
 }
+// Alias for backward compatibility
+function _undoBarAction(type){ _undoDropdownAction(type); }
 
 function deleteTestResult(id, athleteName){
   var ov=_ensureOverlay();

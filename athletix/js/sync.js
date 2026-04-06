@@ -15,8 +15,8 @@ function initSync(){
   _syncEnabled = true;
   console.log('Sync enabled for:', currentTrainer.email);
 
-  // Initial sync: push local data to cloud
-  setTimeout(function(){ syncNow(); }, 1500);
+  // Initial sync: wait for pull to finish first (5s), then push
+  setTimeout(function(){ syncNow(); }, 5000);
 
   // Periodic sync every 30 seconds
   _syncTimer = setInterval(function(){ syncNow(); }, 30000);
@@ -31,12 +31,24 @@ function syncNow(){
   var uid = currentTrainer.id;
 
   function _push(table, rows, label){
-    if(!rows.length) return;
-    sb.from(table).delete().eq('trainer_id', uid).then(function(delRes){
-      if(delRes.error){ console.warn('Sync delete '+label+':', delRes.error.message); return; }
-      sb.from(table).insert(rows).then(function(res){
-        if(res.error) console.warn('Sync '+label+' error:', res.error.message);
-        else console.log('Synced '+rows.length+' '+label);
+    // SAFETY: never overwrite cloud with empty data
+    if(!rows.length){
+      console.log('Skip sync '+label+': local empty');
+      return;
+    }
+    // Check cloud count first — don't delete if cloud has more data
+    sb.from(table).select('id',{count:'exact',head:true}).eq('trainer_id', uid).then(function(countRes){
+      var cloudCount=(countRes.count||0);
+      if(cloudCount>0 && rows.length===0){
+        console.warn('BLOCKED: would delete '+cloudCount+' '+label+' from cloud with empty local');
+        return;
+      }
+      sb.from(table).delete().eq('trainer_id', uid).then(function(delRes){
+        if(delRes.error){ console.warn('Sync delete '+label+':', delRes.error.message); return; }
+        sb.from(table).insert(rows).then(function(res){
+          if(res.error) console.warn('Sync '+label+' error:', res.error.message);
+          else console.log('Synced '+rows.length+' '+label);
+        });
       });
     });
   }

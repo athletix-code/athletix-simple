@@ -26,7 +26,8 @@
       "Bash(python3 -m http.server 8080)",
       "Bash(ls \"/Users/pawellydek/SIGMA ATHLETIX APP/athletix/js/\"*.js)",
       "Bash(ipconfig getifaddr:*)",
-      "Bash(npm list:*)"
+      "Bash(npm list:*)",
+      "Bash(node -c js/athletes.js)"
     ]
   }
 }

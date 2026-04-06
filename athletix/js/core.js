@@ -4,6 +4,14 @@
 //  Settings key: cts_v5 (instead of ct_v5)
 // ═══════════════════════════════════════════════════════
 
+// ── Fix iOS PWA viewport height ──
+function _setAppHeight(){
+  document.documentElement.style.setProperty('--app-h', window.innerHeight+'px');
+}
+_setAppHeight();
+window.addEventListener('resize', _setAppHeight);
+window.addEventListener('orientationchange', function(){ setTimeout(_setAppHeight,100); });
+
 // ── SHARED ──
 var snd='off', sDn=3, sUp=2, sRp=8;
 var touts=[], cntTick=null, metInt=null, active=false;
