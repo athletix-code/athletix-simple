@@ -368,8 +368,6 @@ function _addCustomFavInPanel(){
   var btn=document.getElementById('fav-custom-btn');
   if(btn){ btn.textContent='✓'; setTimeout(function(){ btn.textContent='Dodaj'; },500); }
 }
-// Kompatybilność — stare wywołania
-function _openFavPanel(){ _openFavPanel(); }
 
 // ── Renderowanie kart w edytorze ──
 function _renderPeCards(){
