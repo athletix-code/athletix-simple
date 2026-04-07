@@ -41,7 +41,7 @@ var EXERCISE_LIBRARY = {
     full: ['RowErg Concept2','AirBike Assault','AirBike Rogue','Burpees','Jumping Jacks','Swimming']
   }
 };
-var ZONE_LABELS = { upper: '↑ Góra', lower: '↓ Dół', full: '↕ Całe ciało' };
+var ZONE_LABELS = { upper: '💪 Góra', lower: '🦵 Dół', full: '🫁 Centrum' };
 var CAT_SHORT = { sila:'SIŁ', wyt_sil:'WYT', eksplozywnosc:'EKS', stabilizacja:'STB', mobilnosc:'MOB', kondycja:'KON' };
 var FIELD_LABELS = { reps:'Powt', load:'kg', rir:'RIR', time:'Czas(s)', dist:'Dystans(m)' };
 var FIELD_TYPES = { reps:'number', load:'text', rir:'number', time:'number', dist:'number' };
@@ -53,9 +53,53 @@ var customExercises=[];
 function loadCustomExercises(){ try{ customExercises=JSON.parse(localStorage.getItem(CUSTOM_EX_KEY)||'[]'); }catch(e){ customExercises=[]; } }
 function saveCustomExercises(){ localStorage.setItem(CUSTOM_EX_KEY,JSON.stringify(customExercises)); }
 
+// ── Ulubione ćwiczenia ──
+var FAV_EX_KEY='axs_favorite_exercises';
+var favExercises=[];
+function loadFavEx(){ try{ favExercises=JSON.parse(localStorage.getItem(FAV_EX_KEY)||'[]'); }catch(e){ favExercises=[]; } }
+function saveFavEx(){ localStorage.setItem(FAV_EX_KEY,JSON.stringify(favExercises)); }
+function _addToFav(name,catKey,zone){
+  loadFavEx();
+  if(favExercises.find(function(f){ return f.name===name; })) return;
+  favExercises.push({name:name,cat:catKey||null,zone:zone||null});
+  if(favExercises.length>10) favExercises.shift();
+  saveFavEx();
+}
+// Buduj optgroup ulubionych do selecta
+function _buildFavOptgroup(zoneFilt){
+  loadFavEx();
+  var items=favExercises.filter(function(f){ return !zoneFilt||!f.zone||f.zone===zoneFilt; });
+  if(!items.length) return null;
+  var og=document.createElement('optgroup'); og.label='⭐ Ulubione';
+  items.forEach(function(f){ var o=document.createElement('option'); o.value=f.name; o.setAttribute('data-cat',f.cat||''); o.setAttribute('data-zone',f.zone||''); o.textContent=f.name; og.appendChild(o); });
+  return og;
+}
+
+// ── Modal notatki serii (współdzielony) ──
+function _openSetNoteModal(setsArr, idx, refreshFn){
+  var s=setsArr[idx]; if(!s) return;
+  var noteKey=s._note!==undefined?'_note':'note';
+  var ov=_ensureOverlay();
+  ov.innerHTML='<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) translateY(16px);opacity:0;max-width:400px;width:calc(100% - 40px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:18px;z-index:9993;transition:all .18s ease-out;" id="sn-modal">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+    +'<div style="font-size:14px;font-weight:800;color:var(--text);">📝 Notatka — S'+(idx+1)+'</div>'
+    +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:28px;height:28px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+    +'<textarea id="sn-ta" rows="5" placeholder="Uwagi do serii, tempo, technika..." style="width:100%;min-height:120px;max-height:40vh;padding:12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:500;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;">'+(s[noteKey]||'')+'</textarea>'
+    +'<button id="sn-save" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-top:10px;">Zapisz</button>'
+    +'</div>';
+  ov.style.display='flex'; ov.style.background='rgba(0,0,0,.45)'; ov.style.backdropFilter='blur(6px)'; ov.style.webkitBackdropFilter='blur(6px)';
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ var m=el('sn-modal'); if(m){ m.style.opacity='1'; m.style.transform='translate(-50%,-50%) translateY(0)'; } }); });
+  setTimeout(function(){ el('sn-ta').focus(); },100);
+  document.getElementById('sn-save').onclick=function(){
+    setsArr[idx][noteKey]=(el('sn-ta').value||'').trim();
+    ov.style.display='none'; ov.innerHTML=''; ov.style.backdropFilter=''; ov.style.webkitBackdropFilter=''; ov.style.background=''; document.body.style.overflow='';
+    if(refreshFn) refreshFn();
+  };
+}
+
 // Stan formularza ćwiczeń
 var _exCat='', _exZone='', _exName='', _exSets=[];
-var _strManCat=''; // kategoria wybrana w trybie ręcznym
+var _strManCat='';
 
 function _catIcon(key){ return {sila:'🏋️',wyt_sil:'💪',eksplozywnosc:'⚡',stabilizacja:'🎯',mobilnosc:'🧘',kondycja:'🏃'}[key]||'🏋️'; }
 
@@ -65,6 +109,8 @@ function _strFilterAllEx(){
   var sel=el('str-exercise-sel'); if(!sel) return;
   sel.innerHTML='<option value="">Wybierz ćwiczenie...</option>';
   loadCustomExercises();
+  // Ulubione na górze
+  var favOg=_buildFavOptgroup(zone); if(favOg) sel.appendChild(favOg);
   Object.keys(EXERCISE_LIBRARY).forEach(function(catKey){
     var cat=EXERCISE_LIBRARY[catKey]; var icon=_catIcon(catKey);
     var zones=zone?[zone]:['upper','lower','full'];
@@ -83,6 +129,7 @@ function _strQuickSelect(){
   var opt=sel.options[sel.selectedIndex];
   var catKey=opt.getAttribute('data-cat'); var zone=opt.getAttribute('data-zone');
   _exCat=catKey||''; _exZone=zone||''; _exName=sel.value.replace(/^★ /,'');
+  _addToFav(_exName,catKey,zone);
   initExSets();
   el('ex-sets-wrap').style.display='block';
   el('ex-general-wrap').style.display='block';
@@ -200,20 +247,52 @@ function onExSelect(){
 }
 
 function initExSets(){
-  _exSets=[{note:''}];
+  _exSets=[];
   renderExSets();
 }
 
 function renderExSets(){
   var cat=EXERCISE_LIBRARY[_exCat];
   var fields=cat?cat.fields:['reps','load'];
+  // Batch input
+  var batch=el('ex-batch-row'); if(batch){
+    batch.innerHTML='<input id="ex-batch-cnt" type="number" min="1" max="20" value="3" placeholder="Serii" style="width:40px;text-align:center;font-size:14px;font-weight:700;background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:10px 4px;color:var(--text);outline:none;min-height:44px;box-sizing:border-box;" inputmode="numeric"/>'
+      +'<span style="font-size:14px;color:var(--muted);flex-shrink:0;">×</span>';
+    fields.forEach(function(f){
+      batch.innerHTML+='<input id="ex-batch-'+f+'" class="ex-set-input" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" placeholder="'+FIELD_LABELS[f]+'" style="flex:1;min-width:'+(_fieldWidth(f)-10)+'px;border-radius:10px;"/>';
+    });
+    batch.innerHTML+='<button onclick="_exBatchAdd()" style="padding:8px 12px;background:var(--accent);border:none;border-radius:10px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:#fff;white-space:nowrap;min-height:44px;">+ Dodaj</button>';
+  }
+  // Nagłówki kolumn
   var hdr=el('ex-sets-header'); hdr.innerHTML='';
   fields.forEach(function(f){
     var d=document.createElement('div');
-    d.style.cssText='font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:center;width:'+_fieldWidth(f)+'px;flex-shrink:0;';
+    d.style.cssText='font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:center;flex:1;min-width:'+(_fieldWidth(f)-10)+'px;';
     d.textContent=FIELD_LABELS[f]; hdr.appendChild(d);
   });
-  var list=el('ex-sets-list'); list.innerHTML='';
+  // Lista serii
+  _renderExSetsList(fields);
+}
+
+function _exBatchAdd(){
+  var cat=EXERCISE_LIBRARY[_exCat]; var fields=cat?cat.fields:['reps','load'];
+  var cnt=parseInt((el('ex-batch-cnt')||{}).value)||1; if(cnt<1) cnt=1; if(cnt>20) cnt=20;
+  var vals={}; fields.forEach(function(f){ vals[f]=(el('ex-batch-'+f)||{}).value||''; });
+  for(var i=0;i<cnt;i++){
+    var s={note:''}; fields.forEach(function(f){ s[f]=vals[f]; });
+    _exSets.push(s);
+  }
+  _renderExSetsList(fields);
+  // Reset batch inputs (nie count)
+  fields.forEach(function(f){ var inp=el('ex-batch-'+f); if(inp) inp.value=''; });
+}
+
+function _renderExSetsList(fields){
+  var list=el('ex-sets-list'); if(!list) return;
+  var empty=el('ex-sets-empty');
+  if(!_exSets.length){ list.innerHTML=''; if(empty) empty.style.display='block'; return; }
+  if(empty) empty.style.display='none';
+  list.innerHTML='';
   _exSets.forEach(function(s,i){ list.appendChild(_buildSetRow(i,fields)); });
 }
 
@@ -225,49 +304,54 @@ function _buildSetRow(idx,fields){
   fields.forEach(function(f){
     var inp=document.createElement('input'); inp.className='ex-set-input'; inp.setAttribute('data-field',f); inp.setAttribute('data-idx',idx);
     inp.type=FIELD_TYPES[f]; inp.inputMode=FIELD_INPUTMODES[f];
-    inp.style.width=_fieldWidth(f)+'px'; inp.placeholder='—';
+    inp.style.cssText='flex:1;min-width:'+(_fieldWidth(f)-10)+'px;border-radius:10px;';
+    inp.placeholder='—';
     if(_exSets[idx]&&_exSets[idx][f]!=null) inp.value=_exSets[idx][f];
     inp.oninput=function(){ if(!_exSets[idx]) _exSets[idx]={}; _exSets[idx][f]=inp.value; };
     row.appendChild(inp);
   });
-  var noteBtn=document.createElement('button'); noteBtn.className='ex-set-note-toggle'+(_exSets[idx]&&_exSets[idx].note?' has-note':'');
-  noteBtn.textContent='📝'; noteBtn.title='Notatka do serii';
-  noteBtn.onclick=function(){ var nt=row.nextElementSibling; if(nt&&nt.classList.contains('ex-set-note-row')){ var ta=nt.querySelector('textarea'); ta.style.display=ta.style.display==='none'?'block':'none'; } };
+  // 📝 notatka — otwiera modal
+  var hasNote=_exSets[idx]&&_exSets[idx].note;
+  var noteBtn=document.createElement('button'); noteBtn.className='ex-set-note-toggle'+(hasNote?' has-note':'');
+  noteBtn.innerHTML='📝'+(hasNote?'<span style="position:absolute;top:2px;right:2px;width:4px;height:4px;border-radius:50%;background:var(--accent);"></span>':'');
+  noteBtn.style.position='relative'; noteBtn.title='Notatka do serii';
+  noteBtn.onclick=function(){ _openSetNoteModal(_exSets,idx,function(){ var cat=EXERCISE_LIBRARY[_exCat]; _renderExSetsList(cat?cat.fields:['reps','load']); }); };
   row.appendChild(noteBtn);
-  if(_exSets.length>1){
-    var del=document.createElement('button'); del.className='ex-set-del'; del.textContent='✕'; del.title='Usuń serię';
-    del.onclick=function(){ removeExSet(idx); };
-    row.appendChild(del);
-  }
+  // ✕ usuń
+  var del=document.createElement('button'); del.className='ex-set-del'; del.textContent='✕'; del.title='Usuń serię';
+  del.onclick=function(){ removeExSet(idx); };
+  row.appendChild(del);
   frag.appendChild(row);
-  var noteRow=document.createElement('div'); noteRow.className='ex-set-note-row';
-  var ta=document.createElement('textarea'); ta.className='ex-set-note'; ta.rows=1; ta.placeholder='Notatka do serii...';
-  ta.style.display=(_exSets[idx]&&_exSets[idx].note)?'block':'none';
-  if(_exSets[idx]&&_exSets[idx].note) ta.value=_exSets[idx].note;
-  ta.oninput=function(){ if(!_exSets[idx]) _exSets[idx]={}; _exSets[idx].note=ta.value; noteBtn.classList.toggle('has-note',!!ta.value); };
-  noteRow.appendChild(ta); frag.appendChild(noteRow);
+  // Podgląd notatki pod wierszem
+  if(hasNote){
+    var notePreview=document.createElement('div');
+    notePreview.style.cssText='font-size:10px;font-style:italic;color:var(--muted);padding-left:29px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;';
+    notePreview.textContent=_exSets[idx].note;
+    notePreview.onclick=function(){ _openSetNoteModal(_exSets,idx,function(){ var cat=EXERCISE_LIBRARY[_exCat]; _renderExSetsList(cat?cat.fields:['reps','load']); }); };
+    frag.appendChild(notePreview);
+  }
   return frag;
 }
 
 function addExSet(){
+  var cat=EXERCISE_LIBRARY[_exCat]; var fields=cat?cat.fields:['reps','load'];
   _syncSetsFromDOM();
   _exSets.push({note:''});
-  renderExSets();
+  _renderExSetsList(fields);
 }
 function removeExSet(idx){
   _syncSetsFromDOM();
   _exSets.splice(idx,1);
-  renderExSets();
+  var cat=EXERCISE_LIBRARY[_exCat]; var fields=cat?cat.fields:['reps','load'];
+  _renderExSetsList(fields);
 }
 function _syncSetsFromDOM(){
   var list=el('ex-sets-list'); if(!list) return;
-  var cat=EXERCISE_LIBRARY[_exCat]; if(!cat) return;
   list.querySelectorAll('.ex-set-row').forEach(function(row){
     var i=parseInt(row.getAttribute('data-set-idx'));
     if(!_exSets[i]) _exSets[i]={note:''};
     row.querySelectorAll('.ex-set-input').forEach(function(inp){ _exSets[i][inp.getAttribute('data-field')]=inp.value; });
   });
-  list.querySelectorAll('.ex-set-note-row textarea').forEach(function(ta,i){ if(_exSets[i]) _exSets[i].note=ta.value; });
 }
 
 function toggleExGeneralNote(){
@@ -504,4 +588,4 @@ function _renderStrengthReportEntry(n, idx){
 }
 
 // Init on load
-document.addEventListener('DOMContentLoaded',function(){ loadCustomExercises(); initExCatChips(); _strFilterAllEx(); });
+document.addEventListener('DOMContentLoaded',function(){ loadCustomExercises(); loadFavEx(); initExCatChips(); _strFilterAllEx(); });

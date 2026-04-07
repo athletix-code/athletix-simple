@@ -12,7 +12,7 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>AthletiX Simple — Sigma AthletiX</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=6">
+<link rel="stylesheet" href="css/app.css?v=7">
 </head>
 
 <!-- ════ SETTINGS ════ -->
@@ -386,9 +386,9 @@
       <div style="display:flex;gap:6px;margin-bottom:6px;">
         <select id="str-zone-sel" class="crm-input" style="width:100px;margin-bottom:0;padding:8px 6px;font-size:12px;" onchange="_strFilterAllEx()">
           <option value="">Część...</option>
-          <option value="upper">↑ Góra</option>
-          <option value="lower">↓ Dół</option>
-          <option value="full">↕ Całe</option>
+          <option value="upper">💪 Góra</option>
+          <option value="lower">🦵 Dół</option>
+          <option value="full">🫁 Centrum</option>
         </select>
         <select id="str-exercise-sel" class="crm-input" style="flex:1;margin-bottom:0;padding:8px 6px;font-size:12px;" onchange="_strQuickSelect()">
           <option value="">Wybierz ćwiczenie...</option>
@@ -418,9 +418,10 @@
         </div>
       </div>
       <div id="ex-sets-wrap" style="display:none;margin-top:10px;">
-        <div id="ex-sets-header" style="display:flex;gap:5px;align-items:center;margin-bottom:6px;padding-left:29px;"></div>
+        <div id="ex-batch-row" style="display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap;"></div>
+        <div id="ex-sets-header" style="display:flex;gap:5px;align-items:center;margin-bottom:4px;padding-left:29px;"></div>
         <div id="ex-sets-list"></div>
-        <button class="ex-add-set-btn" onclick="addExSet()">+ Seria</button>
+        <div id="ex-sets-empty" style="text-align:center;color:var(--dim);font-size:12px;padding:10px;">Dodaj serie powyżej</div>
       </div>
       <div id="ex-general-wrap" style="display:none;">
         <button class="ex-general-note-btn" id="ex-general-toggle" onclick="toggleExGeneralNote()">📝 Notatka ogólna</button>
@@ -769,21 +770,21 @@
 </div>
 
 
-<script src="js/storage.js?v=6"></script>
-<script src="js/core.js?v=6"></script>
-<script src="js/timers.js?v=6"></script>
-<script src="js/athletes.js?v=6"></script>
-<script src="js/wallet.js?v=6"></script>
-<script src="js/status.js?v=6"></script>
-<script src="js/exercises.js?v=6"></script>
-<script src="js/diary.js?v=6"></script>
-<script src="js/reports.js?v=6"></script>
-<script src="js/plans.js?v=6"></script>
-<script src="js/data.js?v=6"></script>
-<script src="js/settings.js?v=6"></script>
-<script src="js/supabase-config.js?v=6"></script>
-<script src="js/sync.js?v=6"></script>
-<script src="js/autogrow.js?v=6"></script>
+<script src="js/storage.js?v=7"></script>
+<script src="js/core.js?v=7"></script>
+<script src="js/timers.js?v=7"></script>
+<script src="js/athletes.js?v=7"></script>
+<script src="js/wallet.js?v=7"></script>
+<script src="js/status.js?v=7"></script>
+<script src="js/exercises.js?v=7"></script>
+<script src="js/diary.js?v=7"></script>
+<script src="js/reports.js?v=7"></script>
+<script src="js/plans.js?v=7"></script>
+<script src="js/data.js?v=7"></script>
+<script src="js/settings.js?v=7"></script>
+<script src="js/supabase-config.js?v=7"></script>
+<script src="js/sync.js?v=7"></script>
+<script src="js/autogrow.js?v=7"></script>
 
 </body>
 </html>

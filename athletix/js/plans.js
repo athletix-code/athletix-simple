@@ -35,9 +35,9 @@ function _origSetText(os, fields){
 // Helper: kontrolki prawego górnego rogu karty (↑↓🗑)
 function _cardControls(ei, total, moveF, rmF){
   var h='<div style="display:flex;gap:3px;flex-shrink:0;">';
-  h+='<button onclick="'+moveF+'('+ei+',-1)" title="Przesuń wyżej" style="width:26px;height:26px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:center;'+(ei===0?'opacity:.2;pointer-events:none;':'')+'">↑</button>';
-  h+='<button onclick="'+moveF+'('+ei+',1)" title="Przesuń niżej" style="width:26px;height:26px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:center;'+(ei>=total-1?'opacity:.2;pointer-events:none;':'')+'">↓</button>';
-  h+='<button onclick="'+rmF+'('+ei+')" title="Usuń" style="width:26px;height:26px;background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:11px;color:var(--dim);display:flex;align-items:center;justify-content:center;">🗑</button>';
+  h+='<button onclick="'+moveF+'('+ei+',-1)" title="Przesuń ćwiczenie wyżej" class="pe-move-btn'+(ei===0?' disabled':'')+'">▲</button>';
+  h+='<button onclick="'+moveF+'('+ei+',1)" title="Przesuń ćwiczenie niżej" class="pe-move-btn'+(ei>=total-1?' disabled':'')+'">▼</button>';
+  h+='<button onclick="'+rmF+'('+ei+')" title="Usuń ćwiczenie" class="pe-del-btn">🗑</button>';
   return h+'</div>';
 }
 
@@ -104,7 +104,7 @@ function _renderPlanEditorOverlay(ov,isNew){
     // Dodawanie — szybki select + ręcznie + kategorie + notatka
     +'<div id="pe-add-wrap">'
     +'<div style="display:flex;gap:6px;margin-bottom:6px;">'
-    +'<select id="pe-zone-sel" class="crm-input" style="width:90px;margin-bottom:0;padding:8px 6px;font-size:11px;" onchange="_peFilterAllEx()"><option value="">Część...</option><option value="upper">↑ Góra</option><option value="lower">↓ Dół</option><option value="full">↕ Całe</option></select>'
+    +'<select id="pe-zone-sel" class="crm-input" style="width:90px;margin-bottom:0;padding:8px 6px;font-size:11px;" onchange="_peFilterAllEx()"><option value="">Część...</option><option value="upper">💪 Góra</option><option value="lower">🦵 Dół</option><option value="full">🫁 Centrum</option></select>'
     +'<select id="pe-all-ex-sel" class="crm-input" style="flex:1;margin-bottom:0;padding:8px 6px;font-size:11px;" onchange="_peQuickAdd()"><option value="">+ Dodaj ćwiczenie...</option></select>'
     +'</div>'
     +'<div style="display:flex;gap:6px;">'
@@ -150,6 +150,7 @@ function _peFilterAllEx(){
   var zone=(document.getElementById('pe-zone-sel')||{}).value||'';
   var sel=document.getElementById('pe-all-ex-sel'); if(!sel) return;
   sel.innerHTML='<option value="">+ Dodaj ćwiczenie...</option>';
+  var favOg=_buildFavOptgroup(zone); if(favOg) sel.appendChild(favOg);
   Object.keys(EXERCISE_LIBRARY).forEach(function(catKey){
     var cat=EXERCISE_LIBRARY[catKey]; var icon=_catIcon(catKey);
     var zones=zone?[zone]:['upper','lower','full'];
@@ -168,6 +169,7 @@ function _peQuickAdd(){
   var opt=sel.options[sel.selectedIndex];
   var catKey=opt.getAttribute('data-cat'); var zone=opt.getAttribute('data-zone');
   var name=sel.value.replace(/^★ /,'');
+  _addToFav(name,catKey,zone);
   var cat=EXERCISE_LIBRARY[catKey]||{fields:['reps','load']}; var s={note:''}; cat.fields.forEach(function(f){ s[f]=''; });
   _editingPlan.exercises.push({type:'exercise',label:'',exCat:catKey,exZone:zone||'full',exercise:name,targetSets:[Object.assign({},s)],note:''});
   _rfPeEx(); sel.value='';
