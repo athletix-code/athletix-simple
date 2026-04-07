@@ -122,7 +122,7 @@ function _renderPlanEditorOverlay(ov,isNew){
   var favChipsHtml='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Ulubione</div>'
     +'<div id="pe-fav-chips" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;'+(favNeedToggle?'max-height:42px;overflow:hidden;':'')+'transition:max-height .25s ease;">';
   favExercises.forEach(function(f){
-    favChipsHtml+='<button onclick="_peAddFav(\''+f.name.replace(/'/g,"\\'")+'\',\''+((f.cat||'').replace(/'/g,"\\'"))+'\',\''+(f.zone||'')+'\')" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);">'+f.name+'</button>';
+    favChipsHtml+='<button data-fav-add="'+f.name.replace(/"/g,'&quot;')+'" data-fc="'+(f.cat||'')+'" data-fz="'+(f.zone||'')+'" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);position:relative;-webkit-user-select:none;user-select:none;">'+f.name+'</button>';
   });
   favChipsHtml+='<button onclick="_openFavPanel()" title="Zarządzaj ulubionymi" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:18px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;" onmouseover="this.style.borderColor=\'var(--accent)\';this.style.color=\'var(--accent)\'" onmouseout="this.style.borderColor=\'\';this.style.color=\'var(--muted)\'">+</button>';
   favChipsHtml+='</div>'
@@ -174,6 +174,8 @@ function _renderPlanEditorOverlay(ov,isNew){
     var ch=_editingPlan.athletes.indexOf(name)>=0;
     btn.style.background=ch?'var(--accent-bg)':'var(--s2)'; btn.style.borderColor=ch?'var(--accent)':'var(--border2)'; btn.style.color=ch?'var(--accent)':'var(--muted)';
   });
+  // Inicjalizuj long press na chipach ulubionych
+  _initFavChipEvents();
   // Wypełnij szybki select wszystkimi ćwiczeniami
   _peFilterAllEx();
   // Wypełnij chipy kategorii w manual
@@ -261,7 +263,7 @@ function _refreshPeFavChips(){
   wrap.style.overflow=needToggle&&!_favExpanded?'hidden':'visible';
   wrap.innerHTML='';
   favExercises.forEach(function(f){
-    wrap.innerHTML+='<button onclick="_peAddFav(\''+f.name.replace(/'/g,"\\'")+'\',\''+(f.cat||'').replace(/'/g,"\\'")+'\',\''+(f.zone||'')+'\')" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);">'+f.name+'</button>';
+    wrap.innerHTML+='<button data-fav-add="'+f.name.replace(/"/g,'&quot;')+'" data-fc="'+(f.cat||'')+'" data-fz="'+(f.zone||'')+'" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);position:relative;-webkit-user-select:none;user-select:none;">'+f.name+'</button>';
   });
   wrap.innerHTML+='<button onclick="_openFavPanel()" title="Zarządzaj ulubionymi" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:18px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>';
   var btn=document.getElementById('pe-fav-toggle');
@@ -269,6 +271,7 @@ function _refreshPeFavChips(){
     btn.style.display=needToggle?'block':'none';
     btn.textContent=_favExpanded?'▲ zwiń':'▼ pokaż wszystkie ('+cnt+')';
   }
+  _initFavChipEvents();
 }
 var _favExpanded=false;
 function _toggleFavChips(){
@@ -283,6 +286,69 @@ function _toggleFavChips(){
     wrap.style.maxHeight='42px'; wrap.style.overflow='hidden';
     btn.textContent='▼ pokaż wszystkie ('+favExercises.length+')';
   }
+}
+
+// ── Long press + klik na chipach ulubionych (event delegation) ──
+var _favLpTimer=null, _favLpTriggered=false;
+function _initFavChipEvents(){
+  var wrap=document.getElementById('pe-fav-chips'); if(!wrap) return;
+  // Usuwamy starych listenerów przez klona (prostsze niż removeEventListener)
+  function handler(e){
+    var btn=e.target.closest('[data-fav-add]'); if(!btn) return;
+    var name=btn.getAttribute('data-fav-add');
+    var cat=btn.getAttribute('data-fc'); var zone=btn.getAttribute('data-fz');
+    if(_favLpTriggered){ _favLpTriggered=false; e.preventDefault(); e.stopPropagation(); return; }
+    // Krótki klik — dodaj do planu
+    _peAddFav(name,cat,zone);
+    btn.style.background='rgba(22,163,74,.15)'; setTimeout(function(){ btn.style.background=''; },300);
+  }
+  function startLp(e){
+    var btn=e.target.closest('[data-fav-add]'); if(!btn) return;
+    _favLpTriggered=false;
+    _favLpTimer=setTimeout(function(){
+      _favLpTriggered=true;
+      _showFavRemovePopup(btn);
+    },600);
+  }
+  function endLp(){ clearTimeout(_favLpTimer); }
+  function moveLp(){ clearTimeout(_favLpTimer); }
+  wrap.addEventListener('click',handler);
+  wrap.addEventListener('mousedown',startLp);
+  wrap.addEventListener('mouseup',endLp);
+  wrap.addEventListener('mouseleave',endLp);
+  wrap.addEventListener('touchstart',startLp,{passive:true});
+  wrap.addEventListener('touchend',endLp);
+  wrap.addEventListener('touchmove',moveLp,{passive:true});
+}
+
+function _showFavRemovePopup(chipBtn){
+  // Zamknij stary popup
+  var old=document.getElementById('fav-rm-popup'); if(old) old.remove();
+  var name=chipBtn.getAttribute('data-fav-add');
+  var popup=document.createElement('div'); popup.id='fav-rm-popup';
+  popup.style.cssText='position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid var(--border2);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);padding:10px 14px;z-index:100;white-space:nowrap;text-align:center;';
+  popup.innerHTML='<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">Usunąć z ulubionych?</div>'
+    +'<div style="display:flex;gap:8px;justify-content:center;">'
+    +'<button id="fav-rm-yes" style="padding:6px 14px;background:transparent;border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--red-text);">Usuń</button>'
+    +'<button id="fav-rm-no" style="padding:6px 14px;background:transparent;border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:600;color:var(--muted);">Anuluj</button>'
+    +'</div>'
+    // Strzałka na dole
+    +'<div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:12px;height:6px;overflow:hidden;"><div style="width:12px;height:12px;background:var(--s1);border:1px solid var(--border2);transform:rotate(45deg);position:absolute;top:-7px;left:0;"></div></div>';
+  chipBtn.style.position='relative';
+  chipBtn.appendChild(popup);
+  document.getElementById('fav-rm-yes').onclick=function(e){
+    e.stopPropagation();
+    loadFavEx();
+    favExercises=favExercises.filter(function(f){ return f.name!==name; });
+    saveFavEx(); popup.remove(); _refreshPeFavChips(); _initFavChipEvents();
+  };
+  document.getElementById('fav-rm-no').onclick=function(e){ e.stopPropagation(); popup.remove(); };
+  // Zamknij na klik poza
+  setTimeout(function(){
+    document.addEventListener('click',function _closeFavPopup(e){
+      if(!popup.contains(e.target)){ popup.remove(); document.removeEventListener('click',_closeFavPopup); }
+    });
+  },10);
 }
 
 // ── Panel inline ulubionych (pod chipami, NIE modal) ──
