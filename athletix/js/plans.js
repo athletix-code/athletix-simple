@@ -756,14 +756,14 @@ function _renderExecCards(container){
       h+='<button onclick="_openSetNote('+ei+','+si+')" title="Notatka" style="width:32px;height:32px;background:'+(hasNote?'rgba(59,130,246,.1)':'transparent')+';border:none;cursor:pointer;font-size:14px;opacity:'+(hasNote?'0.8':'0.3')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:var(--r-xs);">📝</button>';
       h+='</div>';
       // Indicator zmiany pod wierszem
-      if(changed) h+='<div style="font-size:10px;color:var(--amber-text);font-style:italic;padding-left:38px;margin-top:1px;">⚠ Zmieniono: plan → '+origDesc+'</div>';
+      if(changed) h+='<div class="exec-changed-indicator" style="font-size:11px;font-weight:600;color:var(--amber-text);padding:3px 0 3px 8px;border-left:2px solid var(--amber);margin-top:2px;">⚠ Zmieniono: plan → '+origDesc+'</div>';
       // Notatka serii — tekst pod wierszem
-      if(hasNote) h+='<div onclick="_openSetNote('+ei+','+si+')" style="font-size:10px;font-style:italic;color:var(--muted);padding-left:38px;margin-top:1px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+s._note.replace(/</g,'&lt;')+'</div>';
+      if(hasNote) h+='<div onclick="_openSetNote('+ei+','+si+')" style="font-size:12px;font-weight:500;color:var(--muted);line-height:1.4;padding:4px 0 4px 8px;border-left:2px solid rgba(59,130,246,.3);margin-top:2px;cursor:pointer;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">'+s._note.replace(/</g,'&lt;')+'</div>';
       h+='</div>';
     });
     // + Seria ekstra
     h+='<button onclick="_addExecSet('+ei+')" style="margin-top:3px;padding:4px 10px;background:transparent;border:1px dashed var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:10px;font-weight:700;color:var(--muted);min-height:28px;">+ Seria ekstra</button>';
-    if(ex.note) h+='<div style="font-size:11px;font-style:italic;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">'+ex.note+'</div>';
+    if(ex.note) h+='<div style="font-size:13px;font-weight:500;font-style:italic;color:var(--muted);line-height:1.5;padding:8px 10px;background:rgba(59,130,246,.03);border-radius:8px;margin-top:6px;">'+ex.note+'</div>';
     card.innerHTML=h; container.appendChild(card);
   });
 }
@@ -776,7 +776,37 @@ function _openSetNote(ei,si){
 }
 
 function _togExec(ei,si,cb){ if(!_execPlan) return; _execPlan.exercises[ei].targetSets[si]._checked=cb.checked; var c=el('plan-exec-list'); if(c) _renderExecCards(c); }
-function _upExec(ei,si,f,v){ if(_execPlan&&_execPlan.exercises[ei]&&_execPlan.exercises[ei].targetSets[si]) _execPlan.exercises[ei].targetSets[si][f]=v; }
+function _upExec(ei,si,f,v){
+  if(!_execPlan||!_execPlan.exercises[ei]||!_execPlan.exercises[ei].targetSets[si]) return;
+  _execPlan.exercises[ei].targetSets[si][f]=v;
+  // Sprawdź zmianę vs plan w real-time
+  var orig=_findPlan(_execPlan.id);
+  var origEx=orig&&orig.exercises&&orig.exercises[ei]?orig.exercises[ei]:null;
+  var os=origEx&&origEx.targetSets&&origEx.targetSets[si]?origEx.targetSets[si]:null;
+  var cat=EXERCISE_LIBRARY[_execPlan.exercises[ei].exCat]||{fields:['reps','load']}; var fields=cat.fields;
+  var changed=false;
+  if(os){ fields.forEach(function(ff){ if(String(_execPlan.exercises[ei].targetSets[si][ff]||'').trim()!==String(os[ff]||'').trim()) changed=true; }); }
+  // Znajdź wiersz i indicator w DOM
+  var rows=document.querySelectorAll('#plan-exec-list .pe-exec-row');
+  var rowIdx=0; for(var x=0;x<ei;x++){ rowIdx+=(_execPlan.exercises[x].targetSets||[]).length; } rowIdx+=si;
+  var row=rows[rowIdx]; if(!row) return;
+  var parent=row.parentElement;
+  // Aktualizuj styl wiersza
+  row.style.background=changed?'rgba(217,119,6,.05)':(_execPlan.exercises[ei].targetSets[si]._checked?'rgba(22,163,74,.05)':'');
+  row.querySelectorAll('.ex-set-input').forEach(function(inp){ if(changed) inp.style.borderColor='var(--amber)'; else if(_execPlan.exercises[ei].targetSets[si]._checked) inp.style.borderColor='var(--green)'; else inp.style.borderColor=''; });
+  // Aktualizuj/dodaj/usuń indicator
+  var indic=parent.querySelector('.exec-changed-indicator');
+  if(changed){
+    var desc=os?_origSetText(os,fields):'';
+    if(!indic){ indic=document.createElement('div'); indic.className='exec-changed-indicator'; parent.appendChild(indic); }
+    // Przenieś indicator za wiersz (nie na koniec parent)
+    if(indic.previousElementSibling!==row){ row.after(indic); }
+    indic.style.cssText='font-size:11px;font-weight:600;color:var(--amber-text);padding:3px 0 3px 8px;border-left:2px solid var(--amber);margin-top:2px;';
+    indic.textContent='⚠ Zmieniono: plan → '+desc;
+  } else {
+    if(indic) indic.remove();
+  }
+}
 function _addExecSet(ei){ if(!_execPlan||!_execPlan.exercises[ei]) return; var cat=EXERCISE_LIBRARY[_execPlan.exercises[ei].exCat]||{fields:['reps','load']}; var s={_note:'',_checked:false}; cat.fields.forEach(function(f){ s[f]=''; }); _execPlan.exercises[ei].targetSets.push(s); var c=el('plan-exec-list'); if(c) _renderExecCards(c); }
 function _moveExecEx(ei,d){ if(!_execPlan) return; var a=_execPlan.exercises; var n=ei+d; if(n<0||n>=a.length) return; var t=a[ei]; a[ei]=a[n]; a[n]=t; var c=el('plan-exec-list'); if(c) _renderExecCards(c); }
 function _rmExecEx(ei){ if(!_execPlan) return; _execPlan.exercises.splice(ei,1); var c=el('plan-exec-list'); if(c) _renderExecCards(c); }
