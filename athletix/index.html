@@ -12,7 +12,7 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>AthletiX Simple — Sigma AthletiX</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/app.css?v=2">
 </head>
 
 <!-- ════ SETTINGS ════ -->
@@ -366,13 +366,31 @@
       </select>
     </div>
 
-    <!-- TRENING notepad -->
+    <!-- TRENING — formularz strukturyzowany -->
     <div id="diary-note-form">
-      <div style="margin-bottom:8px;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Wpis treningowy</div>
-        <textarea id="note-text" rows="3" placeholder="Nazwa ćwiczenia, serie, powtórzenia, ciężar..." style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:'Montserrat',sans-serif;font-size:14px;font-weight:600;outline:none;resize:vertical;line-height:1.5;"></textarea>
+      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Kategoria</div>
+      <div class="ex-cat-scroll" id="ex-cat-scroll"></div>
+      <div id="ex-zone-wrap" style="display:none;margin-top:8px;">
+        <div style="display:flex;gap:5px;" id="ex-zone-btns"></div>
       </div>
-      <button onclick="saveNote()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">+ Zapisz wpis</button>
+      <div id="ex-select-wrap" style="display:none;margin-top:8px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Ćwiczenie</div>
+        <select class="crm-input" id="ex-select" style="margin-bottom:0;" onchange="onExSelect()">
+          <option value="">Wybierz ćwiczenie...</option>
+        </select>
+      </div>
+      <div id="ex-sets-wrap" style="display:none;margin-top:10px;">
+        <div id="ex-sets-header" style="display:flex;gap:5px;align-items:center;margin-bottom:6px;padding-left:29px;"></div>
+        <div id="ex-sets-list"></div>
+        <button class="ex-add-set-btn" onclick="addExSet()">+ Seria</button>
+      </div>
+      <div id="ex-general-wrap" style="display:none;">
+        <button class="ex-general-note-btn" id="ex-general-toggle" onclick="toggleExGeneralNote()">📝 Notatka ogólna</button>
+        <textarea id="ex-general-note" rows="2" placeholder="Uwagi do ćwiczenia..." style="display:none;width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;outline:none;resize:vertical;margin-top:6px;box-sizing:border-box;"></textarea>
+      </div>
+      <div id="ex-save-wrap" style="display:none;margin-top:10px;">
+        <button id="ex-save-btn" onclick="saveStrengthEntry()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">💪 Zapisz wpis</button>
+      </div>
     </div>
 
     <!-- TEST structured form -->
@@ -720,20 +738,21 @@
 </div>
 
 
-<script src="js/storage.js"></script>
-<script src="js/core.js"></script>
-<script src="js/timers.js"></script>
-<script src="js/athletes.js"></script>
-<script src="js/wallet.js"></script>
-<script src="js/status.js"></script>
-<script src="js/diary.js"></script>
-<script src="js/reports.js"></script>
-<script src="js/plans.js"></script>
-<script src="js/data.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/sync.js"></script>
-<script src="js/autogrow.js"></script>
+<script src="js/storage.js?v=2"></script>
+<script src="js/core.js?v=2"></script>
+<script src="js/timers.js?v=2"></script>
+<script src="js/athletes.js?v=2"></script>
+<script src="js/wallet.js?v=2"></script>
+<script src="js/status.js?v=2"></script>
+<script src="js/exercises.js?v=2"></script>
+<script src="js/diary.js?v=2"></script>
+<script src="js/reports.js?v=2"></script>
+<script src="js/plans.js?v=2"></script>
+<script src="js/data.js?v=2"></script>
+<script src="js/settings.js?v=2"></script>
+<script src="js/supabase-config.js?v=2"></script>
+<script src="js/sync.js?v=2"></script>
+<script src="js/autogrow.js?v=2"></script>
 
 </body>
 </html>

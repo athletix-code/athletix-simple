@@ -32,8 +32,12 @@ function _buildReportHtml(athleteName, day, entries){
 
   if(entries.length){
     entries.forEach(function(n,idx){
-      var badge=n.type==='test'?'<span class="test-badge">TEST</span>':'';
-      html+='<div class="entry"><span class="entry-num">'+(idx+1)+'.</span>'+badge+(n.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'<div class="entry-time">'+n.time+'</div></div>';
+      if(n.type==='strength'&&n.sets&&n.sets.length){
+        html+=_renderStrengthReportEntry(n,idx);
+      } else {
+        var badge=n.type==='test'?'<span class="test-badge">TEST</span>':'';
+        html+='<div class="entry"><span class="entry-num">'+(idx+1)+'.</span>'+badge+(n.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'<div class="entry-time">'+n.time+'</div></div>';
+      }
     });
   } else {
     html+='<div style="text-align:center;color:#999;padding:40px;font-size:14px;">Brak wpisów.</div>';
@@ -84,8 +88,12 @@ function printSimpleReport(){
     athletes2.forEach(function(athlete){
       html+='<div class="athlete-section"><div class="athlete-name">'+athlete+'</div>';
       byAthlete[athlete].forEach(function(n,idx){
-        var badge=n.type==='test'?'<span class="test-badge">TEST</span>':'';
-        html+='<div class="entry"><span class="entry-num">'+(idx+1)+'.</span>'+badge+(n.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'<div class="entry-time">'+n.time+'</div></div>';
+        if(n.type==='strength'&&n.sets&&n.sets.length){
+          html+=_renderStrengthReportEntry(n,idx);
+        } else {
+          var badge=n.type==='test'?'<span class="test-badge">TEST</span>':'';
+          html+='<div class="entry"><span class="entry-num">'+(idx+1)+'.</span>'+badge+(n.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'<div class="entry-time">'+n.time+'</div></div>';
+        }
       });
       html+='</div>';
     });

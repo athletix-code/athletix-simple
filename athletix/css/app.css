@@ -349,3 +349,28 @@ select.time-select{width:100%;padding:10px 12px;background:var(--s2);border:1px 
 .ap-stat-val{font-size:20px;font-weight:900;color:var(--text);}
 .ap-stat-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:2px;}
 .superset-label{font-size:10px;font-weight:900;letter-spacing:.12em;color:var(--accent);background:var(--accent-bg);padding:3px 8px;border-radius:3px;min-width:28px;text-align:center;flex-shrink:0;}
+
+/* ── Formularz ćwiczeń ── */
+.ex-cat-scroll{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+.ex-cat-scroll::-webkit-scrollbar{display:none;}
+.ex-cat-chip{padding:7px 11px;border-radius:var(--r-xs);border:1px solid var(--border2);background:var(--s2);color:var(--muted);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;white-space:nowrap;transition:all .15s;flex-shrink:0;min-height:36px;display:flex;align-items:center;gap:4px;letter-spacing:.04em;}
+.ex-zone-chip{padding:5px 10px;border-radius:var(--r-xs);border:1px solid var(--border2);background:var(--s2);color:var(--muted);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;transition:all .15s;min-height:32px;}
+.ex-set-row{display:flex;gap:5px;align-items:center;margin-bottom:5px;}
+.ex-set-badge{font-size:10px;font-weight:800;color:var(--dim);width:24px;text-align:center;flex-shrink:0;}
+.ex-set-input{background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:10px 8px;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:var(--text);text-align:center;outline:none;min-height:44px;box-sizing:border-box;transition:border-color .15s;}
+.ex-set-input:focus{border-color:var(--accent);}
+.ex-set-input.invalid{border-color:var(--red);animation:exShake .3s ease;}
+.ex-set-note-toggle{background:transparent;border:none;cursor:pointer;font-size:14px;opacity:.35;padding:4px;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center;transition:opacity .15s;flex-shrink:0;}
+.ex-set-note-toggle:hover,.ex-set-note-toggle.has-note{opacity:.8;}
+.ex-set-del{background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--red-text);opacity:.3;padding:4px;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center;transition:opacity .15s;flex-shrink:0;}
+.ex-set-del:hover{opacity:.7;}
+.ex-set-note{width:100%;padding:6px 10px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r-xs);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;outline:none;resize:none;margin:0 0 4px 29px;box-sizing:border-box;display:none;}
+.ex-add-set-btn{width:100%;padding:10px;background:transparent;border:1px dashed var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--muted);transition:all .15s;min-height:44px;}
+.ex-add-set-btn:hover{background:var(--s2);}
+.ex-general-note-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--muted);margin-top:8px;transition:all .15s;}
+.ex-cat-badge{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.08em;border-radius:var(--r-xs);padding:3px 7px;}
+.str-entry{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:6px;position:relative;}
+.str-entry .note-actions{display:flex;gap:4px;position:absolute;top:6px;right:6px;}
+.str-entry .note-actions button{background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);padding:6px 8px;border-radius:var(--r-xs);min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;}
+.str-entry .note-actions button:hover{color:var(--red-text);}
+@keyframes exShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}

@@ -16,6 +16,7 @@ function setSimpleDiaryMode(mode){
   el('diary-note-form').style.display=mode==='strength'?'block':'none';
   el('diary-test-form').style.display=mode==='test'?'block':'none';
   if(mode==='test') initTestCatButtons();
+  if(mode==='strength') initExCatChips();
 }
 
 var _selTestCat='', _selTestName='', _selTestUnit='';
@@ -242,12 +243,16 @@ function renderDayDetail(day){
       var body=document.createElement('div');
       body.style.cssText='padding:6px 10px;';
       items.forEach(function(n){
-        var div=document.createElement('div'); div.className='note-entry'; div.setAttribute('data-note-id',n.id);
-        var badge=n.type==='test'?'<span class="note-test-badge">TEST</span>':'';
-        div.innerHTML='<div class="note-actions"><button onclick="editNote('+n.id+')" title="Edytuj">✏️</button><button onclick="deleteNote('+n.id+')" title="Usuń">🗑</button></div>'
-          +'<div class="note-entry-text">'+badge+(n.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>'
-          +'<div class="note-entry-meta">'+n.time+'</div>';
-        body.appendChild(div);
+        if(n.type==='strength'&&n.sets&&n.sets.length){
+          body.appendChild(_renderStrengthCard(n));
+        } else {
+          var div=document.createElement('div'); div.className='note-entry'; div.setAttribute('data-note-id',n.id);
+          var badge=n.type==='test'?'<span class="note-test-badge">TEST</span>':'';
+          div.innerHTML='<div class="note-actions"><button onclick="editNote('+n.id+')" title="Edytuj">✏️</button><button onclick="deleteNote('+n.id+')" title="Usuń">🗑</button></div>'
+            +'<div class="note-entry-text">'+badge+(n.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>'
+            +'<div class="note-entry-meta">'+n.time+'</div>';
+          body.appendChild(div);
+        }
       });
       section.appendChild(body);
     }

@@ -1,7 +1,7 @@
 // ══════════════════════════════════════
 //  EXPORT / IMPORT / BACKUP
 // ══════════════════════════════════════
-var AXS_KEYS=['axs_athletes','axs_sessions','axs_groups','axs_tests','axs_notes','axs_custom_tests','axs_packages','axs_int_presets','axs_plans','cts_v5','ct_theme'];
+var AXS_KEYS=['axs_athletes','axs_sessions','axs_groups','axs_tests','axs_notes','axs_custom_tests','axs_packages','axs_int_presets','axs_custom_exercises','axs_plans','cts_v5','ct_theme'];
 var BACKUP_CFG_KEY='axs_backup_cfg';
 
 function openAppSettings(){ setMode('data'); }
@@ -52,7 +52,7 @@ function importDataFile(input){
         keys.forEach(function(k){ try{ localStorage.setItem(k,JSON.stringify(data[k])); }catch(ex){ try{ localStorage.setItem(k,data[k]); }catch(ex2){} } });
         ov.style.display='none';
         // Reload everything
-        loadCRM(); loadNotes(); loadTests(); loadGroups(); loadLS();
+        loadCRM(); loadNotes(); loadTests(); loadGroups(); loadCustomExercises(); loadLS();
         if(st){ st.textContent='✓ Dane przywrócone pomyślnie! ('+keys.length+' kluczy)'; st.style.color='var(--green-text)'; st.style.display='block'; }
         refreshDataStats();
         renderAthleteList(); populateAthleteSelect();

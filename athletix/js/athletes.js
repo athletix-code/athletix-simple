@@ -502,7 +502,7 @@ function openTestHistory(athleteName){
 
 // ── DELETE TEST + UNDO/REDO ──
 var _undoStack=[], _redoStack=[], _UNDO_MAX=30;
-var _ALL_DATA_KEYS=['axs_athletes','axs_sessions','axs_groups','axs_tests','axs_notes','axs_custom_tests','axs_packages','axs_int_presets'];
+var _ALL_DATA_KEYS=['axs_athletes','axs_sessions','axs_groups','axs_tests','axs_notes','axs_custom_tests','axs_packages','axs_int_presets','axs_custom_exercises'];
 function _pushUndo(label){
   var snapshot=_ALL_DATA_KEYS.map(function(k){ return {key:k, val:localStorage.getItem(k)}; });
   _undoStack.push({label:label, data:snapshot, time:Date.now()});
@@ -519,7 +519,7 @@ function undoLast(){
   var redoPairs=_snapshotKeys(action.data.map(function(p){ return p.key; }));
   _redoStack.push({label:action.label, data:redoPairs, time:Date.now()});
   _restoreSnapshot(action.data);
-  loadCRM(); loadTests(); loadNotes(); loadGroups();
+  loadCRM(); loadTests(); loadNotes(); loadGroups(); loadCustomExercises();
 }
 function redoLast(){
   if(!_redoStack.length) return;
@@ -527,7 +527,7 @@ function redoLast(){
   var undoPairs=_snapshotKeys(action.data.map(function(p){ return p.key; }));
   _undoStack.push({label:action.label, data:undoPairs, time:Date.now()});
   _restoreSnapshot(action.data);
-  loadCRM(); loadTests(); loadNotes(); loadGroups();
+  loadCRM(); loadTests(); loadNotes(); loadGroups(); loadCustomExercises();
 }
 function _renderUndoBar(){
   // Update header button indicator
