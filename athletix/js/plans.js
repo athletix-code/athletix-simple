@@ -341,7 +341,7 @@ function _toggleFavInPanel(row){
   loadFavEx();
   var idx=favExercises.findIndex(function(f){ return f.name===name; });
   if(idx>=0) favExercises.splice(idx,1);
-  else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>20) favExercises.shift(); }
+  else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>40) favExercises.shift(); }
   saveFavEx();
   // Flash na wierszu
   row.style.background='rgba(59,130,246,.1)'; setTimeout(function(){ row.style.background=''; },300);
@@ -359,7 +359,7 @@ function _addCustomFavInPanel(){
   loadFavEx();
   if(!favExercises.find(function(f){ return f.name===name; })){
     favExercises.push({name:name,cat:null,zone:null});
-    if(favExercises.length>20) favExercises.shift();
+    if(favExercises.length>40) favExercises.shift();
     saveFavEx();
   }
   inp.value='';
@@ -438,7 +438,7 @@ function _peToggleFav(ei){
   var zone=_editingPlan.exercises[ei].exZone;
   loadFavEx();
   var idx=favExercises.findIndex(function(f){ return f.name===name; });
-  if(idx>=0) favExercises.splice(idx,1); else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>20) favExercises.shift(); }
+  if(idx>=0) favExercises.splice(idx,1); else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>40) favExercises.shift(); }
   saveFavEx(); _rfPeEx();
 }
 // Modal notatki do ćwiczenia (nie serii)
