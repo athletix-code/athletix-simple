@@ -1,4 +1,4 @@
-var CACHE_NAME = 'athletix-v57';
+var CACHE_NAME = 'athletix-v61';
 var URLS_TO_CACHE = [
   './', './index.html', './manifest.json',
   './css/app.css',

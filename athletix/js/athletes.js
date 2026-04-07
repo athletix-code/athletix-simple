@@ -79,26 +79,32 @@ function syncAthleteBarFromForm(name){
   else if(sessionAthletes.length<4){ sessionAthletes.push(name); activeAthlete=name; }
   renderAthleteBar();
 }
+var _athleteBarExpanded=false;
 function renderAthleteBar(){
   var bar=el('athlete-bar'); var btns=el('athlete-bar-buttons'); var countEl=el('athlete-bar-count');
   if(!btns) return;
   if(!sessionAthletes.length){ if(bar) bar.style.display='none'; if(countEl) countEl.textContent=''; return; }
   if(bar) bar.style.display='flex'; if(countEl) countEl.textContent=sessionAthletes.length+' os.';
-  btns.innerHTML=''; btns.style.flexWrap='wrap';
-  sessionAthletes.forEach(function(name){
+  btns.innerHTML='';
+  var maxVisible=_athleteBarExpanded?999:3;
+  var hasMore=sessionAthletes.length>3;
+
+  sessionAthletes.forEach(function(name,idx){
+    if(idx>=maxVisible) return;
     var isActive=name===activeAthlete; var parts=name.trim().split(' ');
     var initials=((parts[0]||'')[0]||'').toUpperCase()+((parts[1]||'')[0]||'').toUpperCase();
-    var firstName=parts[0]||name; var many=sessionAthletes.length>4;
+    var firstName=parts[0]||name;
+    // Athlete pill + profile — wrapped together so they don't split on wrap
+    var wrap=document.createElement('div');
+    wrap.style.cssText='display:flex;align-items:center;flex-shrink:0;margin-bottom:4px;';
     var btn=document.createElement('button'); btn.title=name;
-    btn.style.cssText='display:flex;align-items:center;gap:'+(many?'4':'7')+'px;padding:3px '+(many?'8':'10')+'px 3px 3px;border-radius:24px;border:2px solid '+(isActive?'#3b82f6':'rgba(255,255,255,.15)')+';background:'+(isActive?'rgba(59,130,246,.2)':'rgba(255,255,255,.04)')+';cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;margin-bottom:4px;';
-    var cs=many?'26':'32'; var fs=many?'10':'11';
-    btn.innerHTML='<div style="width:'+cs+'px;height:'+cs+'px;border-radius:50%;background:'+(isActive?'#3b82f6':'rgba(255,255,255,.12)')+';display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-size:'+fs+'px;font-weight:900;color:'+(isActive?'#fff':'rgba(255,255,255,.45)')+';flex-shrink:0;">'+initials+'</div>'
-      +(many?'':'<span style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:'+(isActive?'800':'600')+';color:'+(isActive?'#fff':'rgba(255,255,255,.4)')+';letter-spacing:.04em;-webkit-user-select:none;user-select:none;">'+firstName+'</span>');
+    btn.style.cssText='display:flex;align-items:center;gap:6px;padding:3px 10px 3px 3px;border-radius:24px;border:2px solid '+(isActive?'#3b82f6':'rgba(255,255,255,.15)')+';background:'+(isActive?'rgba(59,130,246,.2)':'rgba(255,255,255,.04)')+';cursor:pointer;transition:all .15s;white-space:nowrap;';
+    btn.innerHTML='<div style="width:30px;height:30px;border-radius:50%;background:'+(isActive?'#3b82f6':'rgba(255,255,255,.12)')+';display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;color:'+(isActive?'#fff':'rgba(255,255,255,.45)')+';flex-shrink:0;">'+initials+'</div>'
+      +'<span style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:'+(isActive?'800':'600')+';color:'+(isActive?'#fff':'rgba(255,255,255,.4)')+';letter-spacing:.04em;-webkit-user-select:none;user-select:none;">'+firstName+'</span>';
     btn.onclick=function(){ setActiveAthlete(name); };
-    btns.appendChild(btn);
-    // Profile shortcut button
+    wrap.appendChild(btn);
     var profBtn=document.createElement('button');
-    profBtn.style.cssText='display:flex;align-items:center;justify-content:center;width:'+cs+'px;height:'+cs+'px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);cursor:pointer;flex-shrink:0;margin-left:-4px;margin-bottom:4px;font-size:'+(many?'10':'12')+'px;color:rgba(255,255,255,.6);';
+    profBtn.style.cssText='display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);cursor:pointer;flex-shrink:0;margin-left:-4px;font-size:12px;color:rgba(255,255,255,.6);';
     profBtn.textContent='👤';
     profBtn.title='Profil '+name;
     (function(n){ profBtn.onclick=function(e){
@@ -106,8 +112,22 @@ function renderAthleteBar(){
       loadCRM(); var ath=athletes.find(function(x){ return x.name===n; });
       if(ath) openAthleteProfile(ath.id);
     }; })(name);
-    btns.appendChild(profBtn);
+    wrap.appendChild(profBtn);
+    btns.appendChild(wrap);
   });
+
+  // More indicator
+  var moreEl=el('athlete-bar-more');
+  if(moreEl){
+    if(hasMore){
+      var hidden=sessionAthletes.length-3;
+      moreEl.textContent=_athleteBarExpanded?'▲':('+'+hidden);
+      moreEl.style.display='flex';
+    } else {
+      moreEl.style.display='none';
+    }
+  }
+  btns.style.flexWrap=_athleteBarExpanded?'wrap':'nowrap';
 }
 
 // ── ATHLETE BAR SELECTOR (MY ATHLETIX TEAM modal) ──
