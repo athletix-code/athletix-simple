@@ -14,6 +14,7 @@ var Storage = {
     packages: 'axs_packages',
     intPresets: 'axs_int_presets',
     customExercises: 'axs_custom_exercises',
+    plans: 'axs_plans',
     backupCfg: 'axs_backup_cfg',
     settings: 'cts_v5',
     theme: 'ct_theme'
@@ -38,7 +39,7 @@ var Storage = {
   },
   getAllDataKeys: function() {
     return [this._keys.athletes, this._keys.sessions, this._keys.groups, this._keys.tests,
-      this._keys.notes, this._keys.customTests, this._keys.packages, this._keys.intPresets, this._keys.customExercises];
+      this._keys.notes, this._keys.customTests, this._keys.packages, this._keys.intPresets, this._keys.customExercises, this._keys.plans];
   },
   exportAll: function() {
     var data = {_meta:{app:'AthletiXApp Simple',version:'1.0',exportDate:new Date().toISOString()}};

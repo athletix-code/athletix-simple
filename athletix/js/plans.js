@@ -1,362 +1,370 @@
 // ═══════════════════════════════════════
-//  PLANS MODULE
-//  Plan = {id, name, athlete, text, status:'active'|'archived', created, updated}
+//  PLANY TRENINGOWE — strukturyzowane z EXERCISE_LIBRARY
+//  Plan = {id, name, athletes:[], exercises:[{exCat, exZone, exercise, targetSets:[], note}], status, created, updated}
 // ═══════════════════════════════════════
 
 var PLANS_KEY = 'axs_plans';
-var plans = [];
-var _activeSessionPlanId = null;
+var trainingPlans = [];
 
-function loadPlans(){ try{ plans = JSON.parse(localStorage.getItem(PLANS_KEY)||'[]'); }catch(e){ plans=[]; } }
-function savePlans(){ try{ localStorage.setItem(PLANS_KEY, JSON.stringify(plans)); }catch(e){} }
+function loadPlans(){ try{ trainingPlans = JSON.parse(localStorage.getItem(PLANS_KEY)||'[]'); }catch(e){ trainingPlans=[]; } }
+function savePlans(){ try{ localStorage.setItem(PLANS_KEY, JSON.stringify(trainingPlans)); }catch(e){} }
+function _findPlan(id){ return trainingPlans.find(function(x){ return x.id===id; }); }
 
-function _findPlan(id){ return plans.find(function(x){ return x.id===id; }); }
-function _hideOverlay(){ _closeOverlay(); }
+// ══════════════════════════════════════
+//  LISTA PLANÓW
+// ══════════════════════════════════════
+function initPlansTab(){ loadPlans(); loadCRM(); renderPlansList(); }
 
-// ── CREATE ──
-function createPlan(){
-  var athlete=(el('plan-athlete').value||'').trim();
-  var name=(el('plan-name').value||'').trim();
-  var text=(el('plan-text').value||'').trim();
-  if(!name){ el('plan-name').focus(); return; }
-  if(!athlete){ el('plan-athlete').focus(); return; }
-  _pushUndo('Plan: '+name);
-  loadPlans();
-  plans.push({id:Date.now(), name:name, athlete:athlete, text:text, status:'active', created:getDayKey(new Date()), updated:getDayKey(new Date())});
-  savePlans();
-  el('plan-name').value=''; el('plan-text').value='';
-  renderPlans();
-  var btn=document.querySelector('#tab-plans button[onclick*="createPlan"]');
-  if(btn){ var o=btn.textContent; btn.textContent='✓ Utworzono!'; btn.style.background='var(--green)'; setTimeout(function(){ btn.textContent=o; btn.style.background=''; },1200); }
-}
-
-// ── RENDER LIST ──
-function renderPlans(){
+function renderPlansList(){
   loadPlans(); loadCRM();
   var list=el('plans-list'); if(!list) return;
-  var fSel=el('plan-filter'); var curF=fSel?fSel.value:'all';
-  if(fSel){ fSel.innerHTML='<option value="all">Wszyscy</option>'; athletes.forEach(function(a){ var o=document.createElement('option'); o.value=a.name; o.textContent=a.name; fSel.appendChild(o); }); fSel.value=curF; }
-  var paSel=el('plan-athlete');
-  if(paSel){ var curPa=paSel.value; paSel.innerHTML='<option value="">Wybierz...</option>'; athletes.forEach(function(a){ var o=document.createElement('option'); o.value=a.name; o.textContent=a.name; paSel.appendChild(o); }); if(curPa) paSel.value=curPa; if(activeAthlete&&!curPa) paSel.value=activeAthlete; }
-  var sF=el('plan-status-filter')?el('plan-status-filter').value:'active';
-  var filtered=plans.filter(function(p){
-    if(curF!=='all'&&p.athlete!==curF) return false;
-    if(sF==='active'&&p.status!=='active') return false;
-    if(sF==='done'&&p.status!=='archived') return false;
-    return true;
-  });
-  filtered.sort(function(a,b){ if(a.status!==b.status) return a.status==='active'?-1:1; return b.updated>a.updated?1:b.updated<a.updated?-1:0; });
-
-  if(!filtered.length){ list.innerHTML='<div style="text-align:center;color:var(--dim);font-size:12px;padding:20px;">'+(sF==='done'?'Brak zarchiwizowanych planów.':'Brak planów.')+'</div>'; return; }
-
+  if(!trainingPlans.length){
+    list.innerHTML='<div style="text-align:center;padding:40px 20px;"><div style="font-size:40px;margin-bottom:12px;">📋</div><div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:6px;">Brak planów</div><div style="font-size:12px;color:var(--muted);">Stwórz swój pierwszy plan treningowy</div></div>';
+    return;
+  }
   list.innerHTML='';
-  filtered.forEach(function(p){
-    var isArch=p.status==='archived';
+  trainingPlans.forEach(function(p){
     var card=document.createElement('div');
-    card.style.cssText='background:var(--s1);border:1px solid '+(isArch?'var(--border)':'var(--accent)')+';border-radius:var(--r);padding:12px 14px;margin-bottom:8px;'+(isArch?'opacity:.7;':'');
-    var preview=(p.text||'').substring(0,100).replace(/</g,'&lt;').replace(/\n/g,' '); if(p.text&&p.text.length>100) preview+='...';
-    card.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
-      +'<div><div style="font-size:14px;font-weight:800;color:var(--text);">'+p.name+'</div>'
-      +'<div style="font-size:11px;color:var(--muted);">👤 '+p.athlete+' · '+(isArch?'Archiwum':'Aktywny')+' · '+p.updated+'</div></div>'
-      +(isArch?'<span style="font-size:10px;color:var(--dim);font-weight:800;">📦</span>':'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);"></span>')
-      +'</div>'
-      +(preview?'<div style="font-size:12px;color:var(--muted);line-height:1.4;margin-bottom:8px;">'+preview+'</div>':'')
+    card.style.cssText='background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;';
+    var athChips=p.athletes&&p.athletes.length?p.athletes.map(function(a){ return '<span style="font-size:10px;font-weight:700;color:var(--muted);background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:2px 7px;">'+a+'</span>'; }).join(' '):'<span style="font-size:10px;color:var(--dim);font-style:italic;">Nie przypisany</span>';
+    var exCount=p.exercises?p.exercises.length:0;
+    var exPreview=p.exercises?p.exercises.map(function(e){ return e.exercise; }).join(' • '):'';
+    if(exPreview.length>80) exPreview=exPreview.substring(0,80)+'...';
+    card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:4px;">'+p.name+'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">'+athChips+'</div>'
+      +'<div style="font-size:11px;color:var(--dim);margin-bottom:4px;">'+exCount+' ćwicz. • '+(p.created||'')+'</div>'
+      +(exPreview?'<div style="font-size:11px;color:var(--muted);margin-bottom:8px;max-height:32px;overflow:hidden;line-height:1.5;">'+exPreview+'</div>':'')
       +'<div style="display:flex;gap:6px;flex-wrap:wrap;">'
-      +(!isArch?'<button onclick="openEditPlan('+p.id+')" style="padding:6px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--text);">✏️ Edytuj</button>':'')
-      +(!isArch?'<button onclick="startSessionWithPlan('+p.id+')" style="padding:6px 12px;background:var(--accent);border:none;border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:800;color:#fff;">▶ Realizuj</button>':'')
-      +(!isArch?'<button onclick="archivePlan('+p.id+')" style="padding:6px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--dim);">📦 Archiwizuj</button>':'')
-      +(isArch?'<button onclick="reactivatePlan('+p.id+')" style="padding:6px 12px;background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--accent);">↩ Przywróć</button>':'')
-      +'<button onclick="deletePlan('+p.id+')" style="padding:6px 12px;background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--dim);">🗑</button>'
+      +'<button onclick="launchPlan('+p.id+')" style="padding:7px 14px;background:var(--accent);border:none;border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:800;color:#fff;min-height:34px;">▶ Uruchom</button>'
+      +'<button onclick="openPlanEditor('+p.id+')" style="padding:7px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--text);min-height:34px;">✏️ Edytuj</button>'
+      +'<button onclick="copyPlan('+p.id+')" style="padding:7px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--text);min-height:34px;">📋 Kopiuj</button>'
+      +'<button onclick="deletePlanConfirm('+p.id+')" style="padding:7px 12px;background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--dim);min-height:34px;">🗑</button>'
       +'</div>';
     list.appendChild(card);
   });
 }
 
-// ── EDIT ──
-function openEditPlan(id){
-  loadPlans();
-  var p=_findPlan(id); if(!p) return;
+// ══════════════════════════════════════
+//  EDYTOR PLANU (overlay full-screen)
+// ══════════════════════════════════════
+var _editingPlan=null;
+
+function openPlanEditor(id){
+  loadPlans(); loadCRM(); loadCustomExercises();
+  var isNew=!id;
+  var plan=isNew?{id:0,name:'',athletes:[],exercises:[],created:'',updated:'',status:'active'}:JSON.parse(JSON.stringify(_findPlan(id)));
+  if(!plan) return;
+  _editingPlan=plan;
   var ov=_ensureOverlay();
-  ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:440px;width:100%;padding:22px 18px 24px;max-height:90vh;overflow-y:auto;">'
-    +'<div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:4px;">✏️ '+p.name+'</div>'
-    +'<div style="font-size:11px;color:var(--muted);margin-bottom:14px;">👤 '+p.athlete+'</div>'
-    +'<div style="margin-bottom:10px;"><div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Nazwa</div>'
-    +'<input id="edit-plan-name" type="text" value="'+(p.name||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;box-sizing:border-box;"/></div>'
-    +'<div style="margin-bottom:14px;"><div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Treść</div>'
-    +'<textarea id="edit-plan-text" rows="10" style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;font-weight:600;outline:none;resize:vertical;line-height:1.5;box-sizing:border-box;">'+((p.text||'').replace(/</g,'&lt;'))+'</textarea></div>'
-    +'<div style="display:flex;gap:8px;">'
-    +'<button id="edit-plan-save" style="flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💾 Zapisz</button>'
-    +'<button id="edit-plan-cancel" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
-  ov.style.display='flex';
-  setTimeout(function(){ el('edit-plan-text').focus(); },100);
-  document.getElementById('edit-plan-save').onclick=function(){
-    _pushUndo('Edycja: '+p.name); loadPlans();
-    var p2=_findPlan(id); if(!p2) return;
-    p2.name=(el('edit-plan-name').value||'').trim()||p2.name;
-    p2.text=(el('edit-plan-text').value||'').trim();
-    p2.updated=getDayKey(new Date());
-    savePlans(); _hideOverlay(); renderPlans();
-  };
-  document.getElementById('edit-plan-cancel').onclick=function(){ _hideOverlay(); };
+  _renderPlanEditorOverlay(ov, isNew);
 }
 
-// ── ARCHIVE / REACTIVATE / DELETE ──
-function archivePlan(id){
-  _pushUndo('Archiwizacja planu'); loadPlans();
-  var p=_findPlan(id); if(!p) return;
-  p.status='archived'; p.updated=getDayKey(new Date());
-  savePlans(); renderPlans();
-}
-function reactivatePlan(id){
-  _pushUndo('Przywrócenie planu'); loadPlans();
-  var p=_findPlan(id); if(!p) return;
-  p.status='active'; p.updated=getDayKey(new Date());
-  savePlans(); renderPlans();
-}
-function deletePlan(id){
-  loadPlans(); var p=_findPlan(id); if(!p) return;
-  var ov=_ensureOverlay();
-  ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);padding:22px 18px;max-width:340px;width:100%;text-align:center;">'
-    +'<div style="font-size:24px;margin-bottom:8px;">🗑</div>'
-    +'<div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:6px;">Usunąć plan?</div>'
-    +'<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">'+p.name+' · '+p.athlete+'</div>'
-    +'<div style="display:flex;gap:8px;">'
-    +'<button id="del-plan-ok" style="flex:1;padding:11px;background:#ef4444;color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Usuń</button>'
-    +'<button id="del-plan-no" style="flex:1;padding:11px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
-  ov.style.display='flex';
-  document.getElementById('del-plan-ok').onclick=function(){
-    _pushUndo('Usunięto: '+p.name); loadPlans();
-    plans=plans.filter(function(x){ return x.id!==id; });
-    savePlans(); _hideOverlay(); renderPlans();
-  };
-  document.getElementById('del-plan-no').onclick=function(){ _hideOverlay(); };
+function _renderPlanEditorOverlay(ov, isNew){
+  var p=_editingPlan;
+  var athHtml=athletes.length?athletes.map(function(a){
+    var ch=p.athletes&&p.athletes.indexOf(a.name)>=0;
+    return '<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:'+(ch?'var(--accent-bg)':'var(--s2)')+';border:1px solid '+(ch?'var(--accent)':'var(--border2)')+';border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:'+(ch?'var(--accent)':'var(--muted)')+';margin:0 4px 4px 0;min-height:36px;" onclick="togglePlanAthlete(this,\''+a.name.replace(/'/g,"\\'")+'\')">'
+      +'<input type="checkbox" data-ath="'+a.name+'" '+(ch?'checked ':'')+' style="display:none;"/>'+a.name+'</label>';
+  }).join(''):'<div style="font-size:11px;color:var(--dim);">Najpierw dodaj zawodników w zakładce Zawodnicy</div>';
+
+  ov.innerHTML='<div style="position:fixed;inset:0;background:var(--bg);overflow-y:auto;z-index:9991;padding:0 0 100px;">'
+    +'<div style="max-width:520px;margin:0 auto;padding:16px 14px;">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
+    +'<div style="font-size:15px;font-weight:900;color:var(--text);">'+(isNew?'+ Nowy plan':'✏️ Edytuj plan')+'</div>'
+    +'<button onclick="_closePlanEditor()" style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:8px 12px;cursor:pointer;font-size:14px;color:var(--muted);min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+    +'<input id="pe-name" type="text" value="'+(p.name||'').replace(/"/g,'&quot;')+'" placeholder="Nazwa planu..." style="width:100%;padding:12px 14px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;outline:none;margin-bottom:12px;box-sizing:border-box;"/>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Zawodnicy</div>'
+    +'<div id="pe-athletes" style="display:flex;flex-wrap:wrap;margin-bottom:14px;">'+athHtml+'</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Ćwiczenia</div>'
+    +'<div id="pe-exercises">'+_renderPlanExCards()+'</div>'
+    +'<div id="pe-add-wrap"><button onclick="_showPeAddEx()" id="pe-add-btn" style="width:100%;padding:12px;background:transparent;border:1px dashed var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);min-height:44px;">+ Dodaj ćwiczenie</button>'
+    +'<div id="pe-add-inline" style="display:none;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:12px;margin-top:6px;"></div></div>'
+    +'</div>'
+    +'<div style="position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-top:1px solid var(--border);padding:12px 16px calc(env(safe-area-inset-bottom,10px) + 12px);z-index:9992;"><div style="max-width:520px;margin:0 auto;">'
+    +'<button onclick="_savePlan('+p.id+')" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">💾 Zapisz plan</button>'
+    +'</div></div></div>';
+  ov.style.display='block';
 }
 
-// ══════════════════════════════════════
-//  SESSION INTEGRATION
-// ══════════════════════════════════════
-
-function openPlanSelector(){
-  loadPlans(); loadCRM();
-  var athleteName=(el('note-athlete').value||'').trim()||(activeAthlete||'');
-  var available=plans.filter(function(p){ return p.status==='active'; });
-  // Sort: matching athlete first
-  if(athleteName){
-    available.sort(function(a,b){ return (a.athlete===athleteName?0:1)-(b.athlete===athleteName?0:1); });
-  }
-  if(!available.length){
-    var ov=_ensureOverlay();
-    ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);padding:22px 18px;max-width:340px;width:100%;text-align:center;">'
-      +'<div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:8px;">Brak aktywnych planów</div>'
-      +'<div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Utwórz plan w zakładce Plany.</div>'
-      +'<button id="no-plans-ok" style="width:100%;padding:11px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button></div>';
-    ov.style.display='flex';
-    document.getElementById('no-plans-ok').onclick=function(){ _hideOverlay(); };
-    return;
-  }
-  var ov=_ensureOverlay();
-  ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:380px;width:100%;padding:22px 18px 24px;max-height:80vh;overflow-y:auto;">'
-    +'<div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:12px;">📅 Wybierz plan</div>'
-    +available.map(function(p){
-      var preview=(p.text||'').substring(0,50).replace(/\n/g,' ');
-      var isCurrent=athleteName&&p.athlete===athleteName;
-      return '<button data-plan-id="'+p.id+'" class="plan-pick-btn" style="width:100%;text-align:left;padding:10px 12px;background:'+(isCurrent?'var(--accent-bg)':'var(--s2)')+';border:1px solid '+(isCurrent?'var(--accent)':'var(--border2)')+';border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;margin-bottom:6px;">'
-        +'<div style="font-size:13px;font-weight:800;color:var(--text);">'+p.name+'</div>'
-        +'<div style="font-size:11px;color:var(--muted);">👤 '+p.athlete+(preview?' · '+preview:'')+'</div></button>';
-    }).join('')
-    +'<button id="plan-pick-cancel" style="width:100%;padding:10px;background:transparent;color:var(--muted);border:none;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px;">Anuluj</button></div>';
-  ov.style.display='flex';
-  // Bind clicks
-  document.querySelectorAll('.plan-pick-btn').forEach(function(btn){
-    btn.onclick=function(){ var pid=parseInt(btn.getAttribute('data-plan-id')); _hideOverlay(); _openPlanInSession(pid); };
-  });
-  document.getElementById('plan-pick-cancel').onclick=function(){ _hideOverlay(); };
+function togglePlanAthlete(label,name){
+  var idx=_editingPlan.athletes.indexOf(name);
+  if(idx>=0) _editingPlan.athletes.splice(idx,1); else _editingPlan.athletes.push(name);
+  var ch=_editingPlan.athletes.indexOf(name)>=0;
+  label.style.background=ch?'var(--accent-bg)':'var(--s2)'; label.style.borderColor=ch?'var(--accent)':'var(--border2)'; label.style.color=ch?'var(--accent)':'var(--muted)';
 }
 
-function _openPlanInSession(id){
-  loadPlans();
-  var p=_findPlan(id); if(!p) return;
-  _activeSessionPlanId=id;
-  var bar=el('session-plan-bar');
-  if(!bar){ console.warn('session-plan-bar not found'); return; }
-  bar.style.display='block';
-  el('session-plan-name').textContent='📅 '+p.name+' — '+p.athlete;
-  el('session-plan-text').value=p.text||'';
-  var aSel=el('note-athlete'); if(aSel) aSel.value=p.athlete;
-  // Bind buttons (safer than inline onclick)
-  var saveBtn=el('plan-save-close-btn');
-  var archBtn=el('plan-archive-btn');
-  if(saveBtn) saveBtn.onclick=function(){ saveAndCloseSessionPlan(); };
-  if(archBtn) archBtn.onclick=function(){ archiveSessionPlan(); };
-}
-
-function startSessionWithPlan(id){
-  console.log('startSessionWithPlan called, id:', id);
-  // Close any overlay first
-  _hideOverlay();
-  // Close athlete profile if open
-  var profOv=el('athlete-profile-overlay');
-  if(profOv&&profOv.style.display==='block') profOv.style.display='none';
-  // Switch to diary
-  setMode('diary');
-  // Open plan after DOM settles
-  setTimeout(function(){ _openPlanInSession(id); }, 200);
-}
-
-// "Zapisz i zamknij"
-function saveAndCloseSessionPlan(){
-  console.log('saveAndCloseSessionPlan called, planId:', _activeSessionPlanId);
-  if(!_activeSessionPlanId){ console.warn('No active plan'); return; }
-  loadPlans();
-  var p=_findPlan(_activeSessionPlanId); if(!p) return;
-  var newText=(el('session-plan-text').value||'').trim();
-  _pushUndo('Plan sesji: '+p.name);
-  p.text=newText; p.updated=getDayKey(new Date()); savePlans();
-  _createPlanDiaryNote(p, newText);
-  closeSessionPlan();
-  renderCal(); if(selectedDay) renderDayDetail(selectedDay);
-}
-
-// "Archiwizuj"
-function archiveSessionPlan(){
-  if(!_activeSessionPlanId) return;
-  loadPlans();
-  var p=_findPlan(_activeSessionPlanId); if(!p) return;
-  var newText=(el('session-plan-text').value||'').trim();
-  _pushUndo('Archiwizacja: '+p.name);
-  p.text=newText; p.status='archived'; p.updated=getDayKey(new Date()); savePlans();
-  _createPlanDiaryNote(p, newText);
-  closeSessionPlan();
-  renderCal(); if(selectedDay) renderDayDetail(selectedDay);
-}
-
-function _createPlanDiaryNote(p, text){
-  loadNotes();
-  var today=getDayKey(new Date());
-  var now=new Date();
-  var hh=String(now.getHours()).padStart(2,'0');
-  var mm=String(now.getMinutes()).padStart(2,'0');
-  var noteContent='📅 '+p.name+'\n'+text;
-  // Find existing note for this plan in this day — match by plan ID stored in note
-  var planTag='[plan:'+p.id+']';
-  var existing=null;
-  for(var i=0;i<notes.length;i++){
-    if(notes[i].date===today && notes[i].athlete===p.athlete && notes[i].planId===p.id){
-      existing=notes[i]; break;
-    }
-  }
-  if(existing){
-    existing.text=noteContent;
-    existing.time=hh+':'+mm;
-    console.log('Updated existing plan note for', p.name);
-  } else {
-    notes.push({id:Date.now(), date:today, athlete:p.athlete, text:noteContent, type:'strength', time:hh+':'+mm, planId:p.id});
-    console.log('Created new plan note for', p.name);
-  }
-  saveNotes();
-}
-
-function closeSessionPlan(){
-  _activeSessionPlanId=null;
-  var bar=el('session-plan-bar'); if(bar) bar.style.display='none';
-}
-
-// ══════════════════════════════════════
-//  PLANS IN ATHLETE PROFILE
-// ══════════════════════════════════════
-function buildAthletePlansHtml(athleteName){
-  loadPlans();
-  var ap=plans.filter(function(p){ return p.athlete===athleteName; });
-  if(!ap.length) return '';
-  var active=ap.filter(function(p){ return p.status==='active'; });
-  var archived=ap.filter(function(p){ return p.status==='archived'; });
-  var html='<div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px;">'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">📅 Plany</div>';
-  if(active.length){
-    active.forEach(function(p){
-      var preview=(p.text||'').substring(0,60).replace(/\n/g,' ');
-      html+='<div style="background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--r-xs);padding:8px 10px;margin-bottom:6px;">'
-        +'<div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px;">'+p.name+'</div>'
-        +(preview?'<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">'+preview+'</div>':'')
-        +'<div style="display:flex;gap:6px;">'
-        +'<button onclick="openEditPlan('+p.id+')" style="flex:1;padding:6px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--text);">✏️ Edytuj</button>'
-        +'<button onclick="startSessionWithPlan('+p.id+')" style="flex:1;padding:6px;background:var(--accent);border:none;border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:800;color:#fff;">▶ Realizuj</button>'
-        +'</div></div>';
+function _renderPlanExCards(){
+  var p=_editingPlan; if(!p||!p.exercises) return ''; var html='';
+  p.exercises.forEach(function(ex,ei){
+    var cat=EXERCISE_LIBRARY[ex.exCat]||{color:'#888',fields:['reps']}; var fields=cat.fields;
+    html+='<div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:8px;">'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">'
+      +'<span style="font-size:12px;font-weight:900;color:var(--dim);">'+(ei+1)+'.</span>'
+      +'<span class="ex-cat-badge" style="color:'+cat.color+';background:rgba('+_hexToRgb(cat.color)+',.1);">'+CAT_SHORT[ex.exCat]+'</span>'
+      +'<span style="font-size:13px;font-weight:800;color:var(--text);flex:1;">'+ex.exercise+'</span>'
+      +'<span style="font-size:9px;color:var(--dim);">'+(ZONE_LABELS[ex.exZone]||'')+'</span></div>'
+      +'<div style="display:flex;gap:5px;padding-left:29px;margin-bottom:4px;">';
+    fields.forEach(function(f){ html+='<div style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-align:center;width:'+_fieldWidth(f)+'px;flex-shrink:0;">'+FIELD_LABELS[f]+'</div>'; });
+    html+='</div>';
+    (ex.targetSets||[]).forEach(function(s,si){
+      html+='<div class="ex-set-row" style="margin-bottom:4px;"><div class="ex-set-badge">S'+(si+1)+'</div>';
+      fields.forEach(function(f){ html+='<input class="ex-set-input" data-ei="'+ei+'" data-si="'+si+'" data-field="'+f+'" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" style="width:'+_fieldWidth(f)+'px;" placeholder="—" value="'+(s[f]||'')+'" oninput="_upPeSet('+ei+','+si+',\''+f+'\',this.value)"/>'; });
+      if((ex.targetSets||[]).length>1) html+='<button class="ex-set-del" onclick="_rmPeSet('+ei+','+si+')">✕</button>';
+      html+='</div>';
     });
-  } else {
-    html+='<div style="font-size:11px;color:var(--dim);margin-bottom:4px;">Brak aktywnych planów</div>';
-  }
-  if(archived.length){
-    html+='<div style="font-size:9px;color:var(--dim);margin-top:8px;margin-bottom:4px;">Archiwum ('+archived.length+')</div>';
-    archived.slice(0,3).forEach(function(p){
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-top:1px solid var(--border);font-size:11px;">'
-        +'<span style="color:var(--muted);">'+p.name+'</span>'
-        +'<div style="display:flex;gap:4px;align-items:center;">'
-        +'<span style="color:var(--dim);">'+p.updated+'</span>'
-        +'<button onclick="event.stopPropagation();reactivatePlan('+p.id+')" style="background:transparent;border:none;cursor:pointer;font-size:10px;color:var(--accent);font-weight:700;padding:2px 6px;">↩</button>'
-        +'</div></div>';
-    });
-  }
-  html+='</div>';
-  return html;
-}
-
-// ══════════════════════════════════════
-//  PLANS IN ATHLETE LIST (expanded)
-// ══════════════════════════════════════
-function buildAthleteActivePlans(athleteName){
-  loadPlans();
-  var active=plans.filter(function(p){ return p.athlete===athleteName&&p.status==='active'; });
-  if(!active.length) return '';
-  var html='<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:10px 0 5px;">📅 Aktywne plany</div>';
-  active.forEach(function(p){
-    var preview=(p.text||'').substring(0,50).replace(/\n/g,' ');
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;">'
-      +'<div style="flex:1;min-width:0;"><span style="font-weight:700;color:var(--text);">'+p.name+'</span>'
-      +(preview?'<span style="color:var(--dim);margin-left:6px;">'+preview+'</span>':'')+'</div>'
-      +'<button onclick="event.stopPropagation();startSessionWithPlan('+p.id+')" style="padding:4px 10px;background:var(--accent);border:none;border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:9px;font-weight:800;color:#fff;flex-shrink:0;">▶</button>'
+    html+='<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">'
+      +'<button onclick="_addPeSet('+ei+')" style="padding:5px 10px;background:transparent;border:1px dashed var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:10px;font-weight:700;color:var(--muted);min-height:32px;">+ Seria</button>';
+    if(ei>0) html+='<button onclick="_movePeEx('+ei+',-1)" style="padding:5px 8px;background:var(--s1);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:12px;color:var(--muted);min-height:32px;">↑</button>';
+    if(ei<p.exercises.length-1) html+='<button onclick="_movePeEx('+ei+',1)" style="padding:5px 8px;background:var(--s1);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:12px;color:var(--muted);min-height:32px;">↓</button>';
+    html+='<button onclick="_rmPeEx('+ei+')" style="padding:5px 8px;background:transparent;border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:11px;color:var(--dim);min-height:32px;">🗑</button></div>'
+      +'<input type="text" value="'+(ex.note||'').replace(/"/g,'&quot;')+'" placeholder="Notatka do ćwiczenia..." oninput="_editingPlan.exercises['+ei+'].note=this.value" style="width:100%;margin-top:6px;padding:6px 10px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-xs);color:var(--muted);font-family:Montserrat,sans-serif;font-size:11px;outline:none;box-sizing:border-box;"/>'
       +'</div>';
   });
   return html;
 }
 
-// ── QUICK PLAN ACCESS (from athlete list + profile) ──
-function openQuickPlan(athleteName){
-  loadPlans();
-  var active=plans.filter(function(p){ return p.athlete===athleteName&&p.status==='active'; });
-  var ov=_ensureOverlay();
-  if(!active.length){
-    ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:340px;width:100%;padding:22px 18px 24px;text-align:center;">'
-      +'<div style="font-size:20px;margin-bottom:8px;">📅</div>'
-      +'<div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:6px;">Brak aktywnych planów</div>'
-      +'<div style="font-size:12px;color:var(--muted);margin-bottom:14px;">'+athleteName+'</div>'
-      +'<button id="_qp-create" style="width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:8px;">+ Utwórz plan</button>'
-      +'<button id="_qp-close" style="width:100%;padding:9px;background:transparent;color:var(--muted);border:none;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Anuluj</button></div>';
-    ov.style.display='flex';
-    document.getElementById('_qp-create').onclick=function(){ _closeOverlay(); setMode('plans'); setTimeout(function(){ var s=el('plan-athlete'); if(s) s.value=athleteName; el('plan-name').focus(); },200); };
-    document.getElementById('_qp-close').onclick=function(){ _closeOverlay(); };
-    return;
-  }
-  var listHtml=active.map(function(p){
-    var preview=(p.text||'').substring(0,40).replace(/\n/g,' ');
-    return '<div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:10px 12px;margin-bottom:6px;">'
-      +'<div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px;">'+p.name+'</div>'
-      +(preview?'<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">'+preview+'</div>':'')
-      +'<div style="display:flex;gap:6px;">'
-      +'<button data-pid="'+p.id+'" class="_qp-edit" style="flex:1;padding:8px;background:var(--s1);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:var(--text);">✏️ Edytuj</button>'
-      +'<button data-pid="'+p.id+'" class="_qp-run" style="flex:1;padding:8px;background:var(--accent);border:none;border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:#fff;">▶ Realizuj</button>'
-      +'</div></div>';
-  }).join('');
-  ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:380px;width:100%;padding:22px 18px 24px;max-height:80vh;overflow-y:auto;">'
-    +'<div style="font-size:14px;font-weight:900;color:var(--text);margin-bottom:4px;">📅 Plany</div>'
-    +'<div style="font-size:11px;color:var(--muted);margin-bottom:14px;">'+athleteName+'</div>'
-    +listHtml
-    +'<button id="_qp-close" style="width:100%;padding:9px;background:transparent;color:var(--muted);border:none;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px;">Zamknij</button></div>';
-  ov.style.display='flex';
-  document.querySelectorAll('._qp-edit').forEach(function(btn){ btn.onclick=function(){ var pid=parseInt(btn.getAttribute('data-pid')); _closeOverlay(); openEditPlan(pid); }; });
-  document.querySelectorAll('._qp-run').forEach(function(btn){ btn.onclick=function(){ var pid=parseInt(btn.getAttribute('data-pid')); _closeOverlay(); startSessionWithPlan(pid); }; });
-  document.getElementById('_qp-close').onclick=function(){ _closeOverlay(); };
+function _upPeSet(ei,si,f,v){ if(_editingPlan&&_editingPlan.exercises[ei]&&_editingPlan.exercises[ei].targetSets[si]) _editingPlan.exercises[ei].targetSets[si][f]=v; }
+function _addPeSet(ei){ if(!_editingPlan||!_editingPlan.exercises[ei]) return; var cat=EXERCISE_LIBRARY[_editingPlan.exercises[ei].exCat]||{fields:['reps']}; var s={note:''}; cat.fields.forEach(function(f){ s[f]=''; }); _editingPlan.exercises[ei].targetSets.push(s); _rfPeEx(); }
+function _rmPeSet(ei,si){ if(!_editingPlan||!_editingPlan.exercises[ei]) return; _editingPlan.exercises[ei].targetSets.splice(si,1); _rfPeEx(); }
+function _rmPeEx(ei){ if(!_editingPlan) return; _editingPlan.exercises.splice(ei,1); _rfPeEx(); }
+function _movePeEx(ei,d){ if(!_editingPlan) return; var a=_editingPlan.exercises; var n=ei+d; if(n<0||n>=a.length) return; var t=a[ei]; a[ei]=a[n]; a[n]=t; _rfPeEx(); }
+function _rfPeEx(){ var c=document.getElementById('pe-exercises'); if(c) c.innerHTML=_renderPlanExCards(); }
+
+// ── Dodawanie ćwiczenia w edytorze ──
+var _peAddCat='',_peAddZone='';
+function _showPeAddEx(){
+  _peAddCat=''; _peAddZone='';
+  var w=document.getElementById('pe-add-inline'); if(!w) return;
+  w.style.display='block'; el('pe-add-btn').style.display='none';
+  w.innerHTML='<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">Kategoria</div>'
+    +'<div class="ex-cat-scroll" id="pe-cat-chips"></div>'
+    +'<div id="pe-zw" style="display:none;margin-top:8px;"><div style="display:flex;gap:5px;" id="pe-zb"></div></div>'
+    +'<div id="pe-sw" style="display:none;margin-top:8px;"><select class="crm-input" id="pe-esel" style="margin-bottom:0;" onchange="_peOnSel()"><option value="">Wybierz...</option></select></div>'
+    +'<button onclick="_peCancel()" style="margin-top:8px;padding:6px 12px;background:transparent;border:none;cursor:pointer;font-size:11px;font-weight:700;color:var(--muted);">Anuluj</button>';
+  var cc=document.getElementById('pe-cat-chips');
+  Object.keys(EXERCISE_LIBRARY).forEach(function(key){
+    var cat=EXERCISE_LIBRARY[key]; var b=document.createElement('button'); b.className='ex-cat-chip'; b.setAttribute('data-cat',key);
+    b.innerHTML='<span style="font-size:12px;">'+_catIcon(key)+'</span> '+cat.label;
+    b.onclick=function(){ _pePickCat(key); }; cc.appendChild(b);
+  });
+}
+function _peCancel(){ var w=document.getElementById('pe-add-inline'); if(w) w.style.display='none'; el('pe-add-btn').style.display='block'; }
+function _pePickCat(k){
+  _peAddCat=k; _peAddZone=''; var cat=EXERCISE_LIBRARY[k];
+  document.getElementById('pe-cat-chips').querySelectorAll('.ex-cat-chip').forEach(function(b){ var k2=b.getAttribute('data-cat'); var c2=EXERCISE_LIBRARY[k2]; if(k2===k){ b.style.background='rgba('+_hexToRgb(c2.color)+',.12)'; b.style.borderColor=c2.color; b.style.color=c2.color; } else { b.style.background=''; b.style.borderColor=''; b.style.color=''; } });
+  var zb=document.getElementById('pe-zb'); zb.innerHTML='';
+  ['upper','lower'].concat(cat.full&&cat.full.length?['full']:[]).forEach(function(z){ var btn=document.createElement('button'); btn.className='ex-zone-chip'; btn.setAttribute('data-zone',z); btn.textContent=ZONE_LABELS[z]; btn.onclick=function(){ _pePickZone(z===_peAddZone?'':z); }; zb.appendChild(btn); });
+  document.getElementById('pe-zw').style.display='flex'; _peFillSel(); document.getElementById('pe-sw').style.display='block';
+}
+function _pePickZone(z){
+  _peAddZone=z; var cat=EXERCISE_LIBRARY[_peAddCat];
+  document.getElementById('pe-zb').querySelectorAll('.ex-zone-chip').forEach(function(b){ var bz=b.getAttribute('data-zone'); if(bz===z&&z){ b.style.background='rgba('+_hexToRgb(cat.color)+',.12)'; b.style.borderColor=cat.color; b.style.color=cat.color; } else { b.style.background=''; b.style.borderColor=''; b.style.color=''; } });
+  _peFillSel();
+}
+function _peFillSel(){
+  var cat=EXERCISE_LIBRARY[_peAddCat]; if(!cat) return;
+  var sel=document.getElementById('pe-esel'); sel.innerHTML='<option value="">Wybierz...</option>';
+  (_peAddZone?[_peAddZone]:['upper','lower','full']).forEach(function(z){
+    var items=(cat[z]||[]).slice();
+    customExercises.filter(function(c){ return c.cat===_peAddCat&&c.zone===z; }).forEach(function(c){ items.push('★ '+c.name); });
+    if(!items.length) return; var og=document.createElement('optgroup'); og.label=ZONE_LABELS[z];
+    items.forEach(function(n){ var o=document.createElement('option'); o.value=n; o.textContent=n; og.appendChild(o); }); sel.appendChild(og);
+  });
+}
+function _peOnSel(){
+  var val=document.getElementById('pe-esel').value; if(!val) return;
+  var zone=_peAddZone||'full';
+  if(!_peAddZone){ var cat=EXERCISE_LIBRARY[_peAddCat]; ['upper','lower','full'].forEach(function(z){ if((cat[z]||[]).indexOf(val)>=0) zone=z; }); }
+  var cat=EXERCISE_LIBRARY[_peAddCat]||{fields:['reps']}; var s={note:''}; cat.fields.forEach(function(f){ s[f]=''; });
+  _editingPlan.exercises.push({exCat:_peAddCat,exZone:zone,exercise:val.replace(/^★ /,''),targetSets:[Object.assign({},s)],note:''});
+  _rfPeEx(); _peCancel();
 }
 
-// ── INIT ──
-function initPlansTab(){ loadPlans(); loadCRM(); renderPlans(); }
+// ── Zapis planu ──
+function _savePlan(existingId){
+  var name=(document.getElementById('pe-name').value||'').trim();
+  if(!name){ document.getElementById('pe-name').style.borderColor='var(--red)'; setTimeout(function(){ document.getElementById('pe-name').style.borderColor=''; },1000); return; }
+  if(!_editingPlan.exercises.length) return;
+  _editingPlan.name=name; var today=getDayKey(new Date());
+  loadPlans();
+  if(existingId){ _pushUndo('Plan: '+name); var idx=-1; for(var i=0;i<trainingPlans.length;i++){ if(trainingPlans[i].id===existingId){ idx=i; break; } } if(idx>=0){ _editingPlan.updated=today; trainingPlans[idx]=_editingPlan; } }
+  else { _pushUndo('Nowy plan: '+name); _editingPlan.id=Date.now(); _editingPlan.created=today; _editingPlan.updated=today; _editingPlan.status='active'; trainingPlans.push(_editingPlan); }
+  savePlans(); _closePlanEditor(); renderPlansList();
+}
+function _closePlanEditor(){ _editingPlan=null; var ov=el('confirm-overlay'); if(ov){ ov.style.display='none'; ov.innerHTML=''; } document.body.style.overflow=''; }
+
+// ── Kopiowanie i usuwanie ──
+function copyPlan(id){ loadPlans(); var p=_findPlan(id); if(!p) return; _pushUndo('Kopia: '+p.name); var c=JSON.parse(JSON.stringify(p)); c.id=Date.now(); c.name='Kopia — '+c.name; c.created=getDayKey(new Date()); c.updated=c.created; trainingPlans.push(c); savePlans(); renderPlansList(); }
+function deletePlanConfirm(id){
+  loadPlans(); var p=_findPlan(id); if(!p) return;
+  var ov=_ensureOverlay();
+  ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);padding:22px 18px;max-width:340px;width:100%;text-align:center;">'
+    +'<div style="font-size:24px;margin-bottom:8px;">🗑</div><div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:6px;">Usunąć plan?</div>'
+    +'<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">'+p.name+'</div>'
+    +'<div style="display:flex;gap:8px;"><button onclick="_delPlan('+id+')" style="flex:1;padding:11px;background:#ef4444;color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Usuń</button>'
+    +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="flex:1;padding:11px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
+  ov.style.display='flex';
+}
+function _delPlan(id){ _pushUndo('Usunięto plan'); loadPlans(); trainingPlans=trainingPlans.filter(function(x){ return x.id!==id; }); savePlans(); el('confirm-overlay').style.display='none'; renderPlansList(); }
+
+// ══════════════════════════════════════
+//  TRYB WYKONANIA PLANU W SESJI
+// ══════════════════════════════════════
+var _sessionMode='manual', _execPlan=null;
+
+function setSessionMode(mode){
+  _sessionMode=mode;
+  var m=el('smode-manual'),p=el('smode-plan');
+  if(m){ m.className='chip'+(mode==='manual'?' on-blue':''); }
+  if(p){ p.className='chip'+(mode==='plan'?' on-blue':''); }
+  var mw=el('manual-forms-wrap'), pe=el('plan-execution');
+  if(mw) mw.style.display=mode==='manual'?'block':'none';
+  if(pe) pe.style.display=mode==='plan'?'block':'none';
+  if(mode==='plan') _refreshPlanSel();
+  if(mode==='manual') _renderPlanHint();
+}
+
+function _refreshPlanSel(){
+  loadPlans(); var sel=el('plan-select'); if(!sel) return;
+  var ath=(el('note-athlete').value||'').trim()||activeAthlete||'';
+  sel.innerHTML='<option value="">Wybierz plan...</option>';
+  var avail=trainingPlans.filter(function(p){ return p.status!=='archived'&&(!ath||!p.athletes||!p.athletes.length||p.athletes.indexOf(ath)>=0); });
+  if(!avail.length){ sel.innerHTML='<option value="">Brak planów'+(ath?' dla '+ath:'')+'</option>'; return; }
+  avail.forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=p.name+(p.athletes&&p.athletes.length?' ('+p.athletes.join(', ')+')':''); sel.appendChild(o); });
+}
+
+function renderPlanExecution(){
+  var sel=el('plan-select'); var pid=parseInt(sel?sel.value:'');
+  var c=el('plan-exec-list'); if(!c) return;
+  if(!pid){ c.innerHTML=''; el('plan-exec-save-wrap').style.display='none'; return; }
+  loadPlans(); var plan=_findPlan(pid); if(!plan){ c.innerHTML=''; return; }
+  _execPlan=JSON.parse(JSON.stringify(plan));
+  _execPlan.exercises.forEach(function(ex){ ex.targetSets.forEach(function(s){ s._checked=false; }); });
+  _renderExecCards(c);
+  el('plan-exec-save-wrap').style.display='block';
+}
+
+function _renderExecCards(container){
+  if(!_execPlan) return;
+  var orig=_findPlan(_execPlan.id);
+  container.innerHTML='';
+  _execPlan.exercises.forEach(function(ex,ei){
+    var cat=EXERCISE_LIBRARY[ex.exCat]||{color:'#888',fields:['reps']}; var fields=cat.fields;
+    var origEx=orig&&orig.exercises&&orig.exercises[ei]?orig.exercises[ei]:null;
+    // Summary
+    var sum='';
+    if(origEx&&origEx.targetSets&&origEx.targetSets.length){
+      var ts=origEx.targetSets; var pp=[];
+      if(fields.indexOf('reps')>=0){ pp.push(ts.length+'×'+(ts[0].reps||'?')); }
+      if(fields.indexOf('load')>=0){ var ls=ts.map(function(s){ return s.load||''; }).filter(Boolean); if(ls.length) pp.push('@'+ls.join('-')+'kg'); }
+      if(fields.indexOf('rir')>=0){ var rs=ts.map(function(s){ return s.rir||''; }).filter(Boolean); if(rs.length) pp.push('RIR '+rs.join('-')); }
+      if(fields.indexOf('time')>=0){ var tt=ts.map(function(s){ return s.time||''; }).filter(Boolean); if(tt.length) pp.push(tt.join('-')+'s'); }
+      sum=pp.join(' ');
+    }
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;';
+    var h='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">'
+      +'<span style="font-size:12px;font-weight:900;color:var(--dim);">'+(ei+1)+'.</span>'
+      +'<span class="ex-cat-badge" style="color:'+cat.color+';background:rgba('+_hexToRgb(cat.color)+',.1);">'+(CAT_SHORT[ex.exCat]||'?')+'</span>'
+      +'<span style="font-size:14px;font-weight:800;color:var(--text);">'+ex.exercise+'</span>'
+      +'<span style="font-size:9px;color:var(--dim);">'+(ZONE_LABELS[ex.exZone]||'')+'</span></div>';
+    if(sum) h+='<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Cel: '+sum+'</div>';
+    h+='<div style="display:flex;gap:5px;padding-left:38px;margin-bottom:4px;">';
+    fields.forEach(function(f){ h+='<div style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-align:center;width:'+_fieldWidth(f)+'px;flex-shrink:0;">'+FIELD_LABELS[f]+'</div>'; });
+    h+='</div>';
+    ex.targetSets.forEach(function(s,si){
+      var ck=s._checked; var os=origEx&&origEx.targetSets&&origEx.targetSets[si]?origEx.targetSets[si]:null;
+      h+='<div class="pe-exec-row" style="display:flex;gap:5px;align-items:center;margin-bottom:4px;padding:4px 0;border-radius:var(--r-xs);'+(ck?'background:rgba(22,163,74,.05);':'')+'transition:background .2s;">'
+        +'<label style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;cursor:pointer;flex-shrink:0;">'
+        +'<input type="checkbox" data-ei="'+ei+'" data-si="'+si+'" '+(ck?'checked ':'')+' onchange="_togExec('+ei+','+si+',this)" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer;"/></label>';
+      fields.forEach(function(f){
+        var v=s[f]||''; var ov2=os?(os[f]||''):''; var ch=v&&ov2&&String(v)!==String(ov2);
+        h+='<div style="position:relative;flex-shrink:0;"><input class="ex-set-input" data-ei="'+ei+'" data-si="'+si+'" data-field="'+f+'" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" style="width:'+_fieldWidth(f)+'px;'+(ck?'border-color:var(--green);':'')+(ch?'border-color:var(--amber);':'')+'" value="'+v+'" placeholder="—" oninput="_upExec('+ei+','+si+',\''+f+'\',this.value)"/>'
+          +(ch?'<div style="font-size:8px;color:var(--amber-text);text-align:center;margin-top:1px;">plan: '+ov2+'</div>':'')+'</div>';
+      });
+      h+='</div>';
+    });
+    h+='<button onclick="_addExecSet('+ei+')" style="margin-top:4px;padding:5px 10px;background:transparent;border:1px dashed var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:10px;font-weight:700;color:var(--muted);min-height:32px;">+ Seria ekstra</button>';
+    if(ex.note) h+='<div style="font-size:11px;font-style:italic;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">'+ex.note+'</div>';
+    card.innerHTML=h; container.appendChild(card);
+  });
+}
+
+function _togExec(ei,si,cb){ if(!_execPlan) return; _execPlan.exercises[ei].targetSets[si]._checked=cb.checked; var r=cb.closest('.pe-exec-row'); if(r){ r.style.background=cb.checked?'rgba(22,163,74,.05)':''; r.querySelectorAll('.ex-set-input').forEach(function(i){ if(!i.style.borderColor.match(/amber/)) i.style.borderColor=cb.checked?'var(--green)':''; }); } }
+function _upExec(ei,si,f,v){ if(_execPlan&&_execPlan.exercises[ei]&&_execPlan.exercises[ei].targetSets[si]) _execPlan.exercises[ei].targetSets[si][f]=v; }
+function _addExecSet(ei){ if(!_execPlan||!_execPlan.exercises[ei]) return; var cat=EXERCISE_LIBRARY[_execPlan.exercises[ei].exCat]||{fields:['reps']}; var s={note:'',_checked:false}; cat.fields.forEach(function(f){ s[f]=''; }); _execPlan.exercises[ei].targetSets.push(s); var c=el('plan-exec-list'); if(c) _renderExecCards(c); }
+
+// ── Zapis wykonanej sesji ──
+function saveExecutedPlan(){
+  if(!_execPlan) return;
+  var athlete=(el('note-athlete').value||'').trim()||activeAthlete||'';
+  if(!athlete){ el('note-athlete').focus(); return; }
+  var saveDay=selectedDay||getDayKey(new Date());
+  var now=new Date(); var hh=String(now.getHours()).padStart(2,'0'); var mm=String(now.getMinutes()).padStart(2,'0');
+  _pushUndo('Sesja: '+_execPlan.name+' — '+athlete);
+  loadNotes(); var count=0;
+  _execPlan.exercises.forEach(function(ex,ei){
+    var cat=EXERCISE_LIBRARY[ex.exCat]||{fields:['reps']};
+    var sets=ex.targetSets.filter(function(s){ return cat.fields.some(function(f){ return s[f]&&String(s[f]).trim(); }); }).map(function(s){ var o={note:s.note||''}; cat.fields.forEach(function(f){ o[f]=s[f]||''; }); return o; });
+    if(!sets.length) return;
+    var entry={id:Date.now()+ei,date:saveDay,time:hh+':'+mm,athlete:athlete,type:'strength',exCat:ex.exCat,exZone:ex.exZone,exercise:ex.exercise,sets:sets,generalNote:ex.note||'',fromPlan:_execPlan.id,fromPlanName:_execPlan.name};
+    entry.text=buildEntryText(entry); notes.push(entry); count++;
+  });
+  saveNotes(); renderCal(); renderDayDetail(saveDay);
+  var btn=el('plan-exec-save-btn');
+  if(btn){ var o=btn.textContent; btn.textContent='✅ Zapisano! '+count+' ćwiczeń'; btn.style.background='var(--green)'; setTimeout(function(){ btn.textContent=o; btn.style.background=''; },2000); }
+  launchConfetti();
+  setTimeout(function(){ var s=el('plan-select'); if(s) s.value=''; var c=el('plan-exec-list'); if(c) c.innerHTML=''; el('plan-exec-save-wrap').style.display='none'; _execPlan=null; },2500);
+}
+
+// ── launchPlan z zakładki Plany ──
+function launchPlan(planId){
+  loadPlans(); var p=_findPlan(planId); if(!p) return;
+  setMode('diary');
+  setTimeout(function(){
+    setSessionMode('plan');
+    if(p.athletes&&p.athletes.length===1){ var s=el('note-athlete'); if(s) s.value=p.athletes[0]; }
+    _refreshPlanSel();
+    var sel=el('plan-select'); if(sel){ sel.value=planId; renderPlanExecution(); }
+  },100);
+}
+
+// ── Hint w trybie manual ──
+function _renderPlanHint(){
+  var h=el('plan-hint'); if(!h) return;
+  var ath=(el('note-athlete').value||'').trim()||activeAthlete||'';
+  if(!ath||_sessionMode!=='manual'){ h.style.display='none'; return; }
+  loadPlans();
+  var cnt=trainingPlans.filter(function(p){ return p.athletes&&p.athletes.indexOf(ath)>=0&&p.status!=='archived'; }).length;
+  if(cnt>0){ h.textContent='📋 '+ath+' ma '+cnt+' plan'+(cnt===1?'':'ów'); h.style.display='block'; }
+  else h.style.display='none';
+}
+
+// ── Plany w profilu zawodnika ──
+function buildAthletePlansHtml(athleteName){
+  loadPlans();
+  var ap=trainingPlans.filter(function(p){ return p.athletes&&p.athletes.indexOf(athleteName)>=0&&p.status!=='archived'; });
+  if(!ap.length) return '';
+  var html='<div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px;">'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">📅 Plany</div>';
+  ap.forEach(function(p){
+    var exN=p.exercises?p.exercises.map(function(e){ return e.exercise; }).join(', '):'';
+    html+='<div style="background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--r-xs);padding:8px 10px;margin-bottom:6px;">'
+      +'<div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px;">'+p.name+'</div>'
+      +(exN?'<div style="font-size:10px;color:var(--muted);margin-bottom:6px;">'+exN+'</div>':'')
+      +'<div style="display:flex;gap:6px;">'
+      +'<button onclick="openPlanEditor('+p.id+')" style="flex:1;padding:6px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:10px;font-weight:700;color:var(--text);">✏️</button>'
+      +'<button onclick="launchPlan('+p.id+')" style="flex:1;padding:6px;background:var(--accent);border:none;border-radius:var(--r-xs);cursor:pointer;font-size:10px;font-weight:800;color:#fff;">▶ Uruchom</button></div></div>';
+  });
+  html+='</div>'; return html;
+}
+function buildAthleteActivePlans(athleteName){
+  loadPlans();
+  var a=trainingPlans.filter(function(p){ return p.athletes&&p.athletes.indexOf(athleteName)>=0&&p.status!=='archived'; });
+  if(!a.length) return '';
+  var html='<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:10px 0 5px;">📅 Aktywne plany</div>';
+  a.forEach(function(p){ html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;"><span style="font-weight:700;color:var(--text);">'+p.name+'</span><button onclick="event.stopPropagation();launchPlan('+p.id+')" style="padding:4px 10px;background:var(--accent);border:none;border-radius:var(--r-xs);cursor:pointer;font-size:9px;font-weight:800;color:#fff;">▶</button></div>'; });
+  return html;
+}
+function startSessionWithPlan(id){ launchPlan(id); }
+function openQuickPlan(ath){ loadPlans(); var a=trainingPlans.filter(function(p){ return p.athletes&&p.athletes.indexOf(ath)>=0&&p.status!=='archived'; }); if(a.length>=1) launchPlan(a[0].id); else setMode('plans'); }

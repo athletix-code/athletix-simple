@@ -32,7 +32,9 @@
       "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\")",
       "WebFetch(domain:athletix-simple.netlify.app)",
       "Bash(rm:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(sed -i '' 's/\\\\.js?v=2/\\\\.js?v=3/g' index.html)",
+      "Bash(sed -i '' 's/app\\\\.css?v=2/app.css?v=3/g' index.html)"
     ]
   }
 }

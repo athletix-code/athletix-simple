@@ -502,7 +502,7 @@ function openTestHistory(athleteName){
 
 // ── DELETE TEST + UNDO/REDO ──
 var _undoStack=[], _redoStack=[], _UNDO_MAX=30;
-var _ALL_DATA_KEYS=['axs_athletes','axs_sessions','axs_groups','axs_tests','axs_notes','axs_custom_tests','axs_packages','axs_int_presets','axs_custom_exercises'];
+var _ALL_DATA_KEYS=['axs_athletes','axs_sessions','axs_groups','axs_tests','axs_notes','axs_custom_tests','axs_packages','axs_int_presets','axs_custom_exercises','axs_plans'];
 function _pushUndo(label){
   var snapshot=_ALL_DATA_KEYS.map(function(k){ return {key:k, val:localStorage.getItem(k)}; });
   _undoStack.push({label:label, data:snapshot, time:Date.now()});

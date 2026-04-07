@@ -12,7 +12,7 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>AthletiX Simple — Sigma AthletiX</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=2">
+<link rel="stylesheet" href="css/app.css?v=3">
 </head>
 
 <!-- ════ SETTINGS ════ -->
@@ -352,18 +352,31 @@
     <button onclick="printSimpleReport()" style="background:#1d4ed8;border:none;border-radius:var(--r-xs);padding:7px 14px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;color:#fff;display:flex;align-items:center;gap:5px;">🖨 Raport</button>
   </div>
 
-  <!-- Simple notepad form -->
+  <!-- Formularz sesji -->
   <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;">
-    <div style="display:flex;gap:6px;margin-bottom:12px;">
-      <button id="diary-mode-strength" onclick="setSimpleDiaryMode('strength')" style="flex:1;padding:8px;border-radius:var(--r-xs);border:2px solid var(--accent);background:var(--accent-bg);color:var(--accent);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">💪 TRENING</button>
-      <button id="diary-mode-test" onclick="setSimpleDiaryMode('test')" style="flex:1;padding:8px;border-radius:var(--r-xs);border:2px solid var(--border2);background:var(--s2);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">📈 TEST</button>
-    </div>
 
     <div style="margin-bottom:8px;">
       <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Zawodnik</div>
-      <select class="crm-input" id="note-athlete" style="margin-bottom:0;">
+      <select class="crm-input" id="note-athlete" style="margin-bottom:0;" onchange="if(typeof _renderPlanHint==='function') _renderPlanHint(); if(typeof _refreshPlanSel==='function'&&_sessionMode==='plan') _refreshPlanSel();">
         <option value="">Wybierz...</option>
       </select>
+    </div>
+
+    <!-- Hint o planach -->
+    <div id="plan-hint" style="display:none;font-size:11px;color:var(--muted);border-bottom:1px dashed var(--border2);padding-bottom:6px;margin-bottom:8px;cursor:pointer;" onclick="setSessionMode('plan')"></div>
+
+    <!-- Tryb sesji: ręcznie / z planu -->
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <button class="chip on-blue" onclick="setSessionMode('manual')" id="smode-manual">✍️ Ręcznie</button>
+      <button class="chip" onclick="setSessionMode('plan')" id="smode-plan">📋 Z planu</button>
+    </div>
+
+    <!-- FORMULARZE RĘCZNE (owijka) -->
+    <div id="manual-forms-wrap">
+
+    <div style="display:flex;gap:6px;margin-bottom:12px;">
+      <button id="diary-mode-strength" onclick="setSimpleDiaryMode('strength')" style="flex:1;padding:8px;border-radius:var(--r-xs);border:2px solid var(--accent);background:var(--accent-bg);color:var(--accent);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">💪 TRENING</button>
+      <button id="diary-mode-test" onclick="setSimpleDiaryMode('test')" style="flex:1;padding:8px;border-radius:var(--r-xs);border:2px solid var(--border2);background:var(--s2);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;">📈 TEST</button>
     </div>
 
     <!-- TRENING — formularz strukturyzowany -->
@@ -427,6 +440,21 @@
         <button onclick="openAddCustomTest()" style="background:transparent;border:1px dashed var(--border2);border-radius:var(--r-xs);width:100%;padding:8px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--muted);">+ Dodaj własne ćwiczenie testowe</button>
       </div>
     </div>
+
+    </div><!-- /manual-forms-wrap -->
+
+    <!-- WYKONANIE PLANU -->
+    <div id="plan-execution" style="display:none;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Plan treningowy</div>
+      <select class="crm-input" id="plan-select" style="margin-bottom:10px;" onchange="renderPlanExecution()">
+        <option value="">Wybierz plan...</option>
+      </select>
+      <div id="plan-exec-list"></div>
+      <div id="plan-exec-save-wrap" style="display:none;margin-top:12px;">
+        <button id="plan-exec-save-btn" onclick="saveExecutedPlan()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">💾 Zakończ i zapisz sesję</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- Calendar -->
@@ -460,39 +488,10 @@
 
 <!-- ══ PLANY ══ -->
 <div id="tab-plans" style="display:none;">
-  <!-- Create new plan -->
-  <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;">
-    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Nowy plan</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-      <div>
-        <div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Zawodnik</div>
-        <select class="crm-input" id="plan-athlete" style="margin-bottom:0;"></select>
-      </div>
-      <div>
-        <div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Nazwa planu</div>
-        <input class="crm-input" id="plan-name" type="text" placeholder="np. Plan A, Czwartek siła..." style="margin-bottom:0;"/>
-      </div>
-    </div>
-    <textarea id="plan-text" rows="4" placeholder="Treść planu — ćwiczenia, serie, uwagi..." style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;outline:none;resize:vertical;line-height:1.5;margin-bottom:8px;box-sizing:border-box;"></textarea>
-    <button onclick="createPlan()" style="width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.06em;">📅 Utwórz plan</button>
-  </div>
-
-  <!-- Filter -->
-  <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;">
-    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);">Filtruj:</div>
-    <select class="crm-input" id="plan-filter" onchange="renderPlans()" style="margin-bottom:0;flex:1;padding:6px 10px;font-size:12px;">
-      <option value="all">Wszyscy zawodnicy</option>
-    </select>
-    <select class="crm-input" id="plan-status-filter" onchange="renderPlans()" style="margin-bottom:0;width:auto;padding:6px 10px;font-size:12px;">
-      <option value="active">Aktywne</option>
-      <option value="done">Zakończone</option>
-      <option value="all">Wszystkie</option>
-    </select>
-  </div>
-
-  <!-- Plans list -->
+  <button onclick="openPlanEditor()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:12px;">+ Nowy plan</button>
   <div id="plans-list"></div>
 </div>
+
 
 <!-- ══ DANE ══ -->
 <div id="tab-data" style="display:none;">
@@ -738,21 +737,21 @@
 </div>
 
 
-<script src="js/storage.js?v=2"></script>
-<script src="js/core.js?v=2"></script>
-<script src="js/timers.js?v=2"></script>
-<script src="js/athletes.js?v=2"></script>
-<script src="js/wallet.js?v=2"></script>
-<script src="js/status.js?v=2"></script>
-<script src="js/exercises.js?v=2"></script>
-<script src="js/diary.js?v=2"></script>
-<script src="js/reports.js?v=2"></script>
-<script src="js/plans.js?v=2"></script>
-<script src="js/data.js?v=2"></script>
-<script src="js/settings.js?v=2"></script>
-<script src="js/supabase-config.js?v=2"></script>
-<script src="js/sync.js?v=2"></script>
-<script src="js/autogrow.js?v=2"></script>
+<script src="js/storage.js?v=3"></script>
+<script src="js/core.js?v=3"></script>
+<script src="js/timers.js?v=3"></script>
+<script src="js/athletes.js?v=3"></script>
+<script src="js/wallet.js?v=3"></script>
+<script src="js/status.js?v=3"></script>
+<script src="js/exercises.js?v=3"></script>
+<script src="js/diary.js?v=3"></script>
+<script src="js/reports.js?v=3"></script>
+<script src="js/plans.js?v=3"></script>
+<script src="js/data.js?v=3"></script>
+<script src="js/settings.js?v=3"></script>
+<script src="js/supabase-config.js?v=3"></script>
+<script src="js/sync.js?v=3"></script>
+<script src="js/autogrow.js?v=3"></script>
 
 </body>
 </html>
