@@ -12,7 +12,7 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>AthletiX Simple — Sigma AthletiX</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=5">
+<link rel="stylesheet" href="css/app.css?v=6">
 </head>
 
 <!-- ════ SETTINGS ════ -->
@@ -365,10 +365,11 @@
     <!-- Hint o planach -->
     <div id="plan-hint" style="display:none;font-size:11px;color:var(--muted);border-bottom:1px dashed var(--border2);padding-bottom:6px;margin-bottom:8px;cursor:pointer;" onclick="setSessionMode('plan')"></div>
 
-    <!-- Tryb sesji: ręcznie / z planu -->
+    <!-- Tryb sesji: ręcznie / z planu / notatnik -->
     <div style="display:flex;gap:6px;margin-bottom:10px;">
       <button class="chip on-blue" onclick="setSessionMode('manual')" id="smode-manual">✍️ Ręcznie</button>
       <button class="chip" onclick="setSessionMode('plan')" id="smode-plan">📋 Z planu</button>
+      <button class="chip" onclick="setSessionMode('notepad')" id="smode-notepad">📝 Notatnik</button>
     </div>
 
     <!-- FORMULARZE RĘCZNE (owijka) -->
@@ -381,16 +382,40 @@
 
     <!-- TRENING — formularz strukturyzowany -->
     <div id="diary-note-form">
-      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Kategoria</div>
-      <div class="ex-cat-scroll" id="ex-cat-scroll"></div>
-      <div id="ex-zone-wrap" style="display:none;margin-top:8px;">
-        <div style="display:flex;gap:5px;" id="ex-zone-btns"></div>
-      </div>
-      <div id="ex-select-wrap" style="display:none;margin-top:8px;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Ćwiczenie</div>
-        <select class="crm-input" id="ex-select" style="margin-bottom:0;" onchange="onExSelect()">
+      <!-- Szybki select -->
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <select id="str-zone-sel" class="crm-input" style="width:100px;margin-bottom:0;padding:8px 6px;font-size:12px;" onchange="_strFilterAllEx()">
+          <option value="">Część...</option>
+          <option value="upper">↑ Góra</option>
+          <option value="lower">↓ Dół</option>
+          <option value="full">↕ Całe</option>
+        </select>
+        <select id="str-exercise-sel" class="crm-input" style="flex:1;margin-bottom:0;padding:8px 6px;font-size:12px;" onchange="_strQuickSelect()">
           <option value="">Wybierz ćwiczenie...</option>
         </select>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:8px;">
+        <button onclick="_strShowManual()" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--muted);padding:0;">lub wpisz ręcznie ↓</button>
+        <button onclick="_strShowCatFlow()" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--muted);padding:0;">Wybierz z kategorii →</button>
+      </div>
+      <!-- Wpisz ręcznie -->
+      <div id="str-manual-wrap" style="display:none;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:10px;margin-bottom:8px;">
+        <input id="str-manual-name" type="text" placeholder="Nazwa ćwiczenia..." style="width:100%;padding:8px 10px;background:var(--s1);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;outline:none;margin-bottom:6px;box-sizing:border-box;"/>
+        <div class="ex-cat-scroll" id="str-manual-cats" style="margin-bottom:6px;"></div>
+        <div style="display:flex;gap:6px;"><button onclick="_strManualAdd()" style="padding:8px 14px;background:var(--accent);border:none;border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:#fff;">Dodaj</button><button onclick="el('str-manual-wrap').style.display='none'" style="padding:8px;background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--muted);">Anuluj</button></div>
+      </div>
+      <!-- Pełny flow z kategorii (ukryty domyślnie) -->
+      <div id="str-cat-flow" style="display:none;margin-bottom:8px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Kategoria</div>
+        <div class="ex-cat-scroll" id="ex-cat-scroll"></div>
+        <div id="ex-zone-wrap" style="display:none;margin-top:8px;">
+          <div style="display:flex;gap:5px;" id="ex-zone-btns"></div>
+        </div>
+        <div id="ex-select-wrap" style="display:none;margin-top:8px;">
+          <select class="crm-input" id="ex-select" style="margin-bottom:0;" onchange="onExSelect()">
+            <option value="">Wybierz ćwiczenie...</option>
+          </select>
+        </div>
       </div>
       <div id="ex-sets-wrap" style="display:none;margin-top:10px;">
         <div id="ex-sets-header" style="display:flex;gap:5px;align-items:center;margin-bottom:6px;padding-left:29px;"></div>
@@ -442,6 +467,12 @@
     </div>
 
     </div><!-- /manual-forms-wrap -->
+
+    <!-- NOTATNIK -->
+    <div id="notepad-view" style="display:none;">
+      <textarea id="notepad-preview" rows="3" readonly onclick="_openNotepadModal()" style="width:100%;padding:12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:'Montserrat',sans-serif;font-size:14px;font-weight:500;line-height:1.6;outline:none;resize:none;cursor:pointer;box-sizing:border-box;margin-bottom:8px;" placeholder="Kliknij aby wpisać trening..."></textarea>
+      <button id="notepad-save-btn" onclick="_saveNotepadEntry()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">💾 Zapisz notatkę</button>
+    </div>
 
     <!-- WYKONANIE PLANU -->
     <div id="plan-execution" style="display:none;">
@@ -738,21 +769,21 @@
 </div>
 
 
-<script src="js/storage.js?v=5"></script>
-<script src="js/core.js?v=5"></script>
-<script src="js/timers.js?v=5"></script>
-<script src="js/athletes.js?v=5"></script>
-<script src="js/wallet.js?v=5"></script>
-<script src="js/status.js?v=5"></script>
-<script src="js/exercises.js?v=5"></script>
-<script src="js/diary.js?v=5"></script>
-<script src="js/reports.js?v=5"></script>
-<script src="js/plans.js?v=5"></script>
-<script src="js/data.js?v=5"></script>
-<script src="js/settings.js?v=5"></script>
-<script src="js/supabase-config.js?v=5"></script>
-<script src="js/sync.js?v=5"></script>
-<script src="js/autogrow.js?v=5"></script>
+<script src="js/storage.js?v=6"></script>
+<script src="js/core.js?v=6"></script>
+<script src="js/timers.js?v=6"></script>
+<script src="js/athletes.js?v=6"></script>
+<script src="js/wallet.js?v=6"></script>
+<script src="js/status.js?v=6"></script>
+<script src="js/exercises.js?v=6"></script>
+<script src="js/diary.js?v=6"></script>
+<script src="js/reports.js?v=6"></script>
+<script src="js/plans.js?v=6"></script>
+<script src="js/data.js?v=6"></script>
+<script src="js/settings.js?v=6"></script>
+<script src="js/supabase-config.js?v=6"></script>
+<script src="js/sync.js?v=6"></script>
+<script src="js/autogrow.js?v=6"></script>
 
 </body>
 </html>

@@ -55,8 +55,63 @@ function saveCustomExercises(){ localStorage.setItem(CUSTOM_EX_KEY,JSON.stringif
 
 // Stan formularza ćwiczeń
 var _exCat='', _exZone='', _exName='', _exSets=[];
+var _strManCat=''; // kategoria wybrana w trybie ręcznym
 
 function _catIcon(key){ return {sila:'🏋️',wyt_sil:'💪',eksplozywnosc:'⚡',stabilizacja:'🎯',mobilnosc:'🧘',kondycja:'🏃'}[key]||'🏋️'; }
+
+// ══ Szybki select ćwiczeń (tryb ręczny — Sesja) ══
+function _strFilterAllEx(){
+  var zone=(el('str-zone-sel')||{}).value||'';
+  var sel=el('str-exercise-sel'); if(!sel) return;
+  sel.innerHTML='<option value="">Wybierz ćwiczenie...</option>';
+  loadCustomExercises();
+  Object.keys(EXERCISE_LIBRARY).forEach(function(catKey){
+    var cat=EXERCISE_LIBRARY[catKey]; var icon=_catIcon(catKey);
+    var zones=zone?[zone]:['upper','lower','full'];
+    zones.forEach(function(z){
+      var items=(cat[z]||[]).slice();
+      customExercises.filter(function(c){ return c.cat===catKey&&c.zone===z; }).forEach(function(c){ items.push('★ '+c.name); });
+      if(!items.length) return;
+      var og=document.createElement('optgroup'); og.label=icon+' '+cat.label+' — '+ZONE_LABELS[z];
+      items.forEach(function(name){ var o=document.createElement('option'); o.value=name; o.setAttribute('data-cat',catKey); o.setAttribute('data-zone',z); o.textContent=name; og.appendChild(o); });
+      sel.appendChild(og);
+    });
+  });
+}
+function _strQuickSelect(){
+  var sel=el('str-exercise-sel'); if(!sel||!sel.value) return;
+  var opt=sel.options[sel.selectedIndex];
+  var catKey=opt.getAttribute('data-cat'); var zone=opt.getAttribute('data-zone');
+  _exCat=catKey||''; _exZone=zone||''; _exName=sel.value.replace(/^★ /,'');
+  initExSets();
+  el('ex-sets-wrap').style.display='block';
+  el('ex-general-wrap').style.display='block';
+  el('ex-save-wrap').style.display='block';
+}
+function _strShowManual(){
+  el('str-manual-wrap').style.display='block';
+  _strManCat='';
+  var mc=el('str-manual-cats'); if(mc){
+    mc.innerHTML='';
+    Object.keys(EXERCISE_LIBRARY).forEach(function(k){ var c=EXERCISE_LIBRARY[k]; var b=document.createElement('button'); b.className='ex-cat-chip'; b.setAttribute('data-cat',k); b.style.cssText='padding:4px 8px;font-size:9px;'; b.innerHTML=_catIcon(k)+' '+c.label;
+    b.onclick=function(){ _strManCat=(_strManCat===k)?'':k; mc.querySelectorAll('.ex-cat-chip').forEach(function(x){ var xk=x.getAttribute('data-cat'); var xc=EXERCISE_LIBRARY[xk]; if(xk===_strManCat){ x.style.background='rgba('+_hexToRgb(xc.color)+',.12)'; x.style.borderColor=xc.color; x.style.color=xc.color; } else { x.style.background=''; x.style.borderColor=''; x.style.color=''; } }); };
+    mc.appendChild(b); });
+  }
+  setTimeout(function(){ el('str-manual-name').focus(); },50);
+}
+function _strManualAdd(){
+  var name=(el('str-manual-name').value||'').trim(); if(!name) return;
+  _exCat=_strManCat||''; _exZone=''; _exName=name;
+  el('str-manual-name').value=''; el('str-manual-wrap').style.display='none';
+  initExSets();
+  el('ex-sets-wrap').style.display='block';
+  el('ex-general-wrap').style.display='block';
+  el('ex-save-wrap').style.display='block';
+}
+function _strShowCatFlow(){
+  el('str-cat-flow').style.display='block';
+  initExCatChips();
+}
 function _hexToRgb(hex){ hex=hex.replace('#',''); var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16); return r+','+g+','+b; }
 function _fieldWidth(f){ return {reps:60,load:70,rir:50,time:70,dist:80}[f]||60; }
 
@@ -150,8 +205,8 @@ function initExSets(){
 }
 
 function renderExSets(){
-  var cat=EXERCISE_LIBRARY[_exCat]; if(!cat) return;
-  var fields=cat.fields;
+  var cat=EXERCISE_LIBRARY[_exCat];
+  var fields=cat?cat.fields:['reps','load'];
   var hdr=el('ex-sets-header'); hdr.innerHTML='';
   fields.forEach(function(f){
     var d=document.createElement('div');
@@ -282,8 +337,9 @@ function saveStrengthEntry(){
   if(!athlete){ el('note-athlete').style.borderColor='var(--red)'; setTimeout(function(){ el('note-athlete').style.borderColor=''; },1000); el('note-athlete').focus(); return; }
   if(!_exName) return;
   _syncSetsFromDOM();
-  var cat=EXERCISE_LIBRARY[_exCat]; if(!cat) return;
-  var firstField=cat.fields[0];
+  var cat=EXERCISE_LIBRARY[_exCat];
+  var fields=cat?cat.fields:['reps','load'];
+  var firstField=fields[0];
   var hasValid=_exSets.some(function(s){ return s[firstField]&&String(s[firstField]).trim(); });
   if(!hasValid){
     var firstInp=el('ex-sets-list').querySelector('.ex-set-input[data-field="'+firstField+'"]');
@@ -293,9 +349,9 @@ function saveStrengthEntry(){
   var saveDay=selectedDay||getDayKey(new Date());
   var now=new Date(); var hh=String(now.getHours()).padStart(2,'0'); var mm=String(now.getMinutes()).padStart(2,'0');
   var cleanName=_exName.replace(/^★ /,'');
-  var sets=_exSets.filter(function(s){ return cat.fields.some(function(f){ return s[f]&&String(s[f]).trim(); }); }).map(function(s){
+  var sets=_exSets.filter(function(s){ return fields.some(function(f){ return s[f]&&String(s[f]).trim(); }); }).map(function(s){
     var obj={note:s.note||''};
-    cat.fields.forEach(function(f){ obj[f]=s[f]||''; });
+    fields.forEach(function(f){ obj[f]=s[f]||''; });
     return obj;
   });
   if(!sets.length) return;
@@ -448,4 +504,4 @@ function _renderStrengthReportEntry(n, idx){
 }
 
 // Init on load
-document.addEventListener('DOMContentLoaded',function(){ loadCustomExercises(); initExCatChips(); });
+document.addEventListener('DOMContentLoaded',function(){ loadCustomExercises(); initExCatChips(); _strFilterAllEx(); });

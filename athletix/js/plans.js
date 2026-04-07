@@ -270,16 +270,84 @@ function _delPlan(id){ _pushUndo('Usunięto plan'); loadPlans(); trainingPlans=t
 //  TRYB WYKONANIA PLANU W SESJI
 // ══════════════════════════════════════
 var _sessionMode='manual',_execPlan=null;
+var _athleteSessionState={};
+
 function setSessionMode(mode){
   _sessionMode=mode;
-  var m=el('smode-manual'),p=el('smode-plan');
+  var m=el('smode-manual'),p=el('smode-plan'),n=el('smode-notepad');
   if(m) m.className='chip'+(mode==='manual'?' on-blue':'');
   if(p) p.className='chip'+(mode==='plan'?' on-blue':'');
-  var mw=el('manual-forms-wrap'),pe=el('plan-execution');
+  if(n) n.className='chip'+(mode==='notepad'?' on-blue':'');
+  var mw=el('manual-forms-wrap'),pe=el('plan-execution'),nv=el('notepad-view');
   if(mw) mw.style.display=mode==='manual'?'block':'none';
   if(pe) pe.style.display=mode==='plan'?'block':'none';
+  if(nv) nv.style.display=mode==='notepad'?'block':'none';
   if(mode==='plan') _refreshPlanSel();
   if(mode==='manual') _renderPlanHint();
+}
+
+// ── Notatnik z modalem ──
+function _openNotepadModal(){
+  var athlete=(el('note-athlete').value||'').trim()||activeAthlete||'';
+  var preview=el('notepad-preview');
+  var ov=_ensureOverlay();
+  ov.innerHTML='<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) translateY(20px);opacity:0;max-width:480px;width:calc(100% - 32px);background:var(--s1);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.3);padding:20px;z-index:9993;transition:all .2s ease-out;" id="notepad-modal">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
+    +'<div style="font-size:15px;font-weight:800;color:var(--text);">📝 Notatka'+(athlete?' — '+athlete:'')+'</div>'
+    +'<button onclick="_closeNotepadModal()" style="background:transparent;border:none;cursor:pointer;font-size:16px;color:var(--muted);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+    +'<textarea id="notepad-modal-ta" rows="8" placeholder="Wpisz trening: ćwiczenia, serie, uwagi..." style="width:100%;min-height:200px;max-height:50vh;padding:14px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:Montserrat,sans-serif;font-size:15px;font-weight:500;line-height:1.7;outline:none;resize:vertical;box-sizing:border-box;">'+(preview?preview.value:'')+'</textarea>'
+    +'<button onclick="_saveNotepadModal()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:12px;">💾 Zapisz i zamknij</button>'
+    +'</div>';
+  ov.style.display='flex'; ov.style.background='rgba(0,0,0,.5)'; ov.style.backdropFilter='blur(8px)'; ov.style.webkitBackdropFilter='blur(8px)';
+  // Animacja wejścia
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ var modal=el('notepad-modal'); if(modal){ modal.style.opacity='1'; modal.style.transform='translate(-50%,-50%) translateY(0)'; } }); });
+  setTimeout(function(){ el('notepad-modal-ta').focus(); },100);
+}
+function _closeNotepadModal(){
+  var ta=el('notepad-modal-ta'); var preview=el('notepad-preview');
+  if(ta&&preview) preview.value=ta.value;
+  var ov=el('confirm-overlay'); if(ov){ ov.style.display='none'; ov.innerHTML=''; ov.style.backdropFilter=''; ov.style.webkitBackdropFilter=''; ov.style.background=''; }
+  document.body.style.overflow='';
+}
+function _saveNotepadModal(){
+  var ta=el('notepad-modal-ta'); var preview=el('notepad-preview');
+  if(ta&&preview) preview.value=ta.value;
+  _closeNotepadModal();
+}
+function _saveNotepadEntry(){
+  var text=(el('notepad-preview').value||'').trim(); if(!text) return;
+  var athlete=(el('note-athlete').value||'').trim();
+  var now=new Date(); var hh=String(now.getHours()).padStart(2,'0'); var mm=String(now.getMinutes()).padStart(2,'0');
+  var day=selectedDay||getDayKey(now);
+  _pushUndo('Notatka: '+text.substring(0,30));
+  loadNotes();
+  notes.push({id:Date.now(),date:day,athlete:athlete,text:text,type:'strength',time:hh+':'+mm});
+  saveNotes(); el('notepad-preview').value=''; renderCal(); renderDayDetail(day);
+  var btn=el('notepad-save-btn'); if(btn){ var o=btn.textContent; btn.textContent='✓ Zapisano!'; btn.style.background='var(--green)'; setTimeout(function(){ btn.textContent=o; btn.style.background=''; },1200); }
+}
+
+// ── Stan per zawodnik ──
+function _saveAthleteState(name){
+  if(!name) return;
+  var state={mode:_sessionMode};
+  if(_sessionMode==='notepad'){ var p=el('notepad-preview'); state.notepadText=p?p.value:''; }
+  if(_sessionMode==='plan'){ var s=el('plan-select'); state.planId=s?parseInt(s.value):null; }
+  _athleteSessionState[name]=state;
+}
+function _restoreAthleteState(name){
+  if(!name) return;
+  var state=_athleteSessionState[name];
+  if(state){
+    setSessionMode(state.mode||'manual');
+    if(state.mode==='notepad'){ var p=el('notepad-preview'); if(p) p.value=state.notepadText||''; }
+    if(state.mode==='plan'&&state.planId){
+      _refreshPlanSel();
+      var s=el('plan-select'); if(s){ s.value=state.planId; renderPlanExecution(); }
+    }
+  } else {
+    setSessionMode('manual');
+    _renderPlanHint();
+  }
 }
 function _refreshPlanSel(){
   loadPlans(); var sel=el('plan-select'); if(!sel) return;

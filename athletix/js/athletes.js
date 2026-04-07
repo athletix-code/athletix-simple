@@ -67,7 +67,13 @@ function loadCustomTests(){ try{ return JSON.parse(localStorage.getItem(CUSTOM_T
 function saveCustomTests(arr){ try{ localStorage.setItem(CUSTOM_TESTS_KEY,JSON.stringify(arr)); }catch(e){} }
 
 // ── ATHLETE BAR ──
-function setActiveAthlete(name){ activeAthlete=name; renderAthleteBar(); syncFormToActiveAthlete(name); }
+function setActiveAthlete(name){
+  // Zapisz stan poprzedniego zawodnika
+  if(activeAthlete&&typeof _saveAthleteState==='function') _saveAthleteState(activeAthlete);
+  activeAthlete=name; renderAthleteBar(); syncFormToActiveAthlete(name);
+  // Przywróć stan nowego zawodnika
+  if(typeof _restoreAthleteState==='function') _restoreAthleteState(name);
+}
 function syncFormToActiveAthlete(name){
   if(!name) return;
   var sel=el('note-athlete');
