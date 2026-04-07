@@ -267,29 +267,18 @@ function onExSelect(){
 }
 
 function initExSets(){
-  _exSets=[];
+  var cat=EXERCISE_LIBRARY[_exCat]; var fields=cat?cat.fields:['reps','load'];
+  var s={note:''}; fields.forEach(function(f){ s[f]=''; });
+  _exSets=[s];
   renderExSets();
 }
 
 function renderExSets(){
   var cat=EXERCISE_LIBRARY[_exCat];
   var fields=cat?cat.fields:['reps','load'];
-  // Batch input
-  var batch=el('ex-batch-row'); if(batch){
-    batch.innerHTML='<input id="ex-batch-cnt" type="number" min="1" max="20" value="3" placeholder="Serii" style="width:40px;text-align:center;font-size:14px;font-weight:700;background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:10px 4px;color:var(--text);outline:none;min-height:44px;box-sizing:border-box;" inputmode="numeric"/>'
-      +'<span style="font-size:14px;color:var(--muted);flex-shrink:0;">×</span>';
-    fields.forEach(function(f){
-      batch.innerHTML+='<input id="ex-batch-'+f+'" class="ex-set-input" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" placeholder="'+FIELD_LABELS[f]+'" style="flex:1;min-width:'+(_fieldWidth(f)-10)+'px;border-radius:10px;"/>';
-    });
-    batch.innerHTML+='<button onclick="_exBatchAdd()" style="padding:8px 12px;background:var(--accent);border:none;border-radius:10px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:#fff;white-space:nowrap;min-height:44px;">+ Dodaj</button>';
-  }
-  // Nagłówki kolumn
-  var hdr=el('ex-sets-header'); hdr.innerHTML='';
-  fields.forEach(function(f){
-    var d=document.createElement('div');
-    d.style.cssText='font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:center;flex:1;min-width:'+(_fieldWidth(f)-10)+'px;';
-    d.textContent=FIELD_LABELS[f]; hdr.appendChild(d);
-  });
+  // Ukryj batch row i nagłówki (używamy placeholder w inputach)
+  var batch=el('ex-batch-row'); if(batch) batch.style.display='none';
+  var hdr=el('ex-sets-header'); if(hdr) hdr.innerHTML='';
   // Lista serii
   _renderExSetsList(fields);
 }
@@ -319,33 +308,41 @@ function _renderExSetsList(fields){
 function _buildSetRow(idx,fields){
   var frag=document.createDocumentFragment();
   var row=document.createElement('div'); row.className='ex-set-row'; row.setAttribute('data-set-idx',idx);
-  var badge=document.createElement('div'); badge.className='ex-set-badge'; badge.textContent='S'+(idx+1);
+  row.style.gap='5px';
+  var badge=document.createElement('div'); badge.className='ex-set-badge'; badge.style.opacity='0.5';
+  badge.textContent='S'+(idx+1);
   row.appendChild(badge);
   fields.forEach(function(f){
+    var ph={reps:'Powt',load:'kg',rir:'RIR',time:'Czas(s)',dist:'Dyst(m)'}[f]||f;
     var inp=document.createElement('input'); inp.className='ex-set-input'; inp.setAttribute('data-field',f); inp.setAttribute('data-idx',idx);
     inp.type=FIELD_TYPES[f]; inp.inputMode=FIELD_INPUTMODES[f];
-    inp.style.cssText='flex:1;min-width:'+(_fieldWidth(f)-10)+'px;border-radius:10px;';
-    inp.placeholder='—';
-    if(_exSets[idx]&&_exSets[idx][f]!=null) inp.value=_exSets[idx][f];
+    inp.style.cssText='flex:1;min-width:'+(_fieldWidth(f)-10)+'px;border-radius:10px;height:40px;font-size:14px;';
+    inp.placeholder=ph;
+    if(_exSets[idx]&&_exSets[idx][f]!=null&&_exSets[idx][f]!=='') inp.value=_exSets[idx][f];
     inp.oninput=function(){ if(!_exSets[idx]) _exSets[idx]={}; _exSets[idx][f]=inp.value; };
     row.appendChild(inp);
   });
-  // 📝 notatka — otwiera modal
+  // 📝 notatka
   var hasNote=_exSets[idx]&&_exSets[idx].note;
-  var noteBtn=document.createElement('button'); noteBtn.className='ex-set-note-toggle'+(hasNote?' has-note':'');
-  noteBtn.innerHTML='📝'+(hasNote?'<span style="position:absolute;top:2px;right:2px;width:4px;height:4px;border-radius:50%;background:var(--accent);"></span>':'');
-  noteBtn.style.position='relative'; noteBtn.title='Notatka do serii';
+  var noteBtn=document.createElement('button');
+  noteBtn.style.cssText='min-width:36px;min-height:36px;background:'+(hasNote?'rgba(59,130,246,.1)':'transparent')+';border:none;border-radius:8px;cursor:pointer;font-size:16px;opacity:'+(hasNote?'0.8':'0.4')+';position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+  noteBtn.innerHTML='📝'+(hasNote?'<span style="position:absolute;top:1px;right:1px;width:4px;height:4px;border-radius:50%;background:var(--accent);"></span>':'');
+  noteBtn.title='Notatka do serii';
   noteBtn.onclick=function(){ _openSetNoteModal(_exSets,idx,function(){ var cat=EXERCISE_LIBRARY[_exCat]; _renderExSetsList(cat?cat.fields:['reps','load']); }); };
   row.appendChild(noteBtn);
-  // ✕ usuń
-  var del=document.createElement('button'); del.className='ex-set-del'; del.textContent='✕'; del.title='Usuń serię';
+  // 🗑 usuń
+  var del=document.createElement('button');
+  del.style.cssText='min-width:36px;min-height:36px;background:transparent;border:none;cursor:pointer;font-size:16px;color:var(--muted);opacity:0.4;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+  del.textContent='🗑'; del.title='Usuń serię';
+  del.onmouseover=function(){ del.style.opacity='0.9'; del.style.color='var(--red-text)'; };
+  del.onmouseout=function(){ del.style.opacity='0.4'; del.style.color='var(--muted)'; };
   del.onclick=function(){ removeExSet(idx); };
   row.appendChild(del);
   frag.appendChild(row);
-  // Podgląd notatki pod wierszem
+  // Podgląd notatki
   if(hasNote){
     var notePreview=document.createElement('div');
-    notePreview.style.cssText='font-size:10px;font-style:italic;color:var(--muted);padding-left:29px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;';
+    notePreview.style.cssText='font-size:10px;font-style:italic;color:var(--muted);padding-left:28px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;';
     notePreview.textContent=_exSets[idx].note;
     notePreview.onclick=function(){ _openSetNoteModal(_exSets,idx,function(){ var cat=EXERCISE_LIBRARY[_exCat]; _renderExSetsList(cat?cat.fields:['reps','load']); }); };
     frag.appendChild(notePreview);

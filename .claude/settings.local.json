@@ -44,7 +44,9 @@
       "Bash(sed -i '' 's/\\\\.js?v=6/\\\\.js?v=7/g' index.html)",
       "Bash(sed -i '' 's/app\\\\.css?v=6/app.css?v=7/g' index.html)",
       "Bash(sed -i '' 's/\\\\.js?v=7/\\\\.js?v=8/g' index.html)",
-      "Bash(sed -i '' 's/app\\\\.css?v=7/app.css?v=8/g' index.html)"
+      "Bash(sed -i '' 's/app\\\\.css?v=7/app.css?v=8/g' index.html)",
+      "Bash(sed -i '' 's/\\\\.js?v=8/\\\\.js?v=9/g' index.html)",
+      "Bash(sed -i '' 's/app\\\\.css?v=8/app.css?v=9/g' index.html)"
     ]
   }
 }

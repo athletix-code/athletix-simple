@@ -35,9 +35,9 @@ function _origSetText(os, fields){
 // Helper: kontrolki prawego górnego rogu karty (↑↓🗑)
 function _cardControls(ei, total, moveF, rmF){
   var h='<div style="display:flex;gap:3px;flex-shrink:0;">';
-  h+='<button onclick="'+moveF+'('+ei+',-1)" title="Przesuń ćwiczenie wyżej" class="pe-move-btn'+(ei===0?' disabled':'')+'">▲</button>';
-  h+='<button onclick="'+moveF+'('+ei+',1)" title="Przesuń ćwiczenie niżej" class="pe-move-btn'+(ei>=total-1?' disabled':'')+'">▼</button>';
-  h+='<button onclick="'+rmF+'('+ei+')" title="Usuń ćwiczenie" class="pe-del-btn">🗑</button>';
+  h+='<button onclick="'+moveF+'('+ei+',-1)" title="Przesuń wyżej" class="pe-move-btn'+(ei===0?' disabled':'')+'" style="width:34px;height:34px;">▲</button>';
+  h+='<button onclick="'+moveF+'('+ei+',1)" title="Przesuń niżej" class="pe-move-btn'+(ei>=total-1?' disabled':'')+'" style="width:34px;height:34px;">▼</button>';
+  h+='<button onclick="'+rmF+'('+ei+')" title="Usuń ćwiczenie" class="pe-del-btn" style="width:34px;height:34px;">🗑</button>';
   return h+'</div>';
 }
 
@@ -138,7 +138,7 @@ function _renderPlanEditorOverlay(ov,isNew){
     +dropHtml
     +'<div style="margin-bottom:14px;"></div>'
     +favChipsHtml
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Elementy planu</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Ćwiczenia</div>'
     +'<div id="pe-exercises">'+_renderPeCards()+'</div>'
     // Dodawanie — szybki select + ręcznie + kategorie + notatka
     +'<div id="pe-add-wrap">'
@@ -265,43 +265,40 @@ function _renderPeCards(){
       return;
     }
     var cat=EXERCISE_LIBRARY[ex.exCat]||{color:'#888',fields:['reps','load']}; var fields=cat.fields;
-    var catBadge=ex.exCat?'<span class="ex-cat-badge" style="color:'+cat.color+';background:rgba('+_hexToRgb(cat.color)+',.1);">'+(CAT_SHORT[ex.exCat]||'?')+'</span>':'';
-    html+='<div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;margin-bottom:'+mb+'px;'+bl+'">'
-      // Header: [label] [badge] nazwa [zone]   [↑][↓][🗑]
-      +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">'
-      +'<input type="text" value="'+(ex.label||'').replace(/"/g,'&quot;')+'" placeholder="Nr" maxlength="4" oninput="_editingPlan.exercises['+ei+'].label=this.value" style="width:42px;text-align:center;font-size:14px;font-weight:900;background:var(--s1);border:1px solid var(--border2);border-radius:var(--r-xs);padding:6px 2px;color:var(--text);outline:none;flex-shrink:0;"/>'
+    var catBadge=ex.exCat?'<span class="ex-cat-badge" style="color:'+cat.color+';background:rgba('+_hexToRgb(cat.color)+',.1);border-radius:20px;padding:3px 10px;">'+(CAT_SHORT[ex.exCat]||'?')+'</span>':'';
+    // Gwiazdka — ulubione
+    loadFavEx(); var isFav=favExercises.some(function(f){ return f.name===ex.exercise; });
+    var starBtn='<button onclick="_peToggleFav('+ei+')" title="'+(isFav?'Usuń z ulubionych':'Dodaj do ulubionych')+'" style="font-size:16px;background:transparent;border:none;cursor:pointer;padding:2px;opacity:'+(isFav?'1':'0.25')+';color:'+(isFav?'#eab308':'var(--muted)')+';flex-shrink:0;">⭐</button>';
+    html+='<div style="background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:12px;margin-bottom:'+mb+'px;'+bl+'box-shadow:0 2px 8px rgba(0,0,0,.06);">'
+      // Header
+      +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:8px;">'
+      +'<input type="text" value="'+(ex.label||'').replace(/"/g,'&quot;')+'" placeholder="Nr" maxlength="4" oninput="_editingPlan.exercises['+ei+'].label=this.value" style="width:42px;text-align:center;font-size:14px;font-weight:900;background:var(--s1);border:1px solid var(--border2);border-radius:10px;padding:6px 2px;color:var(--text);outline:none;flex-shrink:0;"/>'
       +catBadge
       +'<span style="font-size:13px;font-weight:800;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+ex.exercise+'</span>'
+      +starBtn
       +(ex.exZone?'<span style="font-size:9px;color:var(--dim);flex-shrink:0;">'+(ZONE_LABELS[ex.exZone]||'')+'</span>':'')
       +_cardControls(ei,total,'_movePeEx','_rmPeEx')
       +'</div>'
-      // Batch input
-      +'<div style="display:flex;gap:4px;align-items:center;margin-bottom:6px;flex-wrap:wrap;">'
-      +'<input id="pe-batch-cnt-'+ei+'" type="number" min="1" max="20" value="1" style="width:40px;text-align:center;font-size:13px;font-weight:700;background:var(--s1);border:1px solid var(--border2);border-radius:10px;padding:8px 2px;color:var(--text);outline:none;min-height:38px;box-sizing:border-box;" inputmode="numeric"/>'
-      +'<span style="font-size:12px;color:var(--muted);">×</span>';
-    fields.forEach(function(f){ html+='<input id="pe-batch-'+ei+'-'+f+'" class="ex-set-input" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" placeholder="'+FIELD_LABELS[f]+'" style="flex:1;min-width:'+(_fieldWidth(f)-15)+'px;border-radius:10px;font-size:13px;padding:8px 4px;min-height:38px;"/>'; });
-    html+='<button onclick="_peBatchAdd('+ei+')" style="padding:6px 10px;background:var(--accent);border:none;border-radius:10px;cursor:pointer;font-size:10px;font-weight:800;color:#fff;white-space:nowrap;min-height:38px;">+</button>'
-      +'</div>'
-      // Nagłówki kolumn
-      +'<div style="display:flex;gap:5px;padding-left:29px;margin-bottom:3px;">';
-    fields.forEach(function(f){ html+='<div style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-align:center;flex:1;min-width:'+(_fieldWidth(f)-10)+'px;">'+FIELD_LABELS[f]+'</div>'; });
-    html+='</div>';
-    // Serie
-    if(!(ex.targetSets||[]).length) html+='<div style="text-align:center;color:var(--dim);font-size:11px;padding:8px;">Dodaj serie powyżej</div>';
+      // Serie — z placeholderami zamiast nagłówków
+    ;if(!(ex.targetSets||[]).length) html+='<div style="text-align:center;color:var(--dim);font-size:11px;padding:8px;">Dodaj serie przyciskiem + Seria</div>';
     (ex.targetSets||[]).forEach(function(s,si){
       var hasNote=s.note&&s.note.trim();
-      html+='<div class="ex-set-row" style="margin-bottom:2px;"><div class="ex-set-badge">S'+(si+1)+'</div>';
-      fields.forEach(function(f){ html+='<input class="ex-set-input" style="flex:1;min-width:'+(_fieldWidth(f)-10)+'px;border-radius:10px;" data-ei="'+ei+'" data-si="'+si+'" data-field="'+f+'" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" placeholder="—" value="'+(s[f]||'')+'" oninput="_upPeSet('+ei+','+si+',\''+f+'\',this.value)"/>'; });
-      html+='<button onclick="_openPeSetNote('+ei+','+si+')" title="Notatka" style="width:30px;height:30px;background:transparent;border:none;cursor:pointer;font-size:14px;opacity:'+(hasNote?'0.8':'0.3')+';position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📝'+(hasNote?'<span style="position:absolute;top:1px;right:1px;width:4px;height:4px;border-radius:50%;background:var(--accent);"></span>':'')+'</button>';
-      if((ex.targetSets||[]).length>1) html+='<button class="ex-set-del" onclick="_rmPeSet('+ei+','+si+')">✕</button>';
+      html+='<div class="ex-set-row" style="margin-bottom:4px;gap:5px;">'
+        +'<div class="ex-set-badge" style="opacity:.5;">S'+(si+1)+'</div>';
+      fields.forEach(function(f){
+        var ph={reps:'Powt',load:'kg',rir:'RIR',time:'Czas(s)',dist:'Dyst(m)'}[f]||f;
+        html+='<input class="ex-set-input" style="flex:1;min-width:'+(_fieldWidth(f)-10)+'px;border-radius:10px;height:40px;font-size:14px;" data-ei="'+ei+'" data-si="'+si+'" data-field="'+f+'" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" placeholder="'+ph+'" value="'+(s[f]||'')+'" oninput="_upPeSet('+ei+','+si+',\''+f+'\',this.value)"/>';
+      });
+      html+='<button onclick="_openPeSetNote('+ei+','+si+')" title="Notatka do serii" style="min-width:36px;min-height:36px;background:'+(hasNote?'rgba(59,130,246,.1)':'transparent')+';border:none;border-radius:8px;cursor:pointer;font-size:16px;opacity:'+(hasNote?'0.8':'0.4')+';position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📝'+(hasNote?'<span style="position:absolute;top:1px;right:1px;width:4px;height:4px;border-radius:50%;background:var(--accent);"></span>':'')+'</button>';
+      html+='<button onclick="_rmPeSet('+ei+','+si+')" title="Usuń serię" style="min-width:36px;min-height:36px;background:transparent;border:none;cursor:pointer;font-size:16px;color:var(--muted);opacity:0.4;display:flex;align-items:center;justify-content:center;flex-shrink:0;" onmouseover="this.style.opacity=\'0.9\';this.style.color=\'var(--red-text)\'" onmouseout="this.style.opacity=\'0.4\';this.style.color=\'var(--muted)\'">🗑</button>';
       html+='</div>';
-      if(hasNote) html+='<div onclick="_openPeSetNote('+ei+','+si+')" style="font-size:10px;font-style:italic;color:var(--muted);padding-left:29px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;">'+s.note+'</div>';
+      if(hasNote) html+='<div onclick="_openPeSetNote('+ei+','+si+')" style="font-size:10px;font-style:italic;color:var(--muted);padding-left:28px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;">'+s.note+'</div>';
     });
     // + Seria
-    html+='<button onclick="_addPeSet('+ei+')" style="margin-top:4px;padding:4px 10px;background:transparent;border:1px dashed var(--border2);border-radius:12px;cursor:pointer;font-size:10px;font-weight:700;color:var(--muted);min-height:28px;">+ Seria</button>';
-    // Notatka
-    if(ex.note) html+='<textarea rows="1" oninput="_editingPlan.exercises['+ei+'].note=this.value" style="width:100%;margin-top:4px;padding:5px 8px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-xs);color:var(--muted);font-family:Montserrat,sans-serif;font-size:11px;outline:none;resize:none;box-sizing:border-box;">'+ex.note+'</textarea>';
-    else html+='<button onclick="_editingPlan.exercises['+ei+'].note=\' \';_rfPeEx();" style="margin-top:4px;padding:3px 8px;background:transparent;border:none;cursor:pointer;font-size:10px;color:var(--dim);">📝 Notatka</button>';
+    html+='<button onclick="_addPeSet('+ei+')" style="margin-top:6px;width:100%;padding:10px;background:transparent;border:1.5px dashed var(--border2);border-radius:12px;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);">+ Seria</button>';
+    // Notatka do ćwiczenia
+    html+='<button onclick="_openPeExNote('+ei+')" style="margin-top:6px;padding:4px 8px;background:transparent;border:none;cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);">📝 Notatka do ćwiczenia</button>';
+    if(ex.note&&ex.note.trim()) html+='<div onclick="_openPeExNote('+ei+')" style="font-size:11px;font-style:italic;color:var(--muted);padding-left:4px;margin-top:2px;max-height:32px;overflow:hidden;cursor:pointer;">'+ex.note.replace(/</g,'&lt;')+'</div>';
     html+='</div>';
   });
   return html;
@@ -310,6 +307,39 @@ function _renderPeCards(){
 function _upPeSet(ei,si,f,v){ if(_editingPlan&&_editingPlan.exercises[ei]&&_editingPlan.exercises[ei].targetSets[si]) _editingPlan.exercises[ei].targetSets[si][f]=v; }
 function _addPeSet(ei){ if(!_editingPlan||!_editingPlan.exercises[ei]) return; var cat=EXERCISE_LIBRARY[_editingPlan.exercises[ei].exCat]||{fields:['reps','load']}; var s={note:''}; cat.fields.forEach(function(f){ s[f]=''; }); _editingPlan.exercises[ei].targetSets.push(s); _rfPeEx(); }
 function _rmPeSet(ei,si){ if(!_editingPlan||!_editingPlan.exercises[ei]) return; _editingPlan.exercises[ei].targetSets.splice(si,1); _rfPeEx(); }
+// Toggle ulubione na karcie ćwiczenia
+function _peToggleFav(ei){
+  if(!_editingPlan||!_editingPlan.exercises[ei]) return;
+  var name=_editingPlan.exercises[ei].exercise;
+  var catKey=_editingPlan.exercises[ei].exCat;
+  var zone=_editingPlan.exercises[ei].exZone;
+  loadFavEx();
+  var idx=favExercises.findIndex(function(f){ return f.name===name; });
+  if(idx>=0) favExercises.splice(idx,1); else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>10) favExercises.shift(); }
+  saveFavEx(); _rfPeEx();
+}
+// Modal notatki do ćwiczenia (nie serii)
+function _openPeExNote(ei){
+  if(!_editingPlan||!_editingPlan.exercises[ei]) return;
+  var ex=_editingPlan.exercises[ei];
+  var ov=_ensureOverlay();
+  ov.innerHTML='<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) translateY(16px);opacity:0;max-width:400px;width:calc(100% - 40px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:18px;z-index:9993;transition:all .18s ease-out;" id="en-modal">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+    +'<div style="font-size:14px;font-weight:800;color:var(--text);">📝 Notatka — '+ex.exercise+'</div>'
+    +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:28px;height:28px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+    +'<textarea id="en-ta" rows="5" placeholder="Uwagi do ćwiczenia..." style="width:100%;min-height:140px;max-height:40vh;padding:12px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:500;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;">'+(ex.note||'')+'</textarea>'
+    +'<button id="en-save" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-top:10px;">Zapisz</button>'
+    +'</div>';
+  ov.style.display='flex'; ov.style.background='rgba(0,0,0,.45)'; ov.style.backdropFilter='blur(6px)'; ov.style.webkitBackdropFilter='blur(6px)';
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ var m=el('en-modal'); if(m){ m.style.opacity='1'; m.style.transform='translate(-50%,-50%) translateY(0)'; } }); });
+  setTimeout(function(){ el('en-ta').focus(); },100);
+  document.getElementById('en-save').onclick=function(){
+    _editingPlan.exercises[ei].note=(el('en-ta').value||'').trim();
+    ov.style.display='none'; ov.innerHTML=''; ov.style.backdropFilter=''; ov.style.webkitBackdropFilter=''; ov.style.background=''; document.body.style.overflow='';
+    _rfPeEx();
+  };
+}
+
 // Batch dodawanie serii w edytorze planu
 function _peBatchAdd(ei){
   if(!_editingPlan||!_editingPlan.exercises[ei]) return;
