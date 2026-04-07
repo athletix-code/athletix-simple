@@ -620,10 +620,18 @@
 <!-- ATHLETE PROFILE OVERLAY -->
 <div class="ap-overlay" id="athlete-profile-overlay">
   <div style="max-width:500px;margin:0 auto;padding:0 14px env(safe-area-inset-bottom,10px);">
-    <div style="padding-top:calc(env(safe-area-inset-top,8px) + 6px);padding-bottom:8px;display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--border);">
-      <button onclick="closeAthleteProfile()" style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:7px 12px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;">← Wróć</button>
-      <div style="font-size:14px;font-weight:900;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="ap-name-header"></div>
-      <span style="font-size:10px;font-weight:700;color:var(--dim);flex-shrink:0;">A<span style="color:#ef4444;">X</span></span>
+    <div style="padding-top:calc(env(safe-area-inset-top,8px) + 6px);position:sticky;top:0;background:var(--bg);z-index:10;">
+      <div style="padding-bottom:8px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);">
+        <button onclick="closeAthleteProfile()" style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:7px 12px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;">← Wróć</button>
+        <div style="font-size:14px;font-weight:900;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="ap-name-header"></div>
+        <span style="font-size:10px;font-weight:700;color:var(--dim);flex-shrink:0;">A<span style="color:#ef4444;">X</span></span>
+      </div>
+      <div id="ap-nav" style="display:flex;gap:4px;padding:6px 0;border-bottom:1px solid var(--border);">
+        <button onclick="goToAthleteTests()" style="flex:1;padding:7px 4px;border-radius:var(--r-xs);border:1px solid var(--border2);background:var(--s2);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--muted);text-align:center;">📈 Testy</button>
+        <button onclick="scrollToSection('ap-sec-plans')" style="flex:1;padding:7px 4px;border-radius:var(--r-xs);border:1px solid var(--border2);background:var(--s2);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--muted);text-align:center;">📅 Plany</button>
+        <button onclick="scrollToSection('ap-sec-data')" style="flex:1;padding:7px 4px;border-radius:var(--r-xs);border:1px solid var(--border2);background:var(--s2);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--muted);text-align:center;">📋 Dane</button>
+        <button onclick="goToAthleteSessions()" style="flex:1;padding:7px 4px;border-radius:var(--r-xs);border:1px solid var(--border2);background:var(--s2);cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--muted);text-align:center;">⏱ Sesje</button>
+      </div>
     </div>
     <div id="ap-content" style="padding-top:12px;"></div>
   </div>

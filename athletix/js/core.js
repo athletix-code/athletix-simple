@@ -28,6 +28,35 @@ var _ringColor='';
 var _lockTimer=null;
 
 function el(id){ return document.getElementById(id); }
+function goToAthleteTests(){
+  if(!_currentProfileId) return;
+  loadCRM();
+  var a=athletes.find(function(x){ return String(x.id)===String(_currentProfileId); });
+  if(a) openTestHistory(a.name);
+}
+function goToAthleteSessions(){
+  if(!_currentProfileId) return;
+  loadCRM();
+  var a=athletes.find(function(x){ return String(x.id)===String(_currentProfileId); });
+  if(!a) return;
+  // Close profile, go to athletes tab, expand this athlete
+  el('athlete-profile-overlay').style.display='none';
+  _expandedAthlete=a.name;
+  setMode('athletes');
+}
+function scrollToSection(id){
+  var s=document.getElementById(id); if(!s) return;
+  var ov=document.getElementById('athlete-profile-overlay');
+  if(ov&&ov.style.display==='block'){
+    // Calculate position relative to scrollable container
+    var container=ov;
+    var rect=s.getBoundingClientRect();
+    var ovRect=container.getBoundingClientRect();
+    container.scrollTop+=rect.top-ovRect.top-70;
+  } else {
+    s.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
 
 // ── Audio ──
 function ga(){ if(!actx) actx=new(window.AudioContext||window.webkitAudioContext)(); return actx; }

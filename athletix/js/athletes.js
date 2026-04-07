@@ -276,8 +276,10 @@ function renderAthleteProfile(a, allSess){
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:3px;">Najczęstsze ćwiczenie</div>'
     +'<div style="font-size:14px;font-weight:800;color:var(--text);">'+topEx+'</div></div>'
     // Skarbiec
+    +'<div id="ap-sec-wallet"></div>'
     +_buildWalletSection(a)
     // Dane podstawowe
+    +'<div id="ap-sec-data"></div>'
     +'<div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px;">'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;">Dane zawodnika</div>'
     +'<div style="margin-bottom:8px;"><div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Imię i nazwisko</div>'
@@ -310,24 +312,41 @@ function renderAthleteProfile(a, allSess){
       return '<button data-gname="'+g.name+'" data-aname="'+a.name+'" onclick="toggleAthleteInGroupBtn(this)" style="padding:5px 12px;border-radius:20px;border:2px solid '+(isMember?'#c2410c':'var(--border2)')+';background:'+(isMember?'rgba(194,65,12,.08)':'transparent')+';color:'+(isMember?'#c2410c':'var(--muted)')+';font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;cursor:pointer;">'+g.name+(isMember?' ✓':'')+'</button>';
     }).join('')+'</div></div>':'')
     // Test results
+    +'<div id="ap-sec-tests"></div>'
     +'<div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px;">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);">Wyniki testów</div>'
     +'<button data-aname="'+a.name+'" onclick="openTestHistory(this.dataset.aname)" style="background:transparent;border:1px solid var(--border2);border-radius:20px;padding:3px 12px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:800;color:var(--muted);">Historia →</button></div>'
     +buildLatestTestResults(a.name)+'</div>'
     // Plans
+    +'<div id="ap-sec-plans"></div>'
     +(typeof buildAthletePlansHtml==='function'?buildAthletePlansHtml(a.name):'')
     // Recent sessions
+    +'<div id="ap-sec-sessions"></div>'
     +'<div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;">'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Ostatnie sesje</div>'
-    +allSessCached.filter(function(s){ return s.athlete===a.name; }).sort(function(x,y){ return new Date(y.date)-new Date(x.date); }).slice(0,3).map(function(s){
-      var d2=new Date(s.date); var ds=getDayKey(d2);
-      var tag=''; if(s.mode==='custom'&&s.params) tag=s.params.rounds+'×'+fmtSec(s.params.work)+'/'+fmtSec(s.params.rest);
-      else if(s.mode==='emom'&&s.params) tag='EMOM '+s.params.emom+'min';
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">'
-        +'<div><span style="font-weight:700;color:var(--text);">'+(s.exercise||'Interwał')+'</span>'+(tag?' <span style="color:#c2410c;font-weight:800;font-size:11px;">'+tag+'</span>':'')+'</div>'
-        +'<span style="color:var(--dim);">'+ds+'</span></div>';
-    }).join('')+(sessCnt===0?'<div style="color:var(--dim);font-size:12px;text-align:center;padding:8px;">Brak sesji</div>':'')+'</div>';
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Ostatnia aktywność</div>'
+    +(function(){
+      loadNotes();
+      var items=[];
+      allSessCached.filter(function(s){ return s.athlete===a.name; }).forEach(function(s){
+        var tag=''; if(s.mode==='custom'&&s.params) tag=s.params.rounds+'×'+fmtSec(s.params.work)+'/'+fmtSec(s.params.rest);
+        else if(s.mode==='emom'&&s.params) tag='EMOM '+s.params.emom+'min';
+        items.push({date:getDayKey(new Date(s.date)),icon:'⏱',label:(s.exercise||'Interwał')+(tag?' · '+tag:'')});
+      });
+      notes.filter(function(n){ return n.athlete===a.name; }).forEach(function(n){
+        var preview=(n.text||'').substring(0,40).replace(/\n/g,' ');
+        items.push({date:n.date,icon:n.type==='test'?'📈':'📋',label:preview});
+      });
+      items.sort(function(x,y){ return y.date>x.date?1:y.date<x.date?-1:0; });
+      if(!items.length) return '<div style="color:var(--dim);font-size:12px;text-align:center;padding:8px;">Brak aktywności</div>';
+      return items.slice(0,8).map(function(it){
+        return '<div style="display:flex;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;gap:6px;">'
+          +'<span style="flex-shrink:0;">'+it.icon+'</span>'
+          +'<span style="flex:1;min-width:0;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+it.label+'</span>'
+          +'<span style="color:var(--dim);flex-shrink:0;font-size:10px;">'+it.date+'</span></div>';
+      }).join('');
+    })()
+    +'</div>';
 }
 function saveAthleteProfile(){
   loadCRM(); var a=athletes.find(function(x){ return String(x.id)===String(_currentProfileId); }); if(!a) return;
