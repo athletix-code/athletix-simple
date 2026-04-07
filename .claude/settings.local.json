@@ -28,7 +28,11 @@
       "Bash(ipconfig getifaddr:*)",
       "Bash(npm list:*)",
       "Bash(node -c js/athletes.js)",
-      "Bash(python3)"
+      "Bash(python3)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\")",
+      "WebFetch(domain:athletix-simple.netlify.app)",
+      "Bash(rm:*)",
+      "Bash(sed:*)"
     ]
   }
 }
