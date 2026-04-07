@@ -115,17 +115,15 @@ function _renderPlanEditorOverlay(ov,isNew){
   }
   if(!topAths.length&&!restAths.length) athHtml='<div style="font-size:11px;color:var(--dim);">Dodaj zawodników w zakładce Zawodnicy</div>';
 
-  // Ulubione chipy
+  // Ulubione chipy + przycisk +
   loadFavEx();
-  var favChipsHtml='';
-  if(favExercises.length){
-    favChipsHtml='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Ulubione</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;max-height:60px;overflow:hidden;">';
-    favExercises.slice(0,8).forEach(function(f){
-      favChipsHtml+='<button onclick="_peAddFav(\''+f.name.replace(/'/g,"\\'")+'\',\''+((f.cat||'').replace(/'/g,"\\'"))+'\',\''+(f.zone||'')+'\')" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);">'+f.name+'</button>';
-    });
-    favChipsHtml+='</div>';
-  }
+  var favChipsHtml='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Ulubione</div>'
+    +'<div id="pe-fav-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;align-items:center;">';
+  favExercises.slice(0,8).forEach(function(f){
+    favChipsHtml+='<button onclick="_peAddFav(\''+f.name.replace(/'/g,"\\'")+'\',\''+((f.cat||'').replace(/'/g,"\\'"))+'\',\''+(f.zone||'')+'\')" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);">'+f.name+'</button>';
+  });
+  favChipsHtml+='<button onclick="_openFavModal()" title="Zarządzaj ulubionymi" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:18px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;" onmouseover="this.style.borderColor=\'var(--accent)\';this.style.color=\'var(--accent)\'" onmouseout="this.style.borderColor=\'\';this.style.color=\'var(--muted)\'">+</button>';
+  favChipsHtml+='</div>';
 
   ov.innerHTML='<div style="position:fixed;inset:0;background:var(--bg);overflow-y:auto;z-index:9991;padding:0 0 100px;">'
     +'<div style="max-width:520px;margin:0 auto;padding:16px 14px;">'
@@ -246,6 +244,109 @@ function _peAddFav(name,catKey,zone){
   var cat=EXERCISE_LIBRARY[catKey]||{fields:['reps','load']}; var s={note:''}; cat.fields.forEach(function(f){ s[f]=''; });
   _editingPlan.exercises.push({type:'exercise',label:'',exCat:catKey||null,exZone:zone||null,exercise:name,targetSets:[Object.assign({},s)],note:''});
   _rfPeEx();
+}
+
+// ── Odświeżanie chipów ulubionych w edytorze ──
+function _refreshPeFavChips(){
+  var wrap=document.getElementById('pe-fav-chips'); if(!wrap) return;
+  loadFavEx();
+  wrap.innerHTML='';
+  favExercises.slice(0,8).forEach(function(f){
+    wrap.innerHTML+='<button onclick="_peAddFav(\''+f.name.replace(/'/g,"\\'")+'\',\''+(f.cat||'').replace(/'/g,"\\'")+'\',\''+(f.zone||'')+'\')" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);">'+f.name+'</button>';
+  });
+  wrap.innerHTML+='<button onclick="_openFavModal()" title="Zarządzaj ulubionymi" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:18px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>';
+}
+
+// ── Modal zarządzania ulubionymi ──
+function _openFavModal(){
+  // Osobny element DOM — NIE _ensureOverlay (bo zamknąłby edytor planu)
+  var existing=document.getElementById('favorites-modal'); if(existing) existing.remove();
+  loadFavEx(); loadCustomExercises();
+  // Zbierz WSZYSTKIE ćwiczenia z biblioteki
+  var allEx=[];
+  Object.keys(EXERCISE_LIBRARY).forEach(function(catKey){
+    var cat=EXERCISE_LIBRARY[catKey];
+    ['upper','lower','full'].forEach(function(z){
+      (cat[z]||[]).forEach(function(name){ allEx.push({name:name,cat:catKey,zone:z}); });
+    });
+    customExercises.filter(function(c){ return c.cat===catKey; }).forEach(function(c){ allEx.push({name:c.name,cat:catKey,zone:c.zone}); });
+  });
+
+  var modal=document.createElement('div'); modal.id='favorites-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick=function(e){ if(e.target===modal){ modal.remove(); } };
+
+  var box=document.createElement('div');
+  box.style.cssText='max-width:400px;width:calc(100% - 40px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:18px;max-height:70vh;display:flex;flex-direction:column;opacity:0;transform:translateY(16px);transition:all .18s ease-out;';
+  modal.appendChild(box);
+
+  function render(filter){
+    var filt=(filter||'').toLowerCase();
+    var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+      +'<div style="font-size:14px;font-weight:800;color:var(--text);">⭐ Ulubione ćwiczenia</div>'
+      +'<button onclick="document.getElementById(\'favorites-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+      +'<input id="fav-search" type="text" placeholder="Szukaj lub wpisz nazwę..." value="'+(filter||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;outline:none;margin-bottom:10px;box-sizing:border-box;"/>'
+      +'<div style="overflow-y:auto;flex:1;min-height:100px;">';
+    loadFavEx();
+    var shown=allEx.filter(function(ex){ return !filt||ex.name.toLowerCase().indexOf(filt)>=0; });
+    shown.forEach(function(ex){
+      var isFav=favExercises.some(function(f){ return f.name===ex.name; });
+      var cat=EXERCISE_LIBRARY[ex.cat]||{color:'#888'};
+      html+='<div data-fav-name="'+ex.name.replace(/"/g,'&quot;')+'" data-fav-cat="'+(ex.cat||'')+'" data-fav-zone="'+(ex.zone||'')+'" style="padding:8px 4px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:8px;" onclick="_toggleFavInModal(this)">'
+        +'<span style="font-size:16px;opacity:'+(isFav?'1':'0.25')+';color:'+(isFav?'#eab308':'var(--muted)')+';">'+(isFav?'⭐':'☆')+'</span>'
+        +'<span style="font-size:13px;font-weight:600;color:var(--text);flex:1;">'+ex.name+'</span>'
+        +'<span style="font-size:8px;font-weight:800;color:'+cat.color+';background:rgba('+_hexToRgb(cat.color)+',.1);border-radius:20px;padding:2px 7px;">'+(CAT_SHORT[ex.cat]||'')+'</span>'
+        +'</div>';
+    });
+    if(!shown.length) html+='<div style="text-align:center;color:var(--dim);font-size:12px;padding:16px;">Brak wyników</div>';
+    html+='</div>'
+      +'<div style="border-top:1px solid var(--border);margin:10px 0;"></div>'
+      +'<div style="display:flex;gap:6px;margin-bottom:8px;">'
+      +'<input id="fav-custom-name" type="text" placeholder="Wpisz nazwę..." style="flex:1;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;outline:none;box-sizing:border-box;"/>'
+      +'<button onclick="_addCustomFavFromModal()" style="padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:10px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;white-space:nowrap;">Dodaj</button></div>'
+      +'<button onclick="document.getElementById(\'favorites-modal\').remove()" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;color:var(--text);">Zamknij</button>';
+    box.innerHTML=html;
+    // Bind search input
+    var si=document.getElementById('fav-search');
+    if(si){ si.oninput=function(){ render(si.value); setTimeout(function(){ var s2=document.getElementById('fav-search'); if(s2) s2.focus(); },10); }; }
+  }
+  render('');
+  document.body.appendChild(modal);
+  // Animacja wejścia
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.style.opacity='1'; box.style.transform='translateY(0)'; }); });
+}
+
+function _toggleFavInModal(el2){
+  var name=el2.getAttribute('data-fav-name');
+  var catKey=el2.getAttribute('data-fav-cat');
+  var zone=el2.getAttribute('data-fav-zone');
+  loadFavEx();
+  var idx=favExercises.findIndex(function(f){ return f.name===name; });
+  if(idx>=0) favExercises.splice(idx,1);
+  else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>10) favExercises.shift(); }
+  saveFavEx();
+  // Odśwież gwiazdkę w wierszu
+  var star=el2.querySelector('span');
+  var isFav=favExercises.some(function(f){ return f.name===name; });
+  if(star){ star.textContent=isFav?'⭐':'☆'; star.style.opacity=isFav?'1':'0.25'; star.style.color=isFav?'#eab308':'var(--muted)'; }
+  // Odśwież chipy w edytorze planu
+  _refreshPeFavChips();
+}
+
+function _addCustomFavFromModal(){
+  var inp=document.getElementById('fav-custom-name'); if(!inp) return;
+  var name=inp.value.trim(); if(!name) return;
+  loadFavEx();
+  if(!favExercises.find(function(f){ return f.name===name; })){
+    favExercises.push({name:name,cat:null,zone:null});
+    if(favExercises.length>10) favExercises.shift();
+    saveFavEx();
+  }
+  inp.value='';
+  _refreshPeFavChips();
+  // Odśwież listę w modalu
+  var modal=document.getElementById('favorites-modal');
+  if(modal){ var si=document.getElementById('fav-search'); _openFavModal(); }
 }
 
 // ── Renderowanie kart w edytorze ──
