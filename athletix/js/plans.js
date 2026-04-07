@@ -118,12 +118,13 @@ function _renderPlanEditorOverlay(ov,isNew){
   // Ulubione chipy + przycisk +
   loadFavEx();
   var favChipsHtml='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Ulubione</div>'
-    +'<div id="pe-fav-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;align-items:center;">';
+    +'<div id="pe-fav-chips" style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;max-height:80px;overflow:hidden;transition:max-height .2s ease;">';
   favExercises.slice(0,8).forEach(function(f){
     favChipsHtml+='<button onclick="_peAddFav(\''+f.name.replace(/'/g,"\\'")+'\',\''+((f.cat||'').replace(/'/g,"\\'"))+'\',\''+(f.zone||'')+'\')" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);">'+f.name+'</button>';
   });
   favChipsHtml+='<button onclick="_openFavModal()" title="Zarządzaj ulubionymi" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:18px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;" onmouseover="this.style.borderColor=\'var(--accent)\';this.style.color=\'var(--accent)\'" onmouseout="this.style.borderColor=\'\';this.style.color=\'var(--muted)\'">+</button>';
-  favChipsHtml+='</div>';
+  favChipsHtml+='</div>'
+    +'<button id="pe-fav-toggle" onclick="_toggleFavChips()" style="display:none;font-size:10px;font-weight:700;color:var(--muted);background:transparent;border:none;cursor:pointer;padding:4px 0;width:100%;text-align:center;margin-bottom:8px;">▼ więcej</button>';
 
   ov.innerHTML='<div style="position:fixed;inset:0;background:var(--bg);overflow-y:auto;z-index:9991;padding:0 0 100px;">'
     +'<div style="max-width:520px;margin:0 auto;padding:16px 14px;">'
@@ -160,6 +161,8 @@ function _renderPlanEditorOverlay(ov,isNew){
     +'<button onclick="_savePlan('+p.id+')" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">💾 Zapisz plan</button>'
     +'</div></div></div>';
   ov.style.display='block';
+  _favExpanded=false;
+  setTimeout(_checkFavOverflow,50);
   // Event delegation — chipy zawodników
   var aw=document.getElementById('pe-athletes');
   if(aw) aw.addEventListener('click',function(e){
@@ -250,11 +253,36 @@ function _peAddFav(name,catKey,zone){
 function _refreshPeFavChips(){
   var wrap=document.getElementById('pe-fav-chips'); if(!wrap) return;
   loadFavEx();
+  wrap.style.maxHeight='80px'; wrap.style.overflow='hidden';
   wrap.innerHTML='';
   favExercises.slice(0,8).forEach(function(f){
     wrap.innerHTML+='<button onclick="_peAddFav(\''+f.name.replace(/'/g,"\\'")+'\',\''+(f.cat||'').replace(/'/g,"\\'")+'\',\''+(f.zone||'')+'\')" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);">'+f.name+'</button>';
   });
   wrap.innerHTML+='<button onclick="_openFavModal()" title="Zarządzaj ulubionymi" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:18px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>';
+  setTimeout(_checkFavOverflow,10);
+}
+var _favExpanded=false;
+function _checkFavOverflow(){
+  var wrap=document.getElementById('pe-fav-chips'); if(!wrap) return;
+  var btn=document.getElementById('pe-fav-toggle'); if(!btn) return;
+  if(wrap.scrollHeight>wrap.clientHeight+2){
+    btn.style.display='block';
+    btn.textContent=_favExpanded?'▲ zwiń':'▼ więcej';
+  } else {
+    btn.style.display='none';
+  }
+}
+function _toggleFavChips(){
+  var wrap=document.getElementById('pe-fav-chips'); if(!wrap) return;
+  var btn=document.getElementById('pe-fav-toggle'); if(!btn) return;
+  _favExpanded=!_favExpanded;
+  if(_favExpanded){
+    wrap.style.maxHeight='none'; wrap.style.overflow='visible';
+    btn.textContent='▲ zwiń';
+  } else {
+    wrap.style.maxHeight='80px'; wrap.style.overflow='hidden';
+    btn.textContent='▼ więcej';
+  }
 }
 
 // ── Modal zarządzania ulubionymi ──
