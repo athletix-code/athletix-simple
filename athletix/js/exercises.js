@@ -159,6 +159,26 @@ function _strShowCatFlow(){
   el('str-cat-flow').style.display='block';
   initExCatChips();
 }
+// Ulubione chipy w formularzu ręcznym
+function _renderStrFavChips(){
+  var wrap=el('str-fav-chips'); if(!wrap) return;
+  loadFavEx();
+  if(!favExercises.length){ wrap.innerHTML=''; return; }
+  wrap.innerHTML='';
+  favExercises.slice(0,8).forEach(function(f){
+    var b=document.createElement('button');
+    b.style.cssText='padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);';
+    b.textContent=f.name;
+    b.onclick=function(){
+      _exCat=f.cat||''; _exZone=f.zone||''; _exName=f.name;
+      initExSets();
+      el('ex-sets-wrap').style.display='block';
+      el('ex-general-wrap').style.display='block';
+      el('ex-save-wrap').style.display='block';
+    };
+    wrap.appendChild(b);
+  });
+}
 function _hexToRgb(hex){ hex=hex.replace('#',''); var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16); return r+','+g+','+b; }
 function _fieldWidth(f){ return {reps:60,load:70,rir:50,time:70,dist:80}[f]||60; }
 
@@ -446,6 +466,7 @@ function saveStrengthEntry(){
     sets:sets, generalNote:(el('ex-general-note').value||'').trim()||''
   };
   entry.text=buildEntryText(entry);
+  _addToFav(cleanName,_exCat,_exZone);
   _pushUndo('Wpis: '+cleanName);
   loadNotes();
   notes.push(entry);
@@ -588,4 +609,4 @@ function _renderStrengthReportEntry(n, idx){
 }
 
 // Init on load
-document.addEventListener('DOMContentLoaded',function(){ loadCustomExercises(); loadFavEx(); initExCatChips(); _strFilterAllEx(); });
+document.addEventListener('DOMContentLoaded',function(){ loadCustomExercises(); loadFavEx(); initExCatChips(); _strFilterAllEx(); _renderStrFavChips(); });

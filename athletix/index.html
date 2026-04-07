@@ -12,7 +12,7 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>AthletiX Simple — Sigma AthletiX</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=7">
+<link rel="stylesheet" href="css/app.css?v=8">
 </head>
 
 <!-- ════ SETTINGS ════ -->
@@ -394,6 +394,8 @@
           <option value="">Wybierz ćwiczenie...</option>
         </select>
       </div>
+      <!-- Ulubione chipy -->
+      <div id="str-fav-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;"></div>
       <div style="display:flex;gap:10px;margin-bottom:8px;">
         <button onclick="_strShowManual()" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--muted);padding:0;">lub wpisz ręcznie ↓</button>
         <button onclick="_strShowCatFlow()" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--muted);padding:0;">Wybierz z kategorii →</button>
@@ -422,6 +424,7 @@
         <div id="ex-sets-header" style="display:flex;gap:5px;align-items:center;margin-bottom:4px;padding-left:29px;"></div>
         <div id="ex-sets-list"></div>
         <div id="ex-sets-empty" style="text-align:center;color:var(--dim);font-size:12px;padding:10px;">Dodaj serie powyżej</div>
+        <button class="ex-add-set-btn" onclick="addExSet()" style="margin-top:6px;">+ Seria</button>
       </div>
       <div id="ex-general-wrap" style="display:none;">
         <button class="ex-general-note-btn" id="ex-general-toggle" onclick="toggleExGeneralNote()">📝 Notatka ogólna</button>
@@ -770,21 +773,21 @@
 </div>
 
 
-<script src="js/storage.js?v=7"></script>
-<script src="js/core.js?v=7"></script>
-<script src="js/timers.js?v=7"></script>
-<script src="js/athletes.js?v=7"></script>
-<script src="js/wallet.js?v=7"></script>
-<script src="js/status.js?v=7"></script>
-<script src="js/exercises.js?v=7"></script>
-<script src="js/diary.js?v=7"></script>
-<script src="js/reports.js?v=7"></script>
-<script src="js/plans.js?v=7"></script>
-<script src="js/data.js?v=7"></script>
-<script src="js/settings.js?v=7"></script>
-<script src="js/supabase-config.js?v=7"></script>
-<script src="js/sync.js?v=7"></script>
-<script src="js/autogrow.js?v=7"></script>
+<script src="js/storage.js?v=8"></script>
+<script src="js/core.js?v=8"></script>
+<script src="js/timers.js?v=8"></script>
+<script src="js/athletes.js?v=8"></script>
+<script src="js/wallet.js?v=8"></script>
+<script src="js/status.js?v=8"></script>
+<script src="js/exercises.js?v=8"></script>
+<script src="js/diary.js?v=8"></script>
+<script src="js/reports.js?v=8"></script>
+<script src="js/plans.js?v=8"></script>
+<script src="js/data.js?v=8"></script>
+<script src="js/settings.js?v=8"></script>
+<script src="js/supabase-config.js?v=8"></script>
+<script src="js/sync.js?v=8"></script>
+<script src="js/autogrow.js?v=8"></script>
 
 </body>
 </html>

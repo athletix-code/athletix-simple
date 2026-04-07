@@ -86,10 +86,46 @@ function openPlanEditor(id){
 
 function _renderPlanEditorOverlay(ov,isNew){
   var p=_editingPlan;
-  var athHtml=athletes.length?athletes.map(function(a){
-    var ch=p.athletes&&p.athletes.indexOf(a.name)>=0;
-    return '<button type="button" data-ath-name="'+a.name.replace(/"/g,'&quot;')+'" style="display:inline-flex;align-items:center;padding:6px 10px;background:'+(ch?'var(--accent-bg)':'var(--s2)')+';border:1px solid '+(ch?'var(--accent)':'var(--border2)')+';border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:'+(ch?'var(--accent)':'var(--muted)')+';margin:0 4px 4px 0;min-height:36px;">'+a.name+'</button>';
-  }).join(''):'<div style="font-size:11px;color:var(--dim);">Dodaj zawodników w zakładce Zawodnicy</div>';
+  // Chipy zawodników — max 6 (sesja + aktywni), reszta w dropdown
+  var topAths=[]; var shown={};
+  // Najpierw sessionAthletes
+  (typeof sessionAthletes!=='undefined'?sessionAthletes:[]).forEach(function(n){ if(!shown[n]&&topAths.length<6){ topAths.push(n); shown[n]=true; } });
+  // Potem aktywni
+  athletes.filter(function(a){ return a.status==='active'&&!shown[a.name]; }).forEach(function(a){ if(topAths.length<6){ topAths.push(a.name); shown[a.name]=true; } });
+  // Dodaj też tych co już są w planie
+  (p.athletes||[]).forEach(function(n){ if(!shown[n]){ topAths.push(n); shown[n]=true; } });
+  var athHtml=topAths.length?topAths.map(function(n){
+    var ch=p.athletes&&p.athletes.indexOf(n)>=0;
+    return '<button type="button" data-ath-name="'+n.replace(/"/g,'&quot;')+'" style="display:inline-flex;align-items:center;padding:6px 10px;background:'+(ch?'rgba(59,130,246,.15)':'var(--s2)')+';border:1px solid '+(ch?'var(--accent)':'var(--border2)')+';border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:'+(ch?'var(--accent)':'var(--muted)')+';margin:0 4px 4px 0;min-height:36px;">'+n+'</button>';
+  }).join(''):'';
+  // Dropdown dla reszty
+  var restAths=athletes.filter(function(a){ return !shown[a.name]; });
+  var dropHtml='';
+  if(restAths.length||!topAths.length){
+    dropHtml='<select class="crm-input" style="margin-top:4px;margin-bottom:0;padding:6px 10px;font-size:11px;" onchange="_peToggleAthDrop(this)">'
+      +'<option value="">+ Dodaj zawodnika...</option>';
+    // Grupuj wg grup
+    loadGroups();
+    var inGroup={}; teamGroups.forEach(function(g){ g.athletes.forEach(function(n){ inGroup[n]=g.name; }); });
+    var grouped={}; var ungrouped=[];
+    restAths.forEach(function(a){ var gn=inGroup[a.name]; if(gn){ if(!grouped[gn]) grouped[gn]=[]; grouped[gn].push(a.name); } else ungrouped.push(a.name); });
+    Object.keys(grouped).forEach(function(gn){ dropHtml+='<optgroup label="'+gn+'">'; grouped[gn].forEach(function(n){ dropHtml+='<option value="'+n+'">'+n+'</option>'; }); dropHtml+='</optgroup>'; });
+    if(ungrouped.length){ dropHtml+='<optgroup label="Bez grupy">'; ungrouped.forEach(function(n){ dropHtml+='<option value="'+n+'">'+n+'</option>'; }); dropHtml+='</optgroup>'; }
+    dropHtml+='</select>';
+  }
+  if(!topAths.length&&!restAths.length) athHtml='<div style="font-size:11px;color:var(--dim);">Dodaj zawodników w zakładce Zawodnicy</div>';
+
+  // Ulubione chipy
+  loadFavEx();
+  var favChipsHtml='';
+  if(favExercises.length){
+    favChipsHtml='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Ulubione</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;max-height:60px;overflow:hidden;">';
+    favExercises.slice(0,8).forEach(function(f){
+      favChipsHtml+='<button onclick="_peAddFav(\''+f.name.replace(/'/g,"\\'")+'\',\''+((f.cat||'').replace(/'/g,"\\'"))+'\',\''+(f.zone||'')+'\')" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);">'+f.name+'</button>';
+    });
+    favChipsHtml+='</div>';
+  }
 
   ov.innerHTML='<div style="position:fixed;inset:0;background:var(--bg);overflow-y:auto;z-index:9991;padding:0 0 100px;">'
     +'<div style="max-width:520px;margin:0 auto;padding:16px 14px;">'
@@ -98,7 +134,10 @@ function _renderPlanEditorOverlay(ov,isNew){
     +'<button onclick="_closePlanEditor()" style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);padding:8px 12px;cursor:pointer;font-size:14px;color:var(--muted);min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
     +'<input id="pe-name" type="text" value="'+(p.name||'').replace(/"/g,'&quot;')+'" placeholder="Nazwa planu..." style="width:100%;padding:12px 14px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;outline:none;margin-bottom:12px;box-sizing:border-box;"/>'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Zawodnicy</div>'
-    +'<div id="pe-athletes" style="display:flex;flex-wrap:wrap;margin-bottom:14px;">'+athHtml+'</div>'
+    +'<div id="pe-athletes" style="display:flex;flex-wrap:wrap;margin-bottom:0;">'+athHtml+'</div>'
+    +dropHtml
+    +'<div style="margin-bottom:14px;"></div>'
+    +favChipsHtml
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">Elementy planu</div>'
     +'<div id="pe-exercises">'+_renderPeCards()+'</div>'
     // Dodawanie — szybki select + ręcznie + kategorie + notatka
@@ -189,6 +228,26 @@ function _peManualAdd(){
 }
 function _addPeNote(){ _editingPlan.exercises.push({type:'note',label:'',text:'',exCat:null,exZone:null,exercise:null,targetSets:[]}); _rfPeEx(); }
 
+// Dropdown zawodników i ulubione
+function _peToggleAthDrop(sel){
+  var name=sel.value; sel.selectedIndex=0; if(!name||!_editingPlan) return;
+  var idx=_editingPlan.athletes.indexOf(name);
+  if(idx>=0) _editingPlan.athletes.splice(idx,1); else _editingPlan.athletes.push(name);
+  var wrap=document.getElementById('pe-athletes'); if(!wrap) return;
+  var existing=wrap.querySelector('[data-ath-name="'+name+'"]');
+  if(!existing){
+    var btn=document.createElement('button'); btn.type='button'; btn.setAttribute('data-ath-name',name);
+    btn.style.cssText='display:inline-flex;align-items:center;padding:6px 10px;background:rgba(59,130,246,.15);border:1px solid var(--accent);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--accent);margin:0 4px 4px 0;min-height:36px;';
+    btn.textContent=name; wrap.appendChild(btn);
+  }
+}
+function _peAddFav(name,catKey,zone){
+  if(!_editingPlan) return;
+  var cat=EXERCISE_LIBRARY[catKey]||{fields:['reps','load']}; var s={note:''}; cat.fields.forEach(function(f){ s[f]=''; });
+  _editingPlan.exercises.push({type:'exercise',label:'',exCat:catKey||null,exZone:zone||null,exercise:name,targetSets:[Object.assign({},s)],note:''});
+  _rfPeEx();
+}
+
 // ── Renderowanie kart w edytorze ──
 function _renderPeCards(){
   var p=_editingPlan; if(!p||!p.exercises) return ''; var html=''; var total=p.exercises.length;
@@ -216,21 +275,30 @@ function _renderPeCards(){
       +(ex.exZone?'<span style="font-size:9px;color:var(--dim);flex-shrink:0;">'+(ZONE_LABELS[ex.exZone]||'')+'</span>':'')
       +_cardControls(ei,total,'_movePeEx','_rmPeEx')
       +'</div>'
+      // Batch input
+      +'<div style="display:flex;gap:4px;align-items:center;margin-bottom:6px;flex-wrap:wrap;">'
+      +'<input id="pe-batch-cnt-'+ei+'" type="number" min="1" max="20" value="1" style="width:40px;text-align:center;font-size:13px;font-weight:700;background:var(--s1);border:1px solid var(--border2);border-radius:10px;padding:8px 2px;color:var(--text);outline:none;min-height:38px;box-sizing:border-box;" inputmode="numeric"/>'
+      +'<span style="font-size:12px;color:var(--muted);">×</span>';
+    fields.forEach(function(f){ html+='<input id="pe-batch-'+ei+'-'+f+'" class="ex-set-input" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" placeholder="'+FIELD_LABELS[f]+'" style="flex:1;min-width:'+(_fieldWidth(f)-15)+'px;border-radius:10px;font-size:13px;padding:8px 4px;min-height:38px;"/>'; });
+    html+='<button onclick="_peBatchAdd('+ei+')" style="padding:6px 10px;background:var(--accent);border:none;border-radius:10px;cursor:pointer;font-size:10px;font-weight:800;color:#fff;white-space:nowrap;min-height:38px;">+</button>'
+      +'</div>'
       // Nagłówki kolumn
       +'<div style="display:flex;gap:5px;padding-left:29px;margin-bottom:3px;">';
     fields.forEach(function(f){ html+='<div style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-align:center;flex:1;min-width:'+(_fieldWidth(f)-10)+'px;">'+FIELD_LABELS[f]+'</div>'; });
     html+='</div>';
     // Serie
+    if(!(ex.targetSets||[]).length) html+='<div style="text-align:center;color:var(--dim);font-size:11px;padding:8px;">Dodaj serie powyżej</div>';
     (ex.targetSets||[]).forEach(function(s,si){
-      html+='<div class="ex-set-row" style="margin-bottom:3px;"><div class="ex-set-badge">S'+(si+1)+'</div>';
-      fields.forEach(function(f){ html+='<input class="ex-set-input" style="flex:1;min-width:'+(_fieldWidth(f)-10)+'px;" data-ei="'+ei+'" data-si="'+si+'" data-field="'+f+'" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" placeholder="—" value="'+(s[f]||'')+'" oninput="_upPeSet('+ei+','+si+',\''+f+'\',this.value)"/>'; });
+      var hasNote=s.note&&s.note.trim();
+      html+='<div class="ex-set-row" style="margin-bottom:2px;"><div class="ex-set-badge">S'+(si+1)+'</div>';
+      fields.forEach(function(f){ html+='<input class="ex-set-input" style="flex:1;min-width:'+(_fieldWidth(f)-10)+'px;border-radius:10px;" data-ei="'+ei+'" data-si="'+si+'" data-field="'+f+'" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" placeholder="—" value="'+(s[f]||'')+'" oninput="_upPeSet('+ei+','+si+',\''+f+'\',this.value)"/>'; });
+      html+='<button onclick="_openPeSetNote('+ei+','+si+')" title="Notatka" style="width:30px;height:30px;background:transparent;border:none;cursor:pointer;font-size:14px;opacity:'+(hasNote?'0.8':'0.3')+';position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📝'+(hasNote?'<span style="position:absolute;top:1px;right:1px;width:4px;height:4px;border-radius:50%;background:var(--accent);"></span>':'')+'</button>';
       if((ex.targetSets||[]).length>1) html+='<button class="ex-set-del" onclick="_rmPeSet('+ei+','+si+')">✕</button>';
       html+='</div>';
+      if(hasNote) html+='<div onclick="_openPeSetNote('+ei+','+si+')" style="font-size:10px;font-style:italic;color:var(--muted);padding-left:29px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;">'+s.note+'</div>';
     });
-    // + Seria + notatka
-    html+='<div style="display:flex;gap:6px;margin-top:4px;">'
-      +'<button onclick="_addPeSet('+ei+')" style="padding:4px 10px;background:transparent;border:1px dashed var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:10px;font-weight:700;color:var(--muted);min-height:28px;">+ Seria</button>'
-      +'</div>';
+    // + Seria
+    html+='<button onclick="_addPeSet('+ei+')" style="margin-top:4px;padding:4px 10px;background:transparent;border:1px dashed var(--border2);border-radius:12px;cursor:pointer;font-size:10px;font-weight:700;color:var(--muted);min-height:28px;">+ Seria</button>';
     // Notatka
     if(ex.note) html+='<textarea rows="1" oninput="_editingPlan.exercises['+ei+'].note=this.value" style="width:100%;margin-top:4px;padding:5px 8px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-xs);color:var(--muted);font-family:Montserrat,sans-serif;font-size:11px;outline:none;resize:none;box-sizing:border-box;">'+ex.note+'</textarea>';
     else html+='<button onclick="_editingPlan.exercises['+ei+'].note=\' \';_rfPeEx();" style="margin-top:4px;padding:3px 8px;background:transparent;border:none;cursor:pointer;font-size:10px;color:var(--dim);">📝 Notatka</button>';
@@ -242,6 +310,21 @@ function _renderPeCards(){
 function _upPeSet(ei,si,f,v){ if(_editingPlan&&_editingPlan.exercises[ei]&&_editingPlan.exercises[ei].targetSets[si]) _editingPlan.exercises[ei].targetSets[si][f]=v; }
 function _addPeSet(ei){ if(!_editingPlan||!_editingPlan.exercises[ei]) return; var cat=EXERCISE_LIBRARY[_editingPlan.exercises[ei].exCat]||{fields:['reps','load']}; var s={note:''}; cat.fields.forEach(function(f){ s[f]=''; }); _editingPlan.exercises[ei].targetSets.push(s); _rfPeEx(); }
 function _rmPeSet(ei,si){ if(!_editingPlan||!_editingPlan.exercises[ei]) return; _editingPlan.exercises[ei].targetSets.splice(si,1); _rfPeEx(); }
+// Batch dodawanie serii w edytorze planu
+function _peBatchAdd(ei){
+  if(!_editingPlan||!_editingPlan.exercises[ei]) return;
+  var cat=EXERCISE_LIBRARY[_editingPlan.exercises[ei].exCat]||{fields:['reps','load']}; var fields=cat.fields;
+  var cnt=parseInt((document.getElementById('pe-batch-cnt-'+ei)||{}).value)||1; if(cnt<1) cnt=1; if(cnt>20) cnt=20;
+  var vals={}; fields.forEach(function(f){ vals[f]=(document.getElementById('pe-batch-'+ei+'-'+f)||{}).value||''; });
+  for(var i=0;i<cnt;i++){ var s={note:''}; fields.forEach(function(f){ s[f]=vals[f]; }); _editingPlan.exercises[ei].targetSets.push(s); }
+  fields.forEach(function(f){ var inp=document.getElementById('pe-batch-'+ei+'-'+f); if(inp) inp.value=''; });
+  _rfPeEx();
+}
+// Modal notatki serii w edytorze planu
+function _openPeSetNote(ei,si){
+  if(!_editingPlan||!_editingPlan.exercises[ei]) return;
+  _openSetNoteModal(_editingPlan.exercises[ei].targetSets, si, _rfPeEx);
+}
 function _rmPeEx(ei){ if(!_editingPlan) return; _editingPlan.exercises.splice(ei,1); _rfPeEx(); }
 function _movePeEx(ei,d){ if(!_editingPlan) return; var a=_editingPlan.exercises; var n=ei+d; if(n<0||n>=a.length) return; var t=a[ei]; a[ei]=a[n]; a[n]=t; _rfPeEx(); }
 function _rfPeEx(){ var c=document.getElementById('pe-exercises'); if(c) c.innerHTML=_renderPeCards(); }
