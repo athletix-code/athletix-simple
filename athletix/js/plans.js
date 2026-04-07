@@ -470,7 +470,7 @@ function _renderPeCards(){
     (ex.targetSets||[]).forEach(function(s,si){
       var hasNote=s.note&&s.note.trim();
       html+='<div class="ex-set-row" style="margin-bottom:4px;gap:5px;">'
-        +'<div class="ex-set-badge" style="opacity:.5;">S'+(si+1)+'</div>';
+        +'<input class="ex-set-input" data-ei="'+ei+'" data-si="'+si+'" data-field="_sCount" type="number" min="1" max="20" inputmode="numeric" placeholder="S" value="'+(s._sCount||'')+'" oninput="_upPeSet('+ei+','+si+',\'_sCount\',this.value)" style="width:40px;text-align:center;font-size:13px;font-weight:700;border-radius:10px;height:40px;flex-shrink:0;"/>';
       fields.forEach(function(f){
         var ph={reps:'Powt',load:'kg',rir:'RIR',time:'Czas(s)',dist:'Dyst(m)'}[f]||f;
         html+='<input class="ex-set-input" style="flex:1;min-width:'+(_fieldWidth(f)-10)+'px;border-radius:10px;height:40px;font-size:14px;" data-ei="'+ei+'" data-si="'+si+'" data-field="'+f+'" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" placeholder="'+ph+'" value="'+(s[f]||'')+'" oninput="_upPeSet('+ei+','+si+',\''+f+'\',this.value)"/>';
@@ -558,6 +558,16 @@ function _savePlan(existingId){
   var name=(document.getElementById('pe-name').value||'').trim();
   if(!name){ document.getElementById('pe-name').style.borderColor='var(--red)'; setTimeout(function(){ document.getElementById('pe-name').style.borderColor=''; },1000); return; }
   if(!_editingPlan.exercises.length) return;
+  // Rozdzielanie serii (_sCount > 1)
+  _editingPlan.exercises.forEach(function(ex){
+    if(!ex.targetSets) return;
+    var expanded=[];
+    ex.targetSets.forEach(function(s){
+      var cnt=parseInt(s._sCount)||1; if(cnt<1) cnt=1; if(cnt>20) cnt=20;
+      for(var i=0;i<cnt;i++){ var copy=JSON.parse(JSON.stringify(s)); delete copy._sCount; expanded.push(copy); }
+    });
+    ex.targetSets=expanded;
+  });
   _editingPlan.name=name; var today=getDayKey(new Date());
   loadPlans();
   if(existingId){ _pushUndo('Plan: '+name); var idx=-1; for(var i=0;i<trainingPlans.length;i++){ if(trainingPlans[i].id===existingId){ idx=i; break; } } if(idx>=0){ _editingPlan.updated=today; trainingPlans[idx]=_editingPlan; } }
@@ -783,7 +793,9 @@ function saveExecutedPlan(){
   _execPlan.exercises.forEach(function(ex,ei){
     if(ex.type==='note'){ if(ex.text&&ex.text.trim()){ notes.push({id:Date.now()+ei,date:saveDay,time:hh+':'+mm,athlete:athlete,type:'strength',text:ex.text,label:ex.label||'',fromPlan:_execPlan.id}); count++; } return; }
     var cat=EXERCISE_LIBRARY[ex.exCat]||{fields:['reps','load']};
-    var sets=ex.targetSets.filter(function(s){ return cat.fields.some(function(f){ return s[f]&&String(s[f]).trim(); }); }).map(function(s){ var o={note:s._note||''}; cat.fields.forEach(function(f){ o[f]=s[f]||''; }); return o; });
+    // Rozdzielanie serii (_sCount > 1) i filtrowanie pustych
+    var rawSets=ex.targetSets.filter(function(s){ return cat.fields.some(function(f){ return s[f]&&String(s[f]).trim(); }); });
+    var sets=[]; rawSets.forEach(function(s){ var cnt=parseInt(s._sCount)||1; if(cnt<1) cnt=1; if(cnt>20) cnt=20; for(var i=0;i<cnt;i++){ var o={note:s._note||''}; cat.fields.forEach(function(f){ o[f]=s[f]||''; }); sets.push(o); } });
     if(!sets.length) return;
     var entry={id:Date.now()+ei,date:saveDay,time:hh+':'+mm,athlete:athlete,type:'strength',exCat:ex.exCat,exZone:ex.exZone,exercise:ex.exercise,sets:sets,generalNote:ex.note||'',label:ex.label||'',fromPlan:_execPlan.id,fromPlanName:_execPlan.name};
     if(ex.isCustomEntry) entry.isCustomEntry=true;

@@ -333,9 +333,13 @@ function _buildSetRow(idx,fields){
   var frag=document.createDocumentFragment();
   var row=document.createElement('div'); row.className='ex-set-row'; row.setAttribute('data-set-idx',idx);
   row.style.gap='5px';
-  var badge=document.createElement('div'); badge.className='ex-set-badge'; badge.style.opacity='0.5';
-  badge.textContent='S'+(idx+1);
-  row.appendChild(badge);
+  // Pole Serii — edytowalne
+  var sInp=document.createElement('input'); sInp.className='ex-set-input'; sInp.type='number'; sInp.min='1'; sInp.max='20'; sInp.inputMode='numeric';
+  sInp.placeholder='S'; sInp.setAttribute('data-field','_sCount'); sInp.setAttribute('data-idx',idx);
+  sInp.style.cssText='width:40px;text-align:center;font-size:13px;font-weight:700;border-radius:10px;height:40px;flex-shrink:0;';
+  if(_exSets[idx]&&_exSets[idx]._sCount) sInp.value=_exSets[idx]._sCount;
+  sInp.oninput=function(){ if(!_exSets[idx]) _exSets[idx]={}; _exSets[idx]._sCount=sInp.value; };
+  row.appendChild(sInp);
   fields.forEach(function(f){
     var ph={reps:'Powt',load:'kg',rir:'RIR',time:'Czas(s)',dist:'Dyst(m)'}[f]||f;
     var inp=document.createElement('input'); inp.className='ex-set-input'; inp.setAttribute('data-field',f); inp.setAttribute('data-idx',idx);
@@ -474,10 +478,12 @@ function saveStrengthEntry(){
   var saveDay=selectedDay||getDayKey(new Date());
   var now=new Date(); var hh=String(now.getHours()).padStart(2,'0'); var mm=String(now.getMinutes()).padStart(2,'0');
   var cleanName=_exName.replace(/^★ /,'');
-  var sets=_exSets.filter(function(s){ return fields.some(function(f){ return s[f]&&String(s[f]).trim(); }); }).map(function(s){
-    var obj={note:s.note||''};
-    fields.forEach(function(f){ obj[f]=s[f]||''; });
-    return obj;
+  // Rozdzielanie serii (pole _sCount > 1 → duplikuj wiersz)
+  var rawSets=_exSets.filter(function(s){ return fields.some(function(f){ return s[f]&&String(s[f]).trim(); }); });
+  var sets=[];
+  rawSets.forEach(function(s){
+    var cnt=parseInt(s._sCount)||1; if(cnt<1) cnt=1; if(cnt>20) cnt=20;
+    for(var i=0;i<cnt;i++){ var obj={note:s.note||''}; fields.forEach(function(f){ obj[f]=s[f]||''; }); sets.push(obj); }
   });
   if(!sets.length) return;
   var entry={
