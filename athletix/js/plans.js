@@ -503,7 +503,9 @@ function _peToggleFav(ei){
   loadFavEx();
   var idx=favExercises.findIndex(function(f){ return f.name===name; });
   if(idx>=0) favExercises.splice(idx,1); else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>40) favExercises.shift(); }
-  saveFavEx(); _rfPeEx();
+  saveFavEx();
+  _refreshPeFavChips(); // Zaktualizuj chipy ulubionych
+  _rfPeEx(); // Przerenderuj karty (aktualizuje WSZYSTKIE gwiazdki)
 }
 // Modal notatki do ćwiczenia (nie serii)
 function _openPeExNote(ei){
