@@ -260,8 +260,9 @@ function openAddCustomExercise(){
 
 // ── Generowanie tekstu wpisu ──
 function buildEntryText(entry){
-  var cat=EXERCISE_LIBRARY[entry.exCat]; if(!cat) return entry.exercise+' — '+entry.sets.length+' serie';
-  var fields=cat.fields; var parts=[];
+  var cat=EXERCISE_LIBRARY[entry.exCat];
+  var fields=cat?cat.fields:['reps','load'];
+  var parts=[];
   entry.sets.forEach(function(s){
     var p='';
     if(fields.indexOf('reps')>=0&&s.reps) p+=s.reps;
