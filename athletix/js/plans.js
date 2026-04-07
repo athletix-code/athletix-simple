@@ -650,7 +650,10 @@ function _saveAthleteState(name){
   if(!name) return;
   var state={mode:_sessionMode};
   if(_sessionMode==='notepad'){ var p=el('notepad-preview'); state.notepadText=p?p.value:''; }
-  if(_sessionMode==='plan'){ var s=el('plan-select'); state.planId=s?parseInt(s.value):null; }
+  if(_sessionMode==='plan'){
+    var s=el('plan-select'); state.planId=s?parseInt(s.value):null;
+    if(_execPlan) state.execPlan=JSON.parse(JSON.stringify(_execPlan));
+  }
   _athleteSessionState[name]=state;
 }
 function _restoreAthleteState(name){
@@ -661,7 +664,12 @@ function _restoreAthleteState(name){
     if(state.mode==='notepad'){ var p=el('notepad-preview'); if(p) p.value=state.notepadText||''; }
     if(state.mode==='plan'&&state.planId){
       _refreshPlanSel();
-      var s=el('plan-select'); if(s){ s.value=state.planId; renderPlanExecution(); }
+      var s=el('plan-select'); if(s) s.value=state.planId;
+      if(state.execPlan){
+        _execPlan=JSON.parse(JSON.stringify(state.execPlan));
+        var c=el('plan-exec-list'); if(c) _renderExecCards(c);
+        el('plan-exec-save-wrap').style.display='block';
+      } else { renderPlanExecution(); }
     }
   } else {
     setSessionMode('manual');
@@ -696,14 +704,17 @@ function renderPlanExecution(){
   if(!pid){ c.innerHTML=''; el('plan-exec-save-wrap').style.display='none'; return; }
   loadPlans(); var plan=_findPlan(pid); if(!plan){ c.innerHTML=''; return; }
   _execPlan=JSON.parse(JSON.stringify(plan));
-  _execPlan.exercises.forEach(function(ex){ if(ex.targetSets) ex.targetSets.forEach(function(s){ s._checked=false; s._note=s._note||''; }); });
+  _execPlan.exercises.forEach(function(ex){
+    // Zapisz oryginalne wartości — niosą się z ćwiczeniem przy reorderze
+    ex._origSets=JSON.parse(JSON.stringify(ex.targetSets||[]));
+    if(ex.targetSets) ex.targetSets.forEach(function(s){ s._checked=false; s._note=s._note||''; });
+  });
   _renderExecCards(c);
   el('plan-exec-save-wrap').style.display='block';
 }
 
 function _renderExecCards(container){
   if(!_execPlan) return;
-  var orig=_findPlan(_execPlan.id);
   container.innerHTML=''; var total=_execPlan.exercises.length;
   _execPlan.exercises.forEach(function(ex,ei){
     var prev=ei>0?_execPlan.exercises[ei-1].label:'';
@@ -718,13 +729,12 @@ function _renderExecCards(container){
     }
     // Ćwiczenie
     var cat=EXERCISE_LIBRARY[ex.exCat]||{color:'#888',fields:['reps','load']}; var fields=cat.fields;
-    var origEx=orig&&orig.exercises&&orig.exercises[ei]?orig.exercises[ei]:null;
-    var sum=_planSetSummary(origEx||ex);
+    var sum=_planSetSummary(ex);
     var catBadge=ex.exCat?'<span class="ex-cat-badge" style="color:'+cat.color+';background:rgba('+_hexToRgb(cat.color)+',.1);">'+(CAT_SHORT[ex.exCat]||'?')+'</span>':'';
     var card=document.createElement('div');
     card.style.cssText='background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:'+mb+'px;'+bl;
     var h='<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;">';
-    if(ex.label) h+='<span style="font-size:14px;font-weight:900;color:var(--text);min-width:28px;">'+ex.label+'</span>';
+    h+='<input type="text" maxlength="4" value="'+(ex.label||'').replace(/"/g,'&quot;')+'" placeholder="Nr" oninput="_execPlan.exercises['+ei+'].label=this.value" style="width:42px;text-align:center;font-size:16px;font-weight:900;background:transparent;border:1px solid transparent;border-radius:var(--r-xs);padding:4px 2px;color:var(--text);outline:none;flex-shrink:0;" onfocus="this.style.borderColor=\'var(--border2)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'"/>';
     h+=catBadge+'<span style="font-size:13px;font-weight:800;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+ex.exercise+'</span>'
       +(ex.exZone?'<span style="font-size:9px;color:var(--dim);flex-shrink:0;">'+(ZONE_LABELS[ex.exZone]||'')+'</span>':'')
       +_cardControls(ei,total,'_moveExecEx','_rmExecEx')
@@ -737,10 +747,10 @@ function _renderExecCards(container){
     h+='<div style="width:32px;flex-shrink:0;"></div></div>';
     // Serie
     (ex.targetSets||[]).forEach(function(s,si){
-      var ck=s._checked; var os=origEx&&origEx.targetSets&&origEx.targetSets[si]?origEx.targetSets[si]:null;
-      // Czy seria zmieniona vs plan?
+      var ck=s._checked; var os=ex._origSets&&ex._origSets[si]?ex._origSets[si]:null;
+      // Czy seria zmieniona vs plan (porównaj z _origSets tego ćwiczenia)
       var changed=false; var origDesc='';
-      if(os){ fields.forEach(function(f){ if(String(s[f]||'')!==String(os[f]||'')) changed=true; }); if(changed) origDesc=_origSetText(os,fields); }
+      if(os){ fields.forEach(function(f){ if(String(s[f]||'').trim()!==String(os[f]||'').trim()) changed=true; }); if(changed) origDesc=_origSetText(os,fields); }
       var rowBg=ck?'background:rgba(22,163,74,.05);':'';
       if(changed) rowBg='background:rgba(217,119,6,.05);';
       h+='<div style="margin-bottom:3px;">'
@@ -779,21 +789,20 @@ function _togExec(ei,si,cb){ if(!_execPlan) return; _execPlan.exercises[ei].targ
 function _upExec(ei,si,f,v){
   if(!_execPlan||!_execPlan.exercises[ei]||!_execPlan.exercises[ei].targetSets[si]) return;
   _execPlan.exercises[ei].targetSets[si][f]=v;
-  // Sprawdź zmianę vs plan w real-time
-  var orig=_findPlan(_execPlan.id);
-  var origEx=orig&&orig.exercises&&orig.exercises[ei]?orig.exercises[ei]:null;
-  var os=origEx&&origEx.targetSets&&origEx.targetSets[si]?origEx.targetSets[si]:null;
-  var cat=EXERCISE_LIBRARY[_execPlan.exercises[ei].exCat]||{fields:['reps','load']}; var fields=cat.fields;
+  // Sprawdź zmianę vs oryginał (niesiony z ćwiczeniem, odporny na reorder)
+  var ex=_execPlan.exercises[ei];
+  var os=ex._origSets&&ex._origSets[si]?ex._origSets[si]:null;
+  var cat=EXERCISE_LIBRARY[ex.exCat]||{fields:['reps','load']}; var fields=cat.fields;
   var changed=false;
-  if(os){ fields.forEach(function(ff){ if(String(_execPlan.exercises[ei].targetSets[si][ff]||'').trim()!==String(os[ff]||'').trim()) changed=true; }); }
+  if(os){ fields.forEach(function(ff){ if(String(ex.targetSets[si][ff]||'').trim()!==String(os[ff]||'').trim()) changed=true; }); }
   // Znajdź wiersz i indicator w DOM
   var rows=document.querySelectorAll('#plan-exec-list .pe-exec-row');
   var rowIdx=0; for(var x=0;x<ei;x++){ rowIdx+=(_execPlan.exercises[x].targetSets||[]).length; } rowIdx+=si;
   var row=rows[rowIdx]; if(!row) return;
   var parent=row.parentElement;
-  // Aktualizuj styl wiersza
-  row.style.background=changed?'rgba(217,119,6,.05)':(_execPlan.exercises[ei].targetSets[si]._checked?'rgba(22,163,74,.05)':'');
-  row.querySelectorAll('.ex-set-input').forEach(function(inp){ if(changed) inp.style.borderColor='var(--amber)'; else if(_execPlan.exercises[ei].targetSets[si]._checked) inp.style.borderColor='var(--green)'; else inp.style.borderColor=''; });
+  var s=ex.targetSets[si];
+  row.style.background=changed?'rgba(217,119,6,.05)':(s._checked?'rgba(22,163,74,.05)':'');
+  row.querySelectorAll('.ex-set-input').forEach(function(inp){ if(changed) inp.style.borderColor='var(--amber)'; else if(s._checked) inp.style.borderColor='var(--green)'; else inp.style.borderColor=''; });
   // Aktualizuj/dodaj/usuń indicator
   var indic=parent.querySelector('.exec-changed-indicator');
   if(changed){
