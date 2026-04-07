@@ -124,7 +124,7 @@ function _renderPlanEditorOverlay(ov,isNew){
   favExercises.forEach(function(f){
     favChipsHtml+='<button onclick="_peAddFav(\''+f.name.replace(/'/g,"\\'")+'\',\''+((f.cat||'').replace(/'/g,"\\'"))+'\',\''+(f.zone||'')+'\')" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);">'+f.name+'</button>';
   });
-  favChipsHtml+='<button onclick="_openFavModal()" title="Zarządzaj ulubionymi" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:18px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;" onmouseover="this.style.borderColor=\'var(--accent)\';this.style.color=\'var(--accent)\'" onmouseout="this.style.borderColor=\'\';this.style.color=\'var(--muted)\'">+</button>';
+  favChipsHtml+='<button onclick="_openFavPanel()" title="Zarządzaj ulubionymi" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:18px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;" onmouseover="this.style.borderColor=\'var(--accent)\';this.style.color=\'var(--accent)\'" onmouseout="this.style.borderColor=\'\';this.style.color=\'var(--muted)\'">+</button>';
   favChipsHtml+='</div>'
     +'<button id="pe-fav-toggle" onclick="_toggleFavChips()" style="'+(favNeedToggle?'display:block':'display:none')+';font-size:10px;font-weight:700;color:var(--accent);background:transparent;border:none;cursor:pointer;padding:6px 0;width:100%;text-align:center;margin-top:2px;margin-bottom:8px;">▼ pokaż wszystkie ('+favCnt+')</button>';
 
@@ -248,6 +248,8 @@ function _peAddFav(name,catKey,zone){
   var cat=EXERCISE_LIBRARY[catKey]||{fields:['reps','load']}; var s={note:''}; cat.fields.forEach(function(f){ s[f]=''; });
   _editingPlan.exercises.push({type:'exercise',label:'',exCat:catKey||null,exZone:zone||null,exercise:name,targetSets:[Object.assign({},s)],note:''});
   _rfPeEx();
+  // Flash na chipie (event.target)
+  if(event&&event.target){ var t=event.target; t.style.background='rgba(22,163,74,.15)'; setTimeout(function(){ t.style.background=''; },300); }
 }
 
 // ── Odświeżanie chipów ulubionych w edytorze ──
@@ -261,7 +263,7 @@ function _refreshPeFavChips(){
   favExercises.forEach(function(f){
     wrap.innerHTML+='<button onclick="_peAddFav(\''+f.name.replace(/'/g,"\\'")+'\',\''+(f.cat||'').replace(/'/g,"\\'")+'\',\''+(f.zone||'')+'\')" style="padding:5px 11px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--text);">'+f.name+'</button>';
   });
-  wrap.innerHTML+='<button onclick="_openFavModal()" title="Zarządzaj ulubionymi" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:18px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>';
+  wrap.innerHTML+='<button onclick="_openFavPanel()" title="Zarządzaj ulubionymi" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:18px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>';
   var btn=document.getElementById('pe-fav-toggle');
   if(btn){
     btn.style.display=needToggle?'block':'none';
@@ -283,97 +285,91 @@ function _toggleFavChips(){
   }
 }
 
-// ── Modal zarządzania ulubionymi ──
-function _openFavModal(){
-  // Osobny element DOM — NIE _ensureOverlay (bo zamknąłby edytor planu)
-  var existing=document.getElementById('favorites-modal'); if(existing) existing.remove();
+// ── Panel inline ulubionych (pod chipami, NIE modal) ──
+function _openFavPanel(){
+  var existing=document.getElementById('fav-panel'); if(existing){ existing.remove(); return; }
   loadFavEx(); loadCustomExercises();
-  // Zbierz WSZYSTKIE ćwiczenia z biblioteki
+  // Zbierz WSZYSTKIE ćwiczenia
   var allEx=[];
   Object.keys(EXERCISE_LIBRARY).forEach(function(catKey){
     var cat=EXERCISE_LIBRARY[catKey];
-    ['upper','lower','full'].forEach(function(z){
-      (cat[z]||[]).forEach(function(name){ allEx.push({name:name,cat:catKey,zone:z}); });
-    });
+    ['upper','lower','full'].forEach(function(z){ (cat[z]||[]).forEach(function(name){ allEx.push({name:name,cat:catKey,zone:z}); }); });
     customExercises.filter(function(c){ return c.cat===catKey; }).forEach(function(c){ allEx.push({name:c.name,cat:catKey,zone:c.zone}); });
   });
-
-  var modal=document.createElement('div'); modal.id='favorites-modal';
-  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;';
-  modal.onclick=function(e){ if(e.target===modal){ modal.remove(); } };
-
-  var box=document.createElement('div');
-  box.style.cssText='max-width:400px;width:calc(100% - 40px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:18px;max-height:70vh;display:flex;flex-direction:column;opacity:0;transform:translateY(16px);transition:all .18s ease-out;';
-  modal.appendChild(box);
-
-  function render(filter){
-    var filt=(filter||'').toLowerCase();
-    var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
-      +'<div style="font-size:14px;font-weight:800;color:var(--text);">⭐ Ulubione ćwiczenia</div>'
-      +'<button onclick="document.getElementById(\'favorites-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
-      +'<input id="fav-search" type="text" placeholder="Szukaj lub wpisz nazwę..." value="'+(filter||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;outline:none;margin-bottom:10px;box-sizing:border-box;"/>'
-      +'<div style="overflow-y:auto;flex:1;min-height:100px;">';
-    loadFavEx();
+  // Znajdź kontener — wstaw panel za togglem lub chipami
+  var toggle=document.getElementById('pe-fav-toggle');
+  var chips=document.getElementById('pe-fav-chips');
+  var anchor=toggle||chips; if(!anchor) return;
+  var panel=document.createElement('div'); panel.id='fav-panel';
+  panel.style.cssText='background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:12px;margin-top:6px;margin-bottom:8px;max-height:0;overflow:hidden;transition:max-height .2s ease-out;';
+  anchor.parentNode.insertBefore(panel,anchor.nextSibling);
+  function renderList(filter){
+    var filt=(filter||'').toLowerCase(); loadFavEx();
+    var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+      +'<span style="font-size:12px;font-weight:800;color:var(--text);">⭐ Dodaj ulubione</span>'
+      +'<button onclick="document.getElementById(\'fav-panel\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--muted);width:24px;height:24px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+      +'<input id="fav-search" type="text" placeholder="Szukaj ćwiczenie..." value="'+(filter||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:8px 10px;background:var(--s1);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;outline:none;margin-bottom:6px;box-sizing:border-box;"/>'
+      +'<div style="max-height:200px;overflow-y:auto;scrollbar-width:thin;">';
     var shown=allEx.filter(function(ex){ return !filt||ex.name.toLowerCase().indexOf(filt)>=0; });
     shown.forEach(function(ex){
       var isFav=favExercises.some(function(f){ return f.name===ex.name; });
       var cat=EXERCISE_LIBRARY[ex.cat]||{color:'#888'};
-      html+='<div data-fav-name="'+ex.name.replace(/"/g,'&quot;')+'" data-fav-cat="'+(ex.cat||'')+'" data-fav-zone="'+(ex.zone||'')+'" style="padding:8px 4px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:8px;" onclick="_toggleFavInModal(this)">'
-        +'<span style="font-size:16px;opacity:'+(isFav?'1':'0.25')+';color:'+(isFav?'#eab308':'var(--muted)')+';">'+(isFav?'⭐':'☆')+'</span>'
-        +'<span style="font-size:13px;font-weight:600;color:var(--text);flex:1;">'+ex.name+'</span>'
-        +'<span style="font-size:8px;font-weight:800;color:'+cat.color+';background:rgba('+_hexToRgb(cat.color)+',.1);border-radius:20px;padding:2px 7px;">'+(CAT_SHORT[ex.cat]||'')+'</span>'
-        +'</div>';
+      html+='<div data-fn="'+ex.name.replace(/"/g,'&quot;')+'" data-fc="'+(ex.cat||'')+'" data-fz="'+(ex.zone||'')+'" style="padding:6px 4px;display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:6px;transition:background .3s;" onclick="_toggleFavInPanel(this)">'
+        +'<span style="font-size:14px;opacity:'+(isFav?'1':'0.3')+';color:'+(isFav?'#eab308':'var(--muted)')+';">'+(isFav?'⭐':'☆')+'</span>'
+        +'<span style="font-size:12px;font-weight:600;color:var(--text);flex:1;">'+ex.name+'</span>'
+        +'<span style="font-size:7px;font-weight:800;color:'+cat.color+';background:rgba('+_hexToRgb(cat.color)+',.1);border-radius:20px;padding:2px 6px;">'+(CAT_SHORT[ex.cat]||'')+'</span></div>';
     });
-    if(!shown.length) html+='<div style="text-align:center;color:var(--dim);font-size:12px;padding:16px;">Brak wyników</div>';
-    html+='</div>'
-      +'<div style="border-top:1px solid var(--border);margin:10px 0;"></div>'
-      +'<div style="display:flex;gap:6px;margin-bottom:8px;">'
-      +'<input id="fav-custom-name" type="text" placeholder="Wpisz nazwę..." style="flex:1;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;outline:none;box-sizing:border-box;"/>'
-      +'<button onclick="_addCustomFavFromModal()" style="padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:10px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;white-space:nowrap;">Dodaj</button></div>'
-      +'<button onclick="document.getElementById(\'favorites-modal\').remove()" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;color:var(--text);">Zamknij</button>';
-    box.innerHTML=html;
-    // Bind search input
+    if(!shown.length) html+='<div style="text-align:center;color:var(--dim);font-size:11px;padding:12px;">Brak wyników</div>';
+    html+='</div><div style="border-top:1px solid var(--border);margin:8px 0;"></div>'
+      +'<div style="display:flex;gap:6px;">'
+      +'<input id="fav-custom-inp" type="text" placeholder="Wpisz własne..." style="flex:1;padding:8px 10px;background:var(--s1);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;outline:none;box-sizing:border-box;"/>'
+      +'<button id="fav-custom-btn" onclick="_addCustomFavInPanel()" style="padding:8px 12px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;">Dodaj</button></div>';
+    panel.innerHTML=html;
     var si=document.getElementById('fav-search');
-    if(si){ si.oninput=function(){ render(si.value); setTimeout(function(){ var s2=document.getElementById('fav-search'); if(s2) s2.focus(); },10); }; }
+    if(si){ si.oninput=function(){ renderList(si.value); setTimeout(function(){ var s2=document.getElementById('fav-search'); if(s2){ s2.focus(); s2.setSelectionRange(s2.value.length,s2.value.length); } },10); }; }
   }
-  render('');
-  document.body.appendChild(modal);
-  // Animacja wejścia
-  requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.style.opacity='1'; box.style.transform='translateY(0)'; }); });
+  renderList('');
+  // Animacja otwarcia
+  requestAnimationFrame(function(){ panel.style.maxHeight='400px'; });
 }
+function _closeFavPanel(){ var p=document.getElementById('fav-panel'); if(p){ p.style.maxHeight='0'; setTimeout(function(){ p.remove(); },200); } }
 
-function _toggleFavInModal(el2){
-  var name=el2.getAttribute('data-fav-name');
-  var catKey=el2.getAttribute('data-fav-cat');
-  var zone=el2.getAttribute('data-fav-zone');
+function _toggleFavInPanel(row){
+  var name=row.getAttribute('data-fn');
+  var catKey=row.getAttribute('data-fc');
+  var zone=row.getAttribute('data-fz');
   loadFavEx();
   var idx=favExercises.findIndex(function(f){ return f.name===name; });
   if(idx>=0) favExercises.splice(idx,1);
-  else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>10) favExercises.shift(); }
+  else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>20) favExercises.shift(); }
   saveFavEx();
-  // Odśwież gwiazdkę w wierszu
-  var star=el2.querySelector('span');
+  // Flash na wierszu
+  row.style.background='rgba(59,130,246,.1)'; setTimeout(function(){ row.style.background=''; },300);
+  // Odśwież gwiazdkę
+  var star=row.querySelector('span');
   var isFav=favExercises.some(function(f){ return f.name===name; });
-  if(star){ star.textContent=isFav?'⭐':'☆'; star.style.opacity=isFav?'1':'0.25'; star.style.color=isFav?'#eab308':'var(--muted)'; }
-  // Odśwież chipy w edytorze planu
+  if(star){ star.textContent=isFav?'⭐':'☆'; star.style.opacity=isFav?'1':'0.3'; star.style.color=isFav?'#eab308':'var(--muted)'; }
+  // Odśwież chipy nad panelem
   _refreshPeFavChips();
 }
 
-function _addCustomFavFromModal(){
-  var inp=document.getElementById('fav-custom-name'); if(!inp) return;
+function _addCustomFavInPanel(){
+  var inp=document.getElementById('fav-custom-inp'); if(!inp) return;
   var name=inp.value.trim(); if(!name) return;
   loadFavEx();
   if(!favExercises.find(function(f){ return f.name===name; })){
     favExercises.push({name:name,cat:null,zone:null});
-    if(favExercises.length>10) favExercises.shift();
+    if(favExercises.length>20) favExercises.shift();
     saveFavEx();
   }
   inp.value='';
   _refreshPeFavChips();
-  // Odśwież listę w modalu
-  var modal=document.getElementById('favorites-modal');
-  if(modal){ var si=document.getElementById('fav-search'); _openFavModal(); }
+  // Flash na przycisku
+  var btn=document.getElementById('fav-custom-btn');
+  if(btn){ btn.textContent='✓'; setTimeout(function(){ btn.textContent='Dodaj'; },500); }
 }
+// Kompatybilność — stare wywołania
+function _openFavPanel(){ _openFavPanel(); }
 
 // ── Renderowanie kart w edytorze ──
 function _renderPeCards(){
@@ -442,7 +438,7 @@ function _peToggleFav(ei){
   var zone=_editingPlan.exercises[ei].exZone;
   loadFavEx();
   var idx=favExercises.findIndex(function(f){ return f.name===name; });
-  if(idx>=0) favExercises.splice(idx,1); else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>10) favExercises.shift(); }
+  if(idx>=0) favExercises.splice(idx,1); else { favExercises.push({name:name,cat:catKey||null,zone:zone||null}); if(favExercises.length>20) favExercises.shift(); }
   saveFavEx(); _rfPeEx();
 }
 // Modal notatki do ćwiczenia (nie serii)

@@ -62,7 +62,7 @@ function _addToFav(name,catKey,zone){
   loadFavEx();
   if(favExercises.find(function(f){ return f.name===name; })) return;
   favExercises.push({name:name,cat:catKey||null,zone:zone||null});
-  if(favExercises.length>10) favExercises.shift();
+  if(favExercises.length>20) favExercises.shift();
   saveFavEx();
 }
 // Buduj optgroup ulubionych do selecta
