@@ -661,12 +661,23 @@ function _restoreAthleteState(name){
 function _refreshPlanSel(){
   loadPlans(); var sel=el('plan-select'); if(!sel) return;
   var ath=(el('note-athlete').value||'').trim()||activeAthlete||'';
+  var np=el('plan-no-plans'); if(np) np.style.display='none';
   sel.innerHTML='<option value="">Wybierz plan...</option>';
-  var avail=trainingPlans.filter(function(p){ return p.status!=='archived'&&(!ath||!p.athletes||!p.athletes.length||p.athletes.indexOf(ath)>=0); });
-  var np=el('plan-no-plans');
-  if(!avail.length){ sel.innerHTML='<option value="">Brak planów'+(ath?' dla '+ath:'')+'</option>'; if(np){ np.style.display='block'; np.innerHTML='<div style="text-align:center;padding:20px;color:var(--dim);font-size:12px;">Brak planów'+(ath?' dla '+ath:'')+'. <button onclick="setMode(\'plans\')" style="background:transparent;border:none;cursor:pointer;color:var(--accent);font-weight:700;font-size:12px;text-decoration:underline;">Przejdź do Planów</button></div>'; } return; }
-  if(np) np.style.display='none';
-  avail.forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=p.name; sel.appendChild(o); });
+  var all=trainingPlans.filter(function(p){ return p.status!=='archived'; });
+  if(!all.length){ sel.innerHTML='<option value="">Brak planów — stwórz w zakładce Plany</option>'; return; }
+  // Plany przypisane do zawodnika
+  var forAth=ath?all.filter(function(p){ return p.athletes&&p.athletes.indexOf(ath)>=0; }):[];
+  var rest=all.filter(function(p){ return forAth.indexOf(p)<0; });
+  if(forAth.length){
+    var og1=document.createElement('optgroup'); og1.label='📋 Plany '+ath;
+    forAth.forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=p.name; og1.appendChild(o); });
+    sel.appendChild(og1);
+  }
+  if(rest.length){
+    var og2=document.createElement('optgroup'); og2.label='📁 Wszystkie plany';
+    rest.forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=p.name+(p.athletes&&p.athletes.length?' ('+p.athletes.join(', ')+')':''); og2.appendChild(o); });
+    sel.appendChild(og2);
+  }
 }
 
 function renderPlanExecution(){
