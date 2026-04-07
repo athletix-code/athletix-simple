@@ -180,11 +180,10 @@ function _renderPlanEditorOverlay(ov,isNew){
   _peFilterAllEx();
   // Wypełnij chipy kategorii w manual
   var mc=document.getElementById('pe-manual-cats'); if(mc){
-    mc.innerHTML=''; var _peManCat='';
+    mc.innerHTML=''; window._peManCat='';
     Object.keys(EXERCISE_LIBRARY).forEach(function(k){ var c=EXERCISE_LIBRARY[k]; var b=document.createElement('button'); b.className='ex-cat-chip'; b.setAttribute('data-cat',k); b.style.cssText='padding:4px 8px;font-size:9px;'; b.innerHTML=_catIcon(k)+' '+c.label;
-    b.onclick=function(){ _peManCat=(_peManCat===k)?'':k; mc.querySelectorAll('.ex-cat-chip').forEach(function(x){ var xk=x.getAttribute('data-cat'); var xc=EXERCISE_LIBRARY[xk]; if(xk===_peManCat){ x.style.background='rgba('+_hexToRgb(xc.color)+',.12)'; x.style.borderColor=xc.color; x.style.color=xc.color; } else { x.style.background=''; x.style.borderColor=''; x.style.color=''; } }); };
+    b.onclick=function(){ window._peManCat=(window._peManCat===k)?'':k; mc.querySelectorAll('.ex-cat-chip').forEach(function(x){ var xk=x.getAttribute('data-cat'); var xc=EXERCISE_LIBRARY[xk]; if(xk===window._peManCat){ x.style.background='rgba('+_hexToRgb(xc.color)+',.12)'; x.style.borderColor=xc.color; x.style.color=xc.color; } else { x.style.background=''; x.style.borderColor=''; x.style.color=''; } }); };
     mc.appendChild(b); });
-    window._peManCat='';
   }
 }
 
