@@ -42,6 +42,9 @@ function _buildReportHtml(athleteName, day, entries){
   } else {
     html+='<div style="text-align:center;color:#999;padding:40px;font-size:14px;">Brak wpisów.</div>';
   }
+  // Tonaż łączny
+  var rptTon=0; entries.forEach(function(n){ if(n.type==='strength'&&n.sets&&_hasLoad(n.exCat)) rptTon+=calcTonnage(n.sets); });
+  if(rptTon>0) html+='<div style="text-align:center;font-size:16px;font-weight:900;color:#1d4ed8;margin-top:16px;padding:12px;border-top:2px solid #ddd;">Tonaż łączny: '+rptTon.toLocaleString('pl-PL')+' kg</div>';
   html+='</body></html>';
   return html;
 }
@@ -95,6 +98,9 @@ function printSimpleReport(){
           html+='<div class="entry"><span class="entry-num">'+(idx+1)+'.</span>'+badge+(n.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'<div class="entry-time">'+n.time+'</div></div>';
         }
       });
+      // Tonaż per zawodnik
+      var athTon=0; byAthlete[athlete].forEach(function(n){ if(n.type==='strength'&&n.sets&&_hasLoad(n.exCat)) athTon+=calcTonnage(n.sets); });
+      if(athTon>0) html+='<div style="text-align:right;font-size:13px;font-weight:800;color:#1d4ed8;margin-top:8px;padding-top:6px;border-top:1px solid #ddd;">Tonaż: '+athTon.toLocaleString('pl-PL')+' kg</div>';
       html+='</div>';
     });
     html+='</body></html>';

@@ -259,6 +259,15 @@ function renderDayDetail(day){
 
     container.appendChild(section);
   });
+  // Podsumowanie tonażu dnia
+  var dayTonnage=0;
+  entries.forEach(function(n){ if(n.type==='strength'&&n.sets&&_hasLoad(n.exCat)) dayTonnage+=calcTonnage(n.sets); });
+  if(dayTonnage>0){
+    var sumDiv=document.createElement('div');
+    sumDiv.style.cssText='background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-top:10px;text-align:center;';
+    sumDiv.innerHTML='<span style="font-size:13px;font-weight:800;color:var(--accent);">📊 Tonaż dnia: '+dayTonnage.toLocaleString('pl-PL')+' kg'+(dayTonnage>=1000?' ('+formatTonnage(dayTonnage)+')':'')+'</span>';
+    container.appendChild(sumDiv);
+  }
   el('day-detail').style.display='block';
 }
 

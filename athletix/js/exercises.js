@@ -97,6 +97,20 @@ function _openSetNoteModal(setsArr, idx, refreshFn){
   };
 }
 
+// ── Tonaż ──
+function calcTonnage(sets){
+  var total=0; if(!sets||!sets.length) return 0;
+  for(var i=0;i<sets.length;i++){ var r=parseFloat(sets[i].reps)||0; var l=parseFloat(sets[i].load)||0; total+=r*l; }
+  return Math.round(total);
+}
+function formatTonnage(kg){
+  if(kg>=1000) return (kg/1000).toFixed(1)+'t';
+  return kg.toLocaleString('pl-PL')+' kg';
+}
+function _hasLoad(exCat){
+  var cat=EXERCISE_LIBRARY[exCat]; return cat&&cat.fields&&cat.fields.indexOf('load')>=0;
+}
+
 // Stan formularza ćwiczeń
 var _exCat='', _exZone='', _exName='', _exSets=[];
 var _strManCat='';
@@ -512,6 +526,11 @@ function _renderStrengthCard(n){
     if(s.note) html+='<div style="font-size:11px;color:var(--muted);font-style:italic;margin-left:28px;margin-bottom:2px;">'+s.note.replace(/</g,'&lt;')+'</div>';
   });
   html+='</div>';
+  // Tonaż
+  if(_hasLoad(n.exCat)){
+    var ton=calcTonnage(n.sets);
+    if(ton>0) html+='<div style="font-size:11px;font-weight:700;color:var(--accent);margin-top:6px;padding:4px 0;">📊 Tonaż: '+formatTonnage(ton)+'</div>';
+  }
   if(n.generalNote) html+='<div style="font-size:12px;font-style:italic;color:var(--muted);border-top:1px solid var(--border);padding-top:6px;margin-top:6px;">'+n.generalNote.replace(/</g,'&lt;')+'</div>';
   html+='<div class="note-entry-meta" style="margin-top:4px;">'+n.time+'</div>';
   div.innerHTML=html;
@@ -600,6 +619,7 @@ function _renderStrengthReportEntry(n, idx){
     html+='<td style="padding:4px 6px;color:#888;font-style:italic;font-size:11px;">'+(s.note||'')+'</td></tr>';
   });
   html+='</table>';
+  if(_hasLoad(n.exCat)){ var rton=calcTonnage(n.sets); if(rton>0) html+='<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-top:4px;">Tonaż: '+rton.toLocaleString('pl-PL')+' kg</div>'; }
   if(n.generalNote) html+='<div style="font-size:12px;font-style:italic;color:#777;margin-top:4px;">'+n.generalNote.replace(/</g,'&lt;')+'</div>';
   html+='<div class="entry-time">'+n.time+'</div></div>';
   return html;
