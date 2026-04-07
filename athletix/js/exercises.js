@@ -76,26 +76,36 @@ function _buildFavOptgroup(zoneFilt){
 }
 
 // ── Modal notatki serii (współdzielony) ──
+// Osobny DOM element — NIE _ensureOverlay (bo zamknąłby edytor planu)
 function _openSetNoteModal(setsArr, idx, refreshFn){
   var s=setsArr[idx]; if(!s) return;
   var noteKey=s._note!==undefined?'_note':'note';
-  var ov=_ensureOverlay();
-  ov.innerHTML='<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) translateY(16px);opacity:0;max-width:400px;width:calc(100% - 40px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:18px;z-index:9993;transition:all .18s ease-out;" id="sn-modal">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+  var existing=document.getElementById('ax-note-modal'); if(existing) existing.remove();
+  var modal=document.createElement('div'); modal.id='ax-note-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick=function(e){ if(e.target===modal) closeNoteModal(); };
+  var box=document.createElement('div');
+  box.style.cssText='max-width:400px;width:calc(100% - 40px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:18px;opacity:0;transform:translateY(16px);transition:all .18s ease-out;';
+  box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
     +'<div style="font-size:14px;font-weight:800;color:var(--text);">📝 Notatka — S'+(idx+1)+'</div>'
-    +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:28px;height:28px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
-    +'<textarea id="sn-ta" rows="5" placeholder="Uwagi do serii, tempo, technika..." style="width:100%;min-height:120px;max-height:40vh;padding:12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:500;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;">'+(s[noteKey]||'')+'</textarea>'
-    +'<button id="sn-save" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-top:10px;">Zapisz</button>'
-    +'</div>';
-  ov.style.display='flex'; ov.style.background='rgba(0,0,0,.45)'; ov.style.backdropFilter='blur(6px)'; ov.style.webkitBackdropFilter='blur(6px)';
-  requestAnimationFrame(function(){ requestAnimationFrame(function(){ var m=el('sn-modal'); if(m){ m.style.opacity='1'; m.style.transform='translate(-50%,-50%) translateY(0)'; } }); });
-  setTimeout(function(){ el('sn-ta').focus(); },100);
-  document.getElementById('sn-save').onclick=function(){
-    setsArr[idx][noteKey]=(el('sn-ta').value||'').trim();
-    ov.style.display='none'; ov.innerHTML=''; ov.style.backdropFilter=''; ov.style.webkitBackdropFilter=''; ov.style.background=''; document.body.style.overflow='';
+    +'<button onclick="closeNoteModal()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:28px;height:28px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+    +'<textarea id="ax-note-textarea" rows="5" placeholder="Uwagi do serii, tempo, technika..." style="width:100%;min-height:120px;max-height:40vh;padding:12px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:500;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;">'+(s[noteKey]||'')+'</textarea>'
+    +'<button id="ax-note-save" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-top:10px;">Zapisz</button>';
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.style.opacity='1'; box.style.transform='translateY(0)'; }); });
+  setTimeout(function(){ var ta=document.getElementById('ax-note-textarea'); if(ta) ta.focus(); },100);
+  document.getElementById('ax-note-save').onclick=function(e){
+    e.stopPropagation(); e.preventDefault();
+    setsArr[idx][noteKey]=(document.getElementById('ax-note-textarea').value||'').trim();
+    closeNoteModal();
     if(refreshFn) refreshFn();
   };
 }
+window.closeNoteModal=function(){
+  var m=document.getElementById('ax-note-modal');
+  if(m&&m.parentNode){ m.style.opacity='0'; setTimeout(function(){ if(m.parentNode) m.parentNode.removeChild(m); },200); }
+};
 
 // ── Tonaż ──
 function calcTonnage(sets){

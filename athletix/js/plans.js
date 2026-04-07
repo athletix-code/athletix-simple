@@ -507,23 +507,29 @@ function _peToggleFav(ei){
   _rfPeEx(); // Przerenderuj karty (aktualizuje WSZYSTKIE gwiazdki)
 }
 // Modal notatki do ćwiczenia (nie serii)
+// Notatka do ćwiczenia — osobny DOM element (nie _ensureOverlay!)
 function _openPeExNote(ei){
   if(!_editingPlan||!_editingPlan.exercises[ei]) return;
   var ex=_editingPlan.exercises[ei];
-  var ov=_ensureOverlay();
-  ov.innerHTML='<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) translateY(16px);opacity:0;max-width:400px;width:calc(100% - 40px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:18px;z-index:9993;transition:all .18s ease-out;" id="en-modal">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+  var existing=document.getElementById('ax-note-modal'); if(existing) existing.remove();
+  var modal=document.createElement('div'); modal.id='ax-note-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick=function(e){ if(e.target===modal) closeNoteModal(); };
+  var box=document.createElement('div');
+  box.style.cssText='max-width:400px;width:calc(100% - 40px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:18px;opacity:0;transform:translateY(16px);transition:all .18s ease-out;';
+  box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
     +'<div style="font-size:14px;font-weight:800;color:var(--text);">📝 Notatka — '+ex.exercise+'</div>'
-    +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:28px;height:28px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
-    +'<textarea id="en-ta" rows="5" placeholder="Uwagi do ćwiczenia..." style="width:100%;min-height:140px;max-height:40vh;padding:12px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:500;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;">'+(ex.note||'')+'</textarea>'
-    +'<button id="en-save" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-top:10px;">Zapisz</button>'
-    +'</div>';
-  ov.style.display='flex'; ov.style.background='rgba(0,0,0,.45)'; ov.style.backdropFilter='blur(6px)'; ov.style.webkitBackdropFilter='blur(6px)';
-  requestAnimationFrame(function(){ requestAnimationFrame(function(){ var m=el('en-modal'); if(m){ m.style.opacity='1'; m.style.transform='translate(-50%,-50%) translateY(0)'; } }); });
-  setTimeout(function(){ el('en-ta').focus(); },100);
-  document.getElementById('en-save').onclick=function(){
-    _editingPlan.exercises[ei].note=(el('en-ta').value||'').trim();
-    ov.style.display='none'; ov.innerHTML=''; ov.style.backdropFilter=''; ov.style.webkitBackdropFilter=''; ov.style.background=''; document.body.style.overflow='';
+    +'<button onclick="closeNoteModal()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:28px;height:28px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+    +'<textarea id="ax-note-textarea" rows="5" placeholder="Uwagi do ćwiczenia..." style="width:100%;min-height:140px;max-height:40vh;padding:12px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:500;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;">'+(ex.note||'')+'</textarea>'
+    +'<button id="ax-note-save" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-top:10px;">Zapisz</button>';
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.style.opacity='1'; box.style.transform='translateY(0)'; }); });
+  setTimeout(function(){ document.getElementById('ax-note-textarea').focus(); },100);
+  document.getElementById('ax-note-save').onclick=function(e){
+    e.stopPropagation(); e.preventDefault();
+    _editingPlan.exercises[ei].note=(document.getElementById('ax-note-textarea').value||'').trim();
+    closeNoteModal();
     _rfPeEx();
   };
 }
@@ -742,21 +748,10 @@ function _renderExecCards(container){
 }
 
 // Modal notatki do serii
+// Notatka serii w widoku wykonania — osobny DOM (nie _ensureOverlay)
 function _openSetNote(ei,si){
   if(!_execPlan) return;
-  var s=_execPlan.exercises[ei].targetSets[si];
-  var ov=_ensureOverlay();
-  ov.innerHTML='<div style="background:var(--s1);border-radius:var(--r);max-width:400px;width:100%;padding:22px 18px 24px;">'
-    +'<div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:12px;">📝 Notatka — S'+(si+1)+'</div>'
-    +'<textarea id="set-note-ta" rows="5" placeholder="Notatka do serii..." style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;margin-bottom:12px;">'+(s._note||'')+'</textarea>'
-    +'<div style="display:flex;gap:8px;"><button id="set-note-save" style="flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💾 Zapisz</button>'
-    +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="padding:12px 14px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
-  ov.style.display='flex';
-  setTimeout(function(){ el('set-note-ta').focus(); },50);
-  document.getElementById('set-note-save').onclick=function(){
-    _execPlan.exercises[ei].targetSets[si]._note=(el('set-note-ta').value||'').trim();
-    ov.style.display='none'; var c=el('plan-exec-list'); if(c) _renderExecCards(c);
-  };
+  _openSetNoteModal(_execPlan.exercises[ei].targetSets, si, function(){ var c=el('plan-exec-list'); if(c) _renderExecCards(c); });
 }
 
 function _togExec(ei,si,cb){ if(!_execPlan) return; _execPlan.exercises[ei].targetSets[si]._checked=cb.checked; var c=el('plan-exec-list'); if(c) _renderExecCards(c); }
