@@ -26,16 +26,20 @@ function _logEvent(w, text){
 // Link debit+power by pairId so they delete together
 function _nextPairId(w){ return 'p'+(w.transactions.length+1)+'_'+Date.now(); }
 
+function calcEarned(w){
+  if(!w||!w.transactions) return 0; var t=0;
+  w.transactions.forEach(function(tx){ if(tx.type==='debit'&&!tx.deleted) t+=Math.abs(tx.amount)||0; });
+  return t;
+}
 function _walletBadge(a){
   var w=_getWallet(a);
   var activeTx=w.transactions.filter(function(t){ return !t.deleted; });
-  if(!activeTx.length&&w.balance===0&&w.powerPoints===0) return '';
+  if(!activeTx.length&&w.balance===0) return '';
   var color=w.balance>w.entryRate*2?'var(--green-text)':w.balance>0?'#d97706':'var(--red-text)';
   var entries=w.entryRate>0?Math.floor(w.balance/w.entryRate):0;
   return '<div style="display:flex;align-items:center;gap:8px;margin-top:4px;">'
     +'<span style="font-size:11px;font-weight:800;color:'+color+';">💰 '+w.balance+' pkt</span>'
     +'<span style="font-size:10px;color:var(--dim);">('+entries+' wejść)</span>'
-    +(w.powerPoints?'<span style="font-size:10px;font-weight:800;color:#a855f7;">⚡'+w.powerPoints+'</span>':'')
     +'</div>';
 }
 
@@ -43,31 +47,39 @@ function _buildWalletSection(a){
   var w=_getWallet(a);
   var entries=w.entryRate>0?Math.floor(w.balance/w.entryRate):0;
   var balColor=w.balance>w.entryRate*2?'#16a34a':w.balance>0?'#d97706':'#dc2626';
+  var earned=calcEarned(w);
   var safeName=a.name.replace(/'/g,"\\'");
+  // ATP z gamifikacji
+  var atpVal=0; if(typeof getGamProfile==='function'){ var gp=getGamProfile(a.name); atpVal=gp.totalPoints; }
 
   var html='<div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px;">'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;">💰 Skarbiec</div>'
-    // Balance display
-    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:14px;">'
-    +'<div class="ap-stat" style="border-left:3px solid '+balColor+';"><div class="ap-stat-val" style="color:'+balColor+';">'+w.balance+'</div><div class="ap-stat-lbl">Punkty</div></div>'
-    +'<div class="ap-stat"><div class="ap-stat-val">'+entries+'</div><div class="ap-stat-lbl">Wejść</div></div>'
-    +'<div class="ap-stat"><div class="ap-stat-val" style="font-size:15px;">'+w.entryRate+'</div><div class="ap-stat-lbl">Stawka/wej.</div></div>'
-    +'<div class="ap-stat" style="border-left:3px solid #a855f7;"><div class="ap-stat-val" style="color:#a855f7;">'+w.powerPoints+'</div><div class="ap-stat-lbl">⚡ Moc</div></div>'
+    // DEPOZYT ➤ SKARBIEC
+    +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">'
+    +'<div id="wallet-deposit-tile" style="flex:1;text-align:center;background:var(--s1);border:2px solid var(--green);border-radius:var(--r);padding:14px;transition:border-color .5s;">'
+    +'<div style="font-size:28px;font-weight:900;color:'+balColor+';">'+w.balance+'</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);">Depozyt</div>'
+    +'<div style="font-size:9px;color:var(--muted);">Środki klienta</div></div>'
+    +'<div style="font-size:20px;color:var(--muted);flex-shrink:0;width:30px;text-align:center;">➤</div>'
+    +'<div id="wallet-earned-tile" style="flex:1;text-align:center;background:var(--s1);border:2px solid var(--accent);border-radius:var(--r);padding:14px;transition:border-color .5s,transform .3s;">'
+    +'<div style="font-size:28px;font-weight:900;color:var(--accent);">'+earned+'</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);">Skarbiec</div>'
+    +'<div style="font-size:9px;color:var(--muted);">Twój zarobek</div></div>'
     +'</div>'
-    // Quick actions — 2 rows
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">'
-    +'<button onclick="openAddCredits(\''+safeName+'\')" style="padding:10px 6px;background:var(--green);color:#fff;border:none;border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">+ Doładuj</button>'
-    +'<button onclick="deductEntry(\''+safeName+'\')" style="padding:10px 6px;background:#c2410c;color:#fff;border:none;border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">− Wejście</button>'
+    // Info kafelki
+    +'<div style="display:flex;gap:6px;margin-bottom:10px;">'
+    +'<div style="flex:1;text-align:center;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 6px;"><div style="font-size:16px;font-weight:800;color:var(--text);">'+entries+'</div><div style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--dim);">Wejść</div></div>'
+    +'<div style="flex:1;text-align:center;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 6px;"><div style="font-size:16px;font-weight:800;color:var(--text);">'+w.entryRate+'</div><div style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--dim);">Stawka</div></div>'
+    +'<div style="flex:1;text-align:center;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 6px;"><div style="font-size:16px;font-weight:800;color:var(--accent);">'+atpVal+' ⚡</div><div style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--dim);">ATP</div></div>'
     +'</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">'
-    +'<button onclick="openCancellation(\''+safeName+'\')" style="padding:10px 6px;background:#71717a;color:#fff;border:none;border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">📵 Odwołanie</button>'
-    +'<button onclick="openAddPower(\''+safeName+'\')" style="padding:10px 6px;background:#7c3aed;color:#fff;border:none;border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">⚡ +Moc</button>'
+    // Przyciski
+    +'<div style="display:flex;gap:6px;margin-bottom:6px;">'
+    +'<button onclick="openAddCredits(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:var(--green);color:#fff;border:none;border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">+ Doładuj</button>'
+    +'<button onclick="deductEntry(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:#c2410c;color:#fff;border:none;border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">− Wejście</button>'
     +'</div>'
-    // Entry rate — editable
-    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">'
-    +'<span style="font-size:10px;color:var(--dim);flex-shrink:0;">Stawka za wejście:</span>'
-    +'<input id="wallet-rate" type="number" min="0" step="5" value="'+w.entryRate+'" style="width:70px;padding:5px 8px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;text-align:center;" onchange="updateEntryRate(\''+safeName+'\',this.value)"/>'
-    +'<span style="font-size:10px;color:var(--dim);">pkt</span>'
+    +'<div style="display:flex;gap:6px;margin-bottom:10px;">'
+    +'<button onclick="openCancellation(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:#71717a;color:#fff;border:none;border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">🚫 Odwołanie</button>'
+    +'<button onclick="openRateModal(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:transparent;border:1.5px dashed var(--border2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;">💰 Stawka</button>'
     +'</div>';
 
   // History tabs: Wejścia (active only) | Zdarzenia (full event log)
@@ -204,16 +216,18 @@ function deductEntry(athleteName){
   var w=_getWallet(a);
   var rate=w.entryRate||80;
   w.balance-=rate;
-  w.powerPoints+=10;
   var today=getDayKey(new Date());
   var now=new Date(); var timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  var pid=_nextPairId(w);
-  w.transactions.push({id:Date.now(),date:today,type:'debit',amount:rate,note:'Wejście '+timeStr,pairId:pid});
-  w.transactions.push({id:Date.now()+1,date:today,type:'power',amount:10,note:'⚡ +10 mocy za wejście',pairId:pid});
-  _logEvent(w,'🚪 Wejście: -'+rate+' pkt, ⚡ +10 mocy ('+timeStr+')');
+  w.transactions.push({id:Date.now(),date:today,type:'debit',amount:rate,note:'Wejście '+timeStr});
+  _logEvent(w,'🚪 Wejście: -'+rate+' pkt ('+timeStr+')');
   saveCRM();
   if(_currentProfileId){ var allSess=[]; try{ allSess=JSON.parse(localStorage.getItem(SESSION_KEY)||'[]'); }catch(e){} renderAthleteProfile(a,allSess); }
   renderAthleteList();
+  // Animacja kafelków Depozyt → Skarbiec
+  var dep=document.getElementById('wallet-deposit-tile');
+  var ear=document.getElementById('wallet-earned-tile');
+  if(dep){ dep.style.borderColor='var(--red)'; setTimeout(function(){ dep.style.borderColor='var(--green)'; },500); }
+  if(ear){ ear.style.borderColor='var(--green)'; ear.style.transform='scale(1.03)'; setTimeout(function(){ ear.style.borderColor='var(--accent)'; ear.style.transform='scale(1)'; },500); }
 }
 
 function openAddPower(athleteName){
@@ -429,5 +443,32 @@ function deleteTransaction(txId, athleteName){
     saveCRM(); ov.style.display='none';
     if(_currentProfileId){ var allSess=[]; try{ allSess=JSON.parse(localStorage.getItem(SESSION_KEY)||'[]'); }catch(e){} renderAthleteProfile(a2,allSess); }
     renderAthleteList();
+  };
+}
+
+// ── Modal stawki ──
+function openRateModal(athleteName){
+  var existing=document.getElementById('rate-modal'); if(existing) existing.remove();
+  loadCRM(); var a=athletes.find(function(x){ return x.name===athleteName; }); if(!a) return;
+  var w=_getWallet(a);
+  var modal=document.createElement('div'); modal.id='rate-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick=function(e){ if(e.target===modal) modal.remove(); };
+  var box=document.createElement('div');
+  box.style.cssText='max-width:320px;width:calc(100% - 40px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;text-align:center;';
+  box.innerHTML='<div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px;">💰 Stawka za wejście</div>'
+    +'<input id="rate-inp" type="number" min="0" step="5" value="'+w.entryRate+'" style="width:120px;padding:10px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;text-align:center;outline:none;margin-bottom:4px;"/>'
+    +'<div style="font-size:11px;color:var(--muted);margin-bottom:14px;">pkt za wejście</div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button id="rate-save" style="flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Zapisz</button>'
+    +'<button onclick="document.getElementById(\'rate-modal\').remove()" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div>';
+  modal.appendChild(box); document.body.appendChild(modal);
+  document.getElementById('rate-save').onclick=function(){
+    var val=parseFloat(document.getElementById('rate-inp').value)||0;
+    _pushUndo('Stawka: '+athleteName);
+    loadCRM(); var a2=athletes.find(function(x){ return x.name===athleteName; }); if(!a2) return;
+    var w2=_getWallet(a2); w2.entryRate=Math.max(0,val); saveCRM();
+    modal.remove();
+    if(_currentProfileId){ var as=[]; try{ as=JSON.parse(localStorage.getItem(SESSION_KEY)||'[]'); }catch(e){} renderAthleteProfile(a2,as); }
   };
 }
