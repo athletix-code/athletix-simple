@@ -724,7 +724,15 @@ function _renderExecCards(container){
     if(ex.type==='note'){
       var nd=document.createElement('div');
       nd.style.cssText='background:rgba(59,130,246,.03);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:'+mb+'px;'+bl;
-      nd.innerHTML='<div style="display:flex;align-items:flex-start;gap:8px;">'+(ex.label?'<span style="font-size:14px;font-weight:900;color:var(--dim);min-width:28px;">'+ex.label+'</span>':'')+'<div style="font-size:12px;font-style:italic;color:var(--muted);line-height:1.5;white-space:pre-wrap;">'+(ex.text||'').replace(/</g,'&lt;')+'</div></div>';
+      if(ex.isExtra){
+        nd.innerHTML='<div style="display:flex;align-items:flex-start;gap:8px;">'
+          +'<input type="text" maxlength="4" value="'+(ex.label||'')+'" placeholder="Nr" oninput="_execPlan.exercises['+ei+'].label=this.value" style="width:42px;text-align:center;font-size:14px;font-weight:900;background:transparent;border:1px solid transparent;border-radius:var(--r-xs);padding:4px 2px;color:var(--text);outline:none;flex-shrink:0;" onfocus="this.style.borderColor=\'var(--border2)\'" onblur="this.style.borderColor=\'transparent\'"/>'
+          +'<textarea rows="3" placeholder="Notatka..." oninput="_execPlan.exercises['+ei+'].text=this.value" style="flex:1;padding:6px 8px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-xs);color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;outline:none;resize:vertical;box-sizing:border-box;">'+(ex.text||'')+'</textarea>'
+          +_cardControls(ei,total,'_moveExecEx','_rmExecEx')
+          +'</div>';
+      } else {
+        nd.innerHTML='<div style="display:flex;align-items:flex-start;gap:8px;">'+(ex.label?'<span style="font-size:14px;font-weight:900;color:var(--dim);min-width:28px;">'+ex.label+'</span>':'')+'<div style="font-size:12px;font-style:italic;color:var(--muted);line-height:1.5;white-space:pre-wrap;">'+(ex.text||'').replace(/</g,'&lt;')+'</div></div>';
+      }
       container.appendChild(nd); return;
     }
     // Ćwiczenie
@@ -736,6 +744,7 @@ function _renderExecCards(container){
     var h='<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;">';
     h+='<input type="text" maxlength="4" value="'+(ex.label||'').replace(/"/g,'&quot;')+'" placeholder="Nr" oninput="_execPlan.exercises['+ei+'].label=this.value" style="width:42px;text-align:center;font-size:16px;font-weight:900;background:transparent;border:1px solid transparent;border-radius:var(--r-xs);padding:4px 2px;color:var(--text);outline:none;flex-shrink:0;" onfocus="this.style.borderColor=\'var(--border2)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'"/>';
     h+=catBadge+'<span style="font-size:13px;font-weight:800;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+ex.exercise+'</span>'
+      +(ex.isExtra?'<span style="font-size:8px;font-weight:800;color:var(--accent);opacity:.6;letter-spacing:.06em;">DODANE</span>':'')
       +(ex.exZone?'<span style="font-size:9px;color:var(--dim);flex-shrink:0;">'+(ZONE_LABELS[ex.exZone]||'')+'</span>':'')
       +_cardControls(ei,total,'_moveExecEx','_rmExecEx')
       +'</div>';
@@ -747,10 +756,11 @@ function _renderExecCards(container){
     h+='<div style="width:32px;flex-shrink:0;"></div></div>';
     // Serie
     (ex.targetSets||[]).forEach(function(s,si){
-      var ck=s._checked; var os=ex._origSets&&ex._origSets[si]?ex._origSets[si]:null;
-      // Czy seria zmieniona vs plan (porównaj z _origSets tego ćwiczenia)
+      var ck=s._checked;
       var changed=false; var origDesc='';
-      if(os){ fields.forEach(function(f){ if(String(s[f]||'').trim()!==String(os[f]||'').trim()) changed=true; }); if(changed) origDesc=_origSetText(os,fields); }
+      if(!ex.isExtra){ var os=ex._origSets&&ex._origSets[si]?ex._origSets[si]:null;
+        if(os){ fields.forEach(function(f){ if(String(s[f]||'').trim()!==String(os[f]||'').trim()) changed=true; }); if(changed) origDesc=_origSetText(os,fields); }
+      }
       var rowBg=ck?'background:rgba(22,163,74,.05);':'';
       if(changed) rowBg='background:rgba(217,119,6,.05);';
       h+='<div style="margin-bottom:3px;">'
@@ -766,7 +776,7 @@ function _renderExecCards(container){
       h+='<button onclick="_openSetNote('+ei+','+si+')" title="Notatka" style="width:32px;height:32px;background:'+(hasNote?'rgba(59,130,246,.1)':'transparent')+';border:none;cursor:pointer;font-size:14px;opacity:'+(hasNote?'0.8':'0.3')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:var(--r-xs);">📝</button>';
       h+='</div>';
       // Indicator zmiany pod wierszem
-      if(changed) h+='<div class="exec-changed-indicator" style="font-size:11px;font-weight:600;color:var(--amber-text);padding:3px 0 3px 8px;border-left:2px solid var(--amber);margin-top:2px;">⚠ Zmieniono: plan → '+origDesc+'</div>';
+      if(changed) h+='<div class="exec-changed-indicator" style="font-size:11px;font-weight:600;color:var(--amber-text);padding:3px 0 3px 8px;border-left:2px solid var(--amber);margin-top:2px;">⚠ Było: '+origDesc+'</div>';
       // Notatka serii — tekst pod wierszem
       if(hasNote) h+='<div onclick="_openSetNote('+ei+','+si+')" style="font-size:12px;font-weight:500;color:var(--muted);line-height:1.4;padding:4px 0 4px 8px;border-left:2px solid rgba(59,130,246,.3);margin-top:2px;cursor:pointer;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">'+s._note.replace(/</g,'&lt;')+'</div>';
       h+='</div>';
@@ -776,6 +786,61 @@ function _renderExecCards(container){
     if(ex.note) h+='<div style="font-size:13px;font-weight:500;font-style:italic;color:var(--muted);line-height:1.5;padding:8px 10px;background:rgba(59,130,246,.03);border-radius:8px;margin-top:6px;">'+ex.note+'</div>';
     card.innerHTML=h; container.appendChild(card);
   });
+  // Przyciski dodawania poza planem
+  var addWrap=document.createElement('div'); addWrap.style.cssText='display:flex;gap:6px;margin-top:4px;margin-bottom:8px;';
+  addWrap.innerHTML='<button onclick="_showExecAddEx()" style="flex:1;padding:10px;background:transparent;border:1.5px dashed var(--border2);border-radius:12px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);">➕ Dodaj ćwiczenie</button>'
+    +'<button onclick="_addExecNote()" style="padding:10px 14px;background:transparent;border:1.5px dashed var(--border2);border-radius:12px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--muted);">📝 Notatka</button>';
+  container.appendChild(addWrap);
+  // Inline formularz dodawania ćwiczenia
+  var addInline=document.createElement('div'); addInline.id='exec-add-inline'; addInline.style.cssText='display:none;background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:10px;margin-bottom:8px;';
+  container.appendChild(addInline);
+}
+
+// Dodawanie ćwiczenia poza planem w widoku wykonania
+function _showExecAddEx(){
+  var w=document.getElementById('exec-add-inline'); if(!w) return;
+  if(w.style.display==='block'){ w.style.display='none'; return; }
+  w.style.display='block';
+  loadFavEx(); loadCustomExercises();
+  w.innerHTML='<div style="display:flex;gap:6px;margin-bottom:6px;">'
+    +'<select id="exec-zone-sel" class="crm-input" style="width:90px;margin-bottom:0;padding:8px 6px;font-size:11px;" onchange="_execFilterSel()">'
+    +'<option value="">Część...</option><option value="upper">💪 Góra</option><option value="lower">🦵 Dół</option><option value="full">🫁 Centrum</option></select>'
+    +'<select id="exec-ex-sel" class="crm-input" style="flex:1;margin-bottom:0;padding:8px 6px;font-size:11px;" onchange="_execPickEx()">'
+    +'<option value="">Wybierz ćwiczenie...</option></select></div>'
+    +'<button onclick="document.getElementById(\'exec-add-inline\').style.display=\'none\'" style="padding:4px 10px;background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--muted);">Anuluj</button>';
+  _execFilterSel();
+}
+function _execFilterSel(){
+  var zone=(document.getElementById('exec-zone-sel')||{}).value||'';
+  var sel=document.getElementById('exec-ex-sel'); if(!sel) return;
+  sel.innerHTML='<option value="">Wybierz ćwiczenie...</option>';
+  var favOg=_buildFavOptgroup(zone); if(favOg) sel.appendChild(favOg);
+  Object.keys(EXERCISE_LIBRARY).forEach(function(catKey){
+    var cat=EXERCISE_LIBRARY[catKey]; var icon=_catIcon(catKey);
+    (zone?[zone]:['upper','lower','full']).forEach(function(z){
+      var items=(cat[z]||[]).slice();
+      customExercises.filter(function(c){ return c.cat===catKey&&c.zone===z; }).forEach(function(c){ items.push('★ '+c.name); });
+      if(!items.length) return;
+      var og=document.createElement('optgroup'); og.label=icon+' '+cat.label+' — '+ZONE_LABELS[z];
+      items.forEach(function(n){ var o=document.createElement('option'); o.value=n; o.setAttribute('data-cat',catKey); o.setAttribute('data-zone',z); o.textContent=n; og.appendChild(o); });
+      sel.appendChild(og);
+    });
+  });
+}
+function _execPickEx(){
+  var sel=document.getElementById('exec-ex-sel'); if(!sel||!sel.value) return;
+  var opt=sel.options[sel.selectedIndex];
+  var catKey=opt.getAttribute('data-cat')||''; var zone=opt.getAttribute('data-zone')||'';
+  var name=sel.value.replace(/^★ /,'');
+  var cat=EXERCISE_LIBRARY[catKey]||{fields:['reps','load']}; var s={_note:'',_checked:false}; cat.fields.forEach(function(f){ s[f]=''; });
+  _execPlan.exercises.push({type:'exercise',label:'',exCat:catKey||null,exZone:zone||null,exercise:name,note:'',_origSets:[],targetSets:[s],isExtra:true});
+  document.getElementById('exec-add-inline').style.display='none';
+  var c=el('plan-exec-list'); if(c) _renderExecCards(c);
+  _addToFav(name,catKey,zone);
+}
+function _addExecNote(){
+  _execPlan.exercises.push({type:'note',label:'',text:'',isExtra:true,targetSets:[]});
+  var c=el('plan-exec-list'); if(c) _renderExecCards(c);
 }
 
 // Modal notatki do serii
@@ -789,8 +854,9 @@ function _togExec(ei,si,cb){ if(!_execPlan) return; _execPlan.exercises[ei].targ
 function _upExec(ei,si,f,v){
   if(!_execPlan||!_execPlan.exercises[ei]||!_execPlan.exercises[ei].targetSets[si]) return;
   _execPlan.exercises[ei].targetSets[si][f]=v;
-  // Sprawdź zmianę vs oryginał (niesiony z ćwiczeniem, odporny na reorder)
+  // Sprawdź zmianę vs oryginał (pomiń dla extra ćwiczeń)
   var ex=_execPlan.exercises[ei];
+  if(ex.isExtra) return; // Extra ćwiczenia nie mają oryginału
   var os=ex._origSets&&ex._origSets[si]?ex._origSets[si]:null;
   var cat=EXERCISE_LIBRARY[ex.exCat]||{fields:['reps','load']}; var fields=cat.fields;
   var changed=false;
@@ -811,7 +877,7 @@ function _upExec(ei,si,f,v){
     // Przenieś indicator za wiersz (nie na koniec parent)
     if(indic.previousElementSibling!==row){ row.after(indic); }
     indic.style.cssText='font-size:11px;font-weight:600;color:var(--amber-text);padding:3px 0 3px 8px;border-left:2px solid var(--amber);margin-top:2px;';
-    indic.textContent='⚠ Zmieniono: plan → '+desc;
+    indic.textContent='⚠ Było: '+desc;
   } else {
     if(indic) indic.remove();
   }
