@@ -299,14 +299,38 @@ function renderAthleteProfile(a, allSess){
   // Widget gamifikacji na górze profilu
   var gamHtml=typeof buildGamificationWidget==='function'?buildGamificationWidget(a.name):'';
 
+  // Nowe kafelki statystyk
+  var tDays=_getTrainingDays(a.name);
+  var now2=new Date(); var todayKey2=getDayKey(now2);
+  // Ten tydzień (od poniedziałku)
+  var mon=new Date(now2); mon.setDate(mon.getDate()-((mon.getDay()+6)%7)); var monKey=getDayKey(mon);
+  var weekDays=tDays.filter(function(d){ return d>=monKey&&d<=todayKey2; }).length;
+  // Ten miesiąc
+  var monthStart=now2.getFullYear()+'-'+String(now2.getMonth()+1).padStart(2,'0')+'-01';
+  var monthDays=tDays.filter(function(d){ return d>=monthStart&&d<=todayKey2; }).length;
+  var weeksInMonth=Math.max(1,Math.ceil((now2.getDate())/7));
+  var monthAvg=(monthDays/weeksInMonth).toFixed(1);
+  // Ten rok
+  var yearStart=now2.getFullYear()+'-01-01';
+  var yearDays=tDays.filter(function(d){ return d>=yearStart&&d<=todayKey2; }).length;
+  var dayOfYear=Math.ceil((now2-new Date(now2.getFullYear(),0,1))/86400000);
+  var weeksInYear=Math.max(1,Math.ceil(dayOfYear/7));
+  var yearAvg=(yearDays/weeksInYear).toFixed(1);
+  // Ostatnia
+  var lastDate=tDays.length?tDays[tDays.length-1]:'';
+  var lastLabel='—';
+  if(lastDate===todayKey2) lastLabel='<span style="color:var(--green-text);">Dziś</span>';
+  else if(lastDate){ var yd=new Date(now2); yd.setDate(yd.getDate()-1); if(lastDate===getDayKey(yd)) lastLabel='Wczoraj'; else { var ld=new Date(lastDate+'T12:00:00'); lastLabel=ld.getDate()+'.'+(ld.getMonth()+1); } }
+  var safeName2=a.name.replace(/'/g,"\\'");
+
   el('ap-content').innerHTML=gamHtml
-    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;">'
-    +'<div class="ap-stat"><div class="ap-stat-val">'+sessCnt+'</div><div class="ap-stat-lbl">Sesji</div></div>'
-    +'<div class="ap-stat"><div class="ap-stat-val">'+notesCnt+'</div><div class="ap-stat-lbl">Wpisów</div></div>'
-    +'<div class="ap-stat"><div class="ap-stat-val" style="font-size:13px;">'+lastSessDate+'</div><div class="ap-stat-lbl">Ostatnia</div></div></div>'
-    +'<div class="ap-stat" style="margin-bottom:18px;text-align:left;padding:10px 12px;">'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:3px;">Najczęstsze ćwiczenie</div>'
-    +'<div style="font-size:14px;font-weight:800;color:var(--text);">'+topEx+'</div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:6px;">'
+    +'<div class="ap-stat" style="padding:10px 6px;"><div class="ap-stat-val" style="font-size:22px;">'+weekDays+'</div><div class="ap-stat-lbl" style="font-size:7px;margin-top:4px;">Ten tydzień</div></div>'
+    +'<div class="ap-stat" style="padding:10px 6px;"><div class="ap-stat-val" style="font-size:22px;">'+monthDays+'</div><div style="font-size:9px;font-weight:600;color:var(--muted);">śr. '+monthAvg+'/tyg.</div><div class="ap-stat-lbl" style="font-size:7px;margin-top:2px;">Ten miesiąc</div></div>'
+    +'<div class="ap-stat" style="padding:10px 6px;"><div class="ap-stat-val" style="font-size:22px;">'+yearDays+'</div><div style="font-size:9px;font-weight:600;color:var(--muted);">śr. '+yearAvg+'/tyg.</div><div class="ap-stat-lbl" style="font-size:7px;margin-top:2px;">Ten rok</div></div>'
+    +'<div class="ap-stat" style="padding:10px 6px;"><div class="ap-stat-val" style="font-size:22px;">'+lastLabel+'</div><div class="ap-stat-lbl" style="font-size:7px;margin-top:4px;">Ostatnia</div></div>'
+    +'</div>'
+    +'<div style="text-align:center;margin-bottom:14px;"><button onclick="openFullStatsModal(\''+safeName2+'\')" style="font-size:11px;font-weight:700;color:var(--accent);background:transparent;border:none;cursor:pointer;text-decoration:underline;">📊 Pełne statystyki</button></div>'
     // Skarbiec
     +'<div id="ap-sec-wallet"></div>'
     +_buildWalletSection(a)
@@ -758,6 +782,123 @@ function checkBirthdays(){
   var names=bdays.map(function(a){ var yr=parseInt((a.birthDate||'').split('-')[0],10); var age=yr?today.getFullYear()-yr:''; return '<strong>'+a.name+'</strong>'+(age?' ('+age+' lat)':''); }).join(', ');
   div.innerHTML='<div style="display:flex;align-items:center;gap:12px;flex:1;"><span style="font-size:26px;">🎂</span><div><div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.75;margin-bottom:2px;">Urodziny dziś!</div><div style="font-size:14px;font-weight:900;">'+names+'</div></div></div><button id="bday-close" style="background:rgba(255,255,255,.25);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>';
   document.body.appendChild(div); document.getElementById('bday-close').addEventListener('click',function(){ div.remove(); });
+}
+
+// ── Statystyki zawodnika ──
+function _getTrainingDays(name){
+  var days={}; loadNotes();
+  (notes||[]).forEach(function(e){ if(e.athlete===name&&e.date) days[e.date]=true; });
+  var sess=[]; try{ sess=JSON.parse(localStorage.getItem('axs_sessions')||'[]'); }catch(e){}
+  sess.forEach(function(e){ if(e.athlete===name&&e.date) days[e.date.substring(0,10)]=true; });
+  return Object.keys(days).sort();
+}
+
+function openFullStatsModal(athleteName){
+  loadNotes(); loadTests();
+  var tDays=_getTrainingDays(athleteName);
+  var now2=new Date(); var todayKey2=getDayKey(now2);
+  var safeName=athleteName.replace(/'/g,"\\'");
+
+  // Obliczenia per okres
+  function daysInRange(start,end){ return tDays.filter(function(d){ return d>=start&&d<=end; }).length; }
+  function weeksInRange(start,end){ return Math.max(1,Math.ceil((new Date(end+'T12:00:00')-new Date(start+'T12:00:00'))/604800000)); }
+  function avg(days2,weeks2){ return weeks2?(days2/weeks2).toFixed(1):'0'; }
+
+  var mon=new Date(now2); mon.setDate(mon.getDate()-((mon.getDay()+6)%7)); var monKey=getDayKey(mon);
+  var monthStart=now2.getFullYear()+'-'+String(now2.getMonth()+1).padStart(2,'0')+'-01';
+  var yearStart=now2.getFullYear()+'-01-01';
+  var q3=new Date(now2); q3.setMonth(q3.getMonth()-3); var qKey=getDayKey(q3);
+  var h6=new Date(now2); h6.setMonth(h6.getMonth()-6); var hKey=getDayKey(h6);
+  var allStart=tDays.length?tDays[0]:todayKey2;
+
+  var periods=[
+    {label:'Ten tydzień',d:daysInRange(monKey,todayKey2),a:'—'},
+    {label:'Ten miesiąc',d:daysInRange(monthStart,todayKey2),a:avg(daysInRange(monthStart,todayKey2),weeksInRange(monthStart,todayKey2))},
+    {label:'Ten kwartał',d:daysInRange(qKey,todayKey2),a:avg(daysInRange(qKey,todayKey2),weeksInRange(qKey,todayKey2))},
+    {label:'Pół roku',d:daysInRange(hKey,todayKey2),a:avg(daysInRange(hKey,todayKey2),weeksInRange(hKey,todayKey2))},
+    {label:'Ten rok',d:daysInRange(yearStart,todayKey2),a:avg(daysInRange(yearStart,todayKey2),weeksInRange(yearStart,todayKey2))},
+    {label:'Od początku',d:tDays.length,a:avg(tDays.length,weeksInRange(allStart,todayKey2)),bold:true}
+  ];
+
+  // Tonaż per okres
+  function tonInRange(start,end){
+    var t=0; notes.forEach(function(n){ if(n.athlete!==athleteName||n.date<start||n.date>end||!n.sets) return;
+      n.sets.forEach(function(s){ var r=parseFloat(s.reps)||0; var l=parseFloat(s.load)||0; t+=r*l; }); }); return Math.round(t);
+  }
+  var tonPeriods=[
+    {label:'Ten tydzień',v:tonInRange(monKey,todayKey2)},
+    {label:'Ten miesiąc',v:tonInRange(monthStart,todayKey2)},
+    {label:'Ten kwartał',v:tonInRange(qKey,todayKey2)},
+    {label:'Pół roku',v:tonInRange(hKey,todayKey2)},
+    {label:'Ten rok',v:tonInRange(yearStart,todayKey2)},
+    {label:'Od początku',v:tonInRange(allStart,todayKey2),bold:true}
+  ];
+  function fmtTon(v){ return v>=1000?(v/1000).toFixed(1)+'t':v+' kg'; }
+
+  // Ostatnie testy
+  var tests=(testResults||[]).filter(function(t){ return t.athlete===athleteName; }).sort(function(a2,b2){ return a2.date>b2.date?-1:1; }).slice(0,5);
+
+  // Frekwencja — ostatnie 12 tygodni
+  var daySet={}; tDays.forEach(function(d){ daySet[d]=true; });
+  var startCal=new Date(now2); startCal.setDate(startCal.getDate()-83); // 84 dni = 12 tygodni
+  startCal.setDate(startCal.getDate()-((startCal.getDay()+6)%7)); // wyrównaj do poniedziałku
+
+  var existing=document.getElementById('stats-modal'); if(existing) existing.remove();
+  var modal=document.createElement('div'); modal.id='stats-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.onclick=function(e){ if(e.target===modal) modal.remove(); };
+
+  var h='<div style="max-width:460px;width:calc(100% - 32px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+    +'<div style="font-size:16px;font-weight:900;color:var(--text);">📊 Statystyki</div>'
+    +'<button onclick="document.getElementById(\'stats-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:14px;">'+athleteName+'</div>';
+
+  // A. Dni treningowe
+  h+='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Dni treningowe</div>';
+  periods.forEach(function(p){
+    h+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">'
+      +'<span style="font-weight:500;color:var(--text);">'+p.label+'</span>'
+      +'<div style="display:flex;gap:16px;"><span style="font-weight:'+(p.bold?'800':'600')+';color:'+(p.bold?'var(--accent)':'var(--text)')+';">'+p.d+'</span>'
+      +'<span style="font-size:11px;color:var(--muted);min-width:60px;text-align:right;">'+(p.a==='—'?'':p.a+'/tyg.')+'</span></div></div>';
+  });
+
+  // B. Tonaż
+  h+='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:14px;margin-bottom:6px;">Tonaż</div>';
+  tonPeriods.forEach(function(p){
+    if(!p.v&&!p.bold) return;
+    h+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">'
+      +'<span style="font-weight:500;">'+p.label+'</span>'
+      +'<span style="font-weight:'+(p.bold?'800':'600')+';color:'+(p.bold?'var(--accent)':'var(--text)')+';">'+fmtTon(p.v)+'</span></div>';
+  });
+
+  // C. Testy
+  if(tests.length){
+    h+='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:14px;margin-bottom:6px;">Ostatnie testy</div>';
+    tests.forEach(function(t){
+      h+='<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;">'
+        +'<span style="font-weight:600;color:var(--text);">'+t.testName+': <strong>'+t.value+'</strong> '+t.unit+'</span>'
+        +'<span style="color:var(--dim);font-size:10px;">'+t.date+'</span></div>';
+    });
+  }
+
+  // D. Frekwencja (mini kalendarz 12 tygodni)
+  h+='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:14px;margin-bottom:6px;">Frekwencja (12 tyg.)</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">';
+  ['Pn','Wt','Śr','Cz','Pt','So','Nd'].forEach(function(d2){ h+='<div style="font-size:7px;color:var(--dim);text-align:center;">'+d2+'</div>'; });
+  h+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">';
+  var calDay=new Date(startCal);
+  for(var ci=0;ci<84;ci++){
+    var ck=getDayKey(calDay); var hasTr=!!daySet[ck]; var isToday=ck===todayKey2;
+    h+='<div title="'+ck+'" style="width:100%;aspect-ratio:1;border-radius:2px;background:'+(hasTr?'var(--green)':'var(--s2)')+';'+(isToday?'border:1px solid var(--accent);':'')+'"></div>';
+    calDay.setDate(calDay.getDate()+1);
+  }
+  h+='</div>';
+
+  h+='<button onclick="document.getElementById(\'stats-modal\').remove()" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-top:14px;">Zamknij</button></div>';
+
+  var box=document.createElement('div'); box.innerHTML=h;
+  modal.appendChild(box.firstChild); document.body.appendChild(modal);
 }
 
 // ── FULL ATHLETE LIST (tab Zawodnicy) ──
