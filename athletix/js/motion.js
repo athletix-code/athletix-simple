@@ -495,14 +495,14 @@ function _runPatternLevel(idx,cfg,results,cb){
   _motionState.listening=false; _motionState._keyPressed=null;
   var stimTime=Date.now();
   var targetFs=pc.cols<=2?'28':'20'; var stimFs=pc.cols<=2?'40':'28';
-  // Layout: górna połowa = CEL, dolna = BODZIEC
+  // Layout: górna połowa = CEL, dolna = BODZIEC (symetryczny, wycentrowany)
   ma.innerHTML=_mHUD()
-    +'<div style="position:absolute;top:15%;left:50%;transform:translateX(-50%);text-align:center;z-index:5;">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">SZUKAJ</div>'
-    +'<div style="width:70%;max-width:180px;margin:0 auto;border:3px solid var(--accent);border-radius:16px;padding:12px;background:rgba(59,130,246,.08);">'+_patternHtml(_patternTarget,pc.cols,targetFs)+'</div></div>'
-    +'<div style="position:absolute;top:55%;left:50%;transform:translateX(-50%);text-align:center;z-index:5;">'
-    +'<div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;">OBSERWUJ</div>'
-    +'<div id="pat-stim-box" style="width:70%;max-width:200px;margin:0 auto;border:2px solid rgba(255,255,255,.15);border-radius:16px;padding:14px;">'+_patternHtml(stim,pc.cols,stimFs)+'</div></div>';
+    +'<div style="position:absolute;top:12%;left:50%;transform:translateX(-50%);text-align:center;width:80%;max-width:220px;z-index:5;">'
+    +'<div style="font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;">🎯 SZUKAJ</div>'
+    +'<div style="border:3px solid var(--accent);border-radius:16px;padding:16px;background:rgba(59,130,246,.06);box-shadow:0 0 20px rgba(59,130,246,.15);">'+_patternHtml(_patternTarget,pc.cols,targetFs)+'</div></div>'
+    +'<div style="position:absolute;top:52%;left:50%;transform:translateX(-50%);text-align:center;width:80%;max-width:240px;z-index:5;">'
+    +'<div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">👀 OBSERWUJ</div>'
+    +'<div id="pat-stim-box" style="border:2px solid rgba(255,255,255,.12);border-radius:16px;padding:18px;background:rgba(255,255,255,.02);box-shadow:0 0 15px rgba(255,255,255,.05);transition:border-color .2s,box-shadow .2s;">'+_patternHtml(stim,pc.cols,stimFs)+'</div></div>';
   _sndStim();
   _motionState.listening=true; _motionState._keyPressed=null;
   var reacted=false;
