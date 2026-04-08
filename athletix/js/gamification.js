@@ -89,9 +89,11 @@ function showLevelUp(athleteName,rank){
   var box=document.createElement('div');
   box.style.cssText='text-align:center;background:var(--s1);border:3px solid '+rank.color+';border-radius:20px;padding:28px 24px;max-width:320px;width:calc(100% - 40px);transform:scale(0.8);transition:transform .3s ease-out;';
   box.innerHTML='<div style="font-size:56px;margin-bottom:8px;">'+rank.emoji+'</div>'
-    +'<div style="font-size:22px;font-weight:900;color:'+rank.color+';margin-bottom:4px;">AWANS!</div>'
+    +'<div style="font-size:22px;font-weight:900;color:'+rank.color+';margin-bottom:4px;">⚡ AWANS!</div>'
     +'<div style="font-size:16px;font-weight:700;color:var(--text);">'+rank.name+' • Poziom '+rank.level+'</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-top:8px;">'+athleteName+'</div>';
+    +'<div style="font-size:13px;color:var(--muted);margin-top:6px;">Twój ATP rośnie!</div>'
+    +'<div style="font-size:12px;font-weight:800;color:var(--accent);margin-top:8px;">Elevate Your Game ⚡</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-top:4px;">'+athleteName+'</div>';
   ov.appendChild(box); document.body.appendChild(ov);
   requestAnimationFrame(function(){ ov.style.opacity='1'; box.style.transform='scale(1)'; });
   launchConfetti();
@@ -104,7 +106,7 @@ function buildGamificationWidget(athleteName){
   loadGamification(); var gp=getGamProfile(athleteName);
   var rank=getRank(gp.totalPoints); var next=getNextRank(gp.totalPoints);
   var pct=next?Math.min(100,Math.round((gp.totalPoints-rank.points)/(next.points-rank.points)*100)):100;
-  var ptsText=next?gp.totalPoints+' / '+next.points+' pkt':'MAX';
+  var ptsText=next?gp.totalPoints+' / '+next.points+' ATP':'MAX';
   var avatarEmoji=gp.avatar||rank.emoji;
   var n=athleteName.replace(/'/g,"\\'");
 
@@ -129,9 +131,48 @@ function buildGamificationWidget(athleteName){
     +'<div style="display:flex;gap:16px;margin-top:8px;">'
     +'<span style="font-size:12px;font-weight:700;color:var(--text);">'+(gp.weeklyStreak>0?'🔥 '+gp.weeklyStreak+'. tydzień z rzędu':'<span style="color:var(--muted);">Brak streaku</span>')+'</span>'
     +'<span style="font-size:11px;color:var(--muted);">🏆 Najlepiej: '+gp.bestStreak+' tyg.</span></div>'
-    +'<div style="font-size:11px;color:var(--muted);margin-top:4px;">Punkty łącznie: '+gp.totalPoints+'</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-top:4px;">ATP łącznie: '+gp.totalPoints+'</div>'
+    +'<button onclick="openATPInfoModal(\''+n+'\')" style="font-size:10px;font-weight:600;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;margin-top:6px;padding:0;" onmouseover="this.style.color=\'var(--accent)\'" onmouseout="this.style.color=\'var(--muted)\'">⚡ Jak to działa?</button>'
     +'</div>';
   return html;
+}
+
+// ── Modal "Jak to działa?" ──
+function openATPInfoModal(athleteName){
+  loadGamification(); var gp=getGamProfile(athleteName);
+  var curRank=getRank(gp.totalPoints);
+  var existing=document.getElementById('atp-info-modal'); if(existing) existing.remove();
+  var modal=document.createElement('div'); modal.id='atp-info-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.onclick=function(e){ if(e.target===modal) modal.remove(); };
+  var h='<div style="max-width:400px;width:calc(100% - 32px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
+    +'<div style="font-size:17px;font-weight:900;color:var(--accent);">⚡ ATP — Twoje źródło mocy</div>'
+    +'<button onclick="document.getElementById(\'atp-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+    +'<div style="font-size:13px;font-weight:500;line-height:1.6;color:var(--text);margin:12px 0;">ATP to główne źródło energii w Twoich mięśniach. Im więcej trenujesz, tym więcej ATP produkujesz.</div>'
+    +'<div style="font-size:14px;font-weight:800;color:var(--accent);text-align:center;margin:12px 0;padding:10px;background:var(--accent-bg);border-radius:var(--r);">Więcej ATP = więcej mocy. Elevate Your Game! ⚡</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:14px;margin-bottom:6px;">Jak zdobywać ATP</div>'
+    +'<div style="font-size:12px;font-weight:500;line-height:1.8;color:var(--text);">'
+    +'💪 Każdy trening → +ATP<br>'
+    +'📋 Sesja z planu → +ATP<br>'
+    +'🧪 Wykonany test → +ATP<br>'
+    +'🔥 Regularny trening co tydzień → bonus ATP<br>'
+    +'📝 Notatka treningowa → +ATP</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:14px;margin-bottom:6px;">Rangi</div>';
+  RANK_TABLE.forEach(function(r){
+    var isCurrent=r.level===curRank.level;
+    h+='<div style="padding:7px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">'
+      +'<span style="font-size:20px;">'+r.emoji+'</span>'
+      +'<span style="font-size:13px;font-weight:700;color:'+r.color+';flex:1;">'+r.name+'</span>'
+      +'<span style="font-size:10px;color:var(--dim);">'+r.points+' ATP</span>'
+      +(isCurrent?'<span style="font-size:9px;font-weight:800;color:var(--accent);background:var(--accent-bg);border-radius:10px;padding:2px 8px;">← Tu jesteś</span>':'')
+      +'</div>';
+  });
+  h+='<div style="font-size:11px;font-style:italic;color:var(--muted);margin-top:8px;">🏆 Osiągnij szczyt. Elevate Your Game!</div>'
+    +'<button onclick="document.getElementById(\'atp-info-modal\').remove()" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-top:12px;">Zamknij</button>'
+    +'</div>';
+  var box=document.createElement('div'); box.innerHTML=h;
+  modal.appendChild(box.firstChild); document.body.appendChild(modal);
 }
 
 // ── Modal edycji awatara ──
