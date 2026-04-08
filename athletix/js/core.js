@@ -86,18 +86,19 @@ function speak(text){ if(snd!=='voice'||!window.speechSynthesis) return; window.
 var _currentMode='tempo';
 function setMode(m){
   _currentMode=m;
-  ['tempo','reactive','interval','diary','athletes','plans','data'].forEach(function(x){
+  ['tempo','reactive','interval','diary','athletes','plans','data','motion'].forEach(function(x){
     var btn=el('mt-'+x),tab=el('tab-'+x);
     if(btn) btn.classList.toggle('on',x===m);
     if(tab) tab.style.display=x===m?'block':'none';
   });
   var isInt=m==='interval';
-  el('go-btn-main').style.display=(isInt||m==='diary'||m==='athletes'||m==='plans'||m==='data')?'none':'block';
+  el('go-btn-main').style.display=(isInt||m==='diary'||m==='athletes'||m==='plans'||m==='data'||m==='motion')?'none':'block';
   el('go-btn-interval').classList.toggle('show',isInt);
   if(m==='athletes'){ loadCRM(); loadNotes(); renderAthleteList(); }
   if(m==='diary'){ loadCRM(); loadNotes(); populateAthleteSelect(); if(activeAthlete) syncFormToActiveAthlete(activeAthlete); if(!selectedDay) selectedDay=getDayKey(new Date()); renderCal(); renderDayDetail(selectedDay); }
   if(m==='plans'){ initPlansTab(); }
   if(m==='data'){ refreshDataStats(); refreshAutoBackupUI(); }
+  if(m==='motion'){ loadCRM(); var ms=el('motion-athlete'); if(ms){ ms.innerHTML='<option value="">Bez zawodnika</option>'; athletes.forEach(function(a){ var o=document.createElement('option'); o.value=a.name; o.textContent=a.name; ms.appendChild(o); }); if(activeAthlete) ms.value=activeAthlete; } }
   var gb=el('go-btn-main');
   if(m==='interval') gb.style.background='#c2410c'; else gb.style.background='var(--accent)';
 }
@@ -147,5 +148,5 @@ lb.addEventListener('mousedown',_startFill); lb.addEventListener('mouseup',_canc
 // ══ SWIPE DOWN = STOP ══
 var _tsY=0,_tsX=0;
 document.addEventListener('touchstart',function(e){ _tsY=e.touches[0].clientY; _tsX=e.touches[0].clientX; },{passive:true});
-document.addEventListener('touchend',function(e){ var dy=e.changedTouches[0].clientY-_tsY; var dx=Math.abs(e.changedTouches[0].clientX-_tsX); if(dy>90&&dx<60){ if(el('workout').style.display==='block') stopW(); else if(el('rc-active').style.display==='block') stopRC(); else if(el('int-active').style.display==='block') stopInt(); } },{passive:true});
+document.addEventListener('touchend',function(e){ var dy=e.changedTouches[0].clientY-_tsY; var dx=Math.abs(e.changedTouches[0].clientX-_tsX); if(dy>90&&dx<60){ if(el('workout').style.display==='block') stopW(); else if(el('rc-active').style.display==='block') stopRC(); else if(el('int-active').style.display==='block') stopInt(); else if(el('motion-active').style.display==='block'&&typeof stopMotion==='function') stopMotion(); } },{passive:true});
 

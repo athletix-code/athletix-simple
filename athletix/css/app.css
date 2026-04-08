@@ -27,7 +27,8 @@ html[data-theme="light"] .mtab.mgmt.on{ color:#7e22ce; }
 html[data-theme="light"] .int-block-label{ color:rgba(0,0,0,.5); }
 html[data-theme="light"] #workout,
 html[data-theme="light"] #rc-active,
-html[data-theme="light"] #int-active{
+html[data-theme="light"] #int-active,
+html[data-theme="light"] #motion-active{
   --bg:#060606;--s1:#141414;--text:#f2f2f2;--muted:rgba(255,255,255,.55);--dim:rgba(255,255,255,.35);
 }
 .hdr-sub-text{color:rgba(255,255,255,.55);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-top:3px;transition:color .2s;}
