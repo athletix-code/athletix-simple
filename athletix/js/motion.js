@@ -8,6 +8,43 @@ var _motionRunning=false, _motionAbort=false, _desktopFallback=false, _motionHan
 var _motionState={listening:false,ax:0,ay:0,az:0,baseline:{x:0,y:0,z:0},sensitivity:3,_keyPressed:null};
 // Stan gry
 var _gamePoints=0, _gameLives=3, _gameLevel=1, _gameCombo=0, _gameMaxCombo=0, _gameTotalTrials=0, _gameCorrect=0, _gameTimes=[], _gameBestLevel=0;
+// Tryb Wzorce
+var PATTERN_SYMBOLS=['🔴','🟢','🔵','🟡','🟣','🟠','⬜','⬛'];
+var _patternTarget=[], _patternInterval=null;
+
+// ── Postacie per level ──
+var LEVEL_CHARACTERS=[
+  {level:1,emoji:'🐣',name:'Pisklak',desc:'Dopiero się wykluwasz. Spokojnie, każdy kiedyś zaczynał.'},
+  {level:2,emoji:'🐥',name:'Żółtodziób',desc:'Jeszcze niepewny, ale już ruszasz!'},
+  {level:3,emoji:'🐱',name:'Kotek',desc:'Szybki jak kot... no, prawie.'},
+  {level:4,emoji:'🐕',name:'Pies myśliwski',desc:'Instynkt się wyostrza. Dobra robota!'},
+  {level:5,emoji:'🦊',name:'Lis',desc:'Sprytny i szybki. Nie dasz się nabrać.'},
+  {level:6,emoji:'🐆',name:'Gepard',desc:'Zaczynasz łapać prawdziwe tempo!'},
+  {level:7,emoji:'🦅',name:'Orzeł',desc:'Widzisz wszystko. Nic Ci nie umknie.'},
+  {level:8,emoji:'🐺',name:'Wilk',desc:'Drapieżnik. Skupiony. Bezlitosny.'},
+  {level:9,emoji:'🦈',name:'Rekin',desc:'Wyczuwasz bodźce zanim się pojawią.'},
+  {level:10,emoji:'🐉',name:'Smok',desc:'Legendarny refleks. Niewielu tu dociera.'},
+  {level:12,emoji:'⚡',name:'Błyskawica',desc:'Szybszy niż myśl. Dosłownie.'},
+  {level:15,emoji:'🧠',name:'Neo',desc:'Widzisz Matrixa. Czas zwalnia dla Ciebie.'},
+  {level:18,emoji:'👁️',name:'Wyrocznia',desc:'Reagujesz zanim cokolwiek się pojawi.'},
+  {level:20,emoji:'🌌',name:'Kosmita',desc:'Twój czas reakcji łamie prawa fizyki.'},
+  {level:25,emoji:'🏆',name:'G.O.A.T.',desc:'Greatest Of All Time. Koniec dyskusji.'}
+];
+function getLevelCharacter(lv){ var c=LEVEL_CHARACTERS[0]; for(var i=LEVEL_CHARACTERS.length-1;i>=0;i--){ if(lv>=LEVEL_CHARACTERS[i].level){ c=LEVEL_CHARACTERS[i]; break; } } return c; }
+
+// ── Próg ruchu rosnący z levelem ──
+function _movementThreshold(lv){ return Math.min(1.2+(lv-1)*0.3,6.0); }
+
+// ── Punktowanie ──
+function _calcPoints(ms){
+  if(ms<150) return {pts:7,label:'NADLUDZKI!'};
+  if(ms<250) return {pts:5,label:'BŁYSKAWICA!'};
+  if(ms<350) return {pts:4,label:''};
+  if(ms<450) return {pts:3,label:''};
+  if(ms<600) return {pts:2,label:''};
+  if(ms<800) return {pts:1,label:'Było blisko!'};
+  return {pts:0,label:''};
+}
 
 // ── Poziomy ──
 function _getLevelCfg(lv){
@@ -24,9 +61,7 @@ function _getLevelCfg(lv){
 // ── UI ustawień ──
 function _setMotionMode(m){
   _motionMode=m;
-  el('mt-simple').className='chip'+(m==='simple'?' on-blue':'');
-  el('mt-dirs').className='chip'+(m==='directions'?' on-blue':'');
-  el('mt-gonogo').className='chip'+(m==='gonogo'?' on-blue':'');
+  ['simple','dirs','gonogo','pattern'].forEach(function(k){ var b=el('mt-'+k); if(b) b.className='chip'+((k==='simple'&&m==='simple')||(k==='dirs'&&m==='directions')||(k==='gonogo'&&m==='gonogo')||(k==='pattern'&&m==='pattern')?' on-blue':''); });
 }
 
 // ── Modal "Jak grać?" ──
@@ -45,6 +80,11 @@ function openMotionInfo(){
     +'<div style="font-size:12px;color:var(--text);line-height:1.8;margin-bottom:12px;">&lt;200ms = 5 pkt ⚡<br>&lt;300ms = 3 pkt<br>&lt;400ms = 2 pkt<br>&lt;500ms = 1 pkt<br>🔥 Combo 3+ szybkich = podwójne!<br>🔥 Combo 5+ = potrójne!<br>❌ Fałszywy start = -2 pkt<br>❌ Błąd Go/No-Go = -3 pkt</div>'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">🏆 Poziomy</div>'
     +'<div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:14px;">Gra ma nieskończoną ilość poziomów. Każdy kolejny jest trudniejszy: szybsze bodźce, krótsze okno reakcji, fałszywe sygnały. Masz 3 życia — fałszywy start lub brak reakcji = stracone życie.</div>'
+    // Postacie do odblokowania
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;margin-top:6px;">🏆 Postacie do odblokowania</div>'
+    +'<div style="max-height:180px;overflow-y:auto;margin-bottom:12px;">'
+    +(function(){ var athlete2=(el('motion-athlete')||{}).value||''; var prev2=_getMotionResults(athlete2); var maxLv2=0; prev2.forEach(function(r){ if(r.level>maxLv2) maxLv2=r.level; }); return LEVEL_CHARACTERS.map(function(c){ var unlocked=maxLv2>=c.level; var isCurrent=c===getLevelCharacter(maxLv2||1); return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border);'+(isCurrent?'border-left:2px solid var(--accent);padding-left:6px;':'')+(unlocked?'':'opacity:.4;')+'">'+'<span style="font-size:18px;">'+(unlocked?c.emoji:'❓')+'</span>'+'<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:var(--text);">'+(unlocked?c.name:'???')+' <span style="font-size:9px;color:var(--dim);">Lv.'+c.level+'</span></div>'+(unlocked?'<div style="font-size:10px;color:var(--muted);">'+c.desc+'</div>':'')+'</div></div>'; }).join(''); })()
+    +'</div>'
     +'<button onclick="var nd=document.getElementById(\'motion-nerd-section\');nd.style.display=nd.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🤓 Sekcja dla nerdów — jak to NAPRAWDĘ działa?</button>'
     +'<div id="motion-nerd-section" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;margin-top:8px;font-size:12px;font-weight:500;line-height:1.7;color:var(--text);">'
     // Akcelerometr
@@ -118,7 +158,7 @@ function calibrateMotion(cb){
     cb();
   },1000);
 }
-function detectMovement(){ var dx=Math.abs(_motionState.ax-_motionState.baseline.x),dy=Math.abs(_motionState.ay-_motionState.baseline.y); var th=1.5+(5-_motionState.sensitivity)*0.8; return dx>th||dy>th; }
+function detectMovement(){ var dx=Math.abs(_motionState.ax-_motionState.baseline.x),dy=Math.abs(_motionState.ay-_motionState.baseline.y); var th=_movementThreshold(_gameLevel); return dx>th||dy>th; }
 function detectDirection(){ var dx=_motionState.ax-_motionState.baseline.x,dy=_motionState.ay-_motionState.baseline.y,th=2.0+(5-_motionState.sensitivity)*0.6; if(Math.abs(dx)>Math.abs(dy)){ if(dx>th) return 'left'; if(dx<-th) return 'right'; } else { if(dy>th) return 'up'; if(dy<-th) return 'down'; } return null; }
 
 // ── Dźwięki ──
@@ -161,12 +201,14 @@ function _motionCountdown(cb){
 // ── Ekran helper ──
 function _mScreen(title,sub,extra){ return '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;"><div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.4);">'+title+'</div>'+(sub?'<div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:4px;">'+sub+'</div>':'')+(extra||'')+'</div>'; }
 function _mHUD(){
-  var hearts=''; for(var i=0;i<3;i++) hearts+=i<_gameLives?'❤️':'🖤';
-  var comboHtml=_gameCombo>=3?'<span style="font-size:12px;font-weight:800;color:#fb923c;margin-left:8px;">🔥 x'+_gameCombo+'</span>':'';
+  var lives=''; for(var i=0;i<3;i++) lives+='<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+(i<_gameLives?'var(--red)':'rgba(255,255,255,.15)')+';margin-left:3px;"></span>';
+  var comboHtml=_gameCombo>=3?'<div style="font-size:14px;font-weight:900;color:#f59e0b;animation:mBtnPulse 1s infinite;">🔥 x'+_gameCombo+' COMBO</div>':'';
+  var ch=getLevelCharacter(_gameLevel);
   return '<div style="position:absolute;top:0;left:0;right:0;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10;">'
-    +'<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:22px;font-weight:900;color:var(--accent);" id="m-pts">⚡ '+_gamePoints+'</span>'+comboHtml+'</div>'
-    +'<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;font-weight:800;color:#fbbf24;">LV.'+_gameLevel+'</span><span style="font-size:14px;">'+hearts+'</span>'
-    +'<button class="lock-btn" onclick="lockScreen()">🔒</button></div></div>';
+    +'<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:22px;font-weight:900;color:var(--accent);transition:transform .2s;" id="m-pts">⚡ '+_gamePoints+'</span></div>'
+    +'<div style="text-align:center;">'+comboHtml+'</div>'
+    +'<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;font-weight:800;color:#fbbf24;">'+ch.emoji+' Lv.'+_gameLevel+'</span>'+lives
+    +'<button class="lock-btn" onclick="lockScreen()" style="margin-left:4px;">🔒</button></div></div>';
 }
 function _mPtsAnim(text,color){
   var d=document.createElement('div'); d.style.cssText='position:fixed;top:45%;left:50%;transform:translate(-50%,0);font-size:28px;font-weight:900;color:'+color+';z-index:20;pointer-events:none;transition:all .6s ease-out;opacity:1;';
@@ -180,8 +222,9 @@ function _mCircle(state,content,subtext){
   var colors={wait:'rgba(255,255,255,.1)',go:'#4ade80',nogo:'#f87171',result:'rgba(255,255,255,.08)',wrong:'#f87171'};
   var borderC=colors[state]||'rgba(255,255,255,.1)';
   var bg=state==='go'?'#4ade80':state==='nogo'?'#f87171':'transparent';
+  var shadow=state==='go'?'0 0 40px rgba(74,222,128,.3)':state==='nogo'?'0 0 40px rgba(248,113,113,.3)':'none';
   return '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">'
-    +'<div style="width:160px;height:160px;border-radius:50%;border:3px solid '+borderC+';background:'+bg+';display:flex;align-items:center;justify-content:center;margin:0 auto;'+(state==='go'||state==='nogo'?'animation:mPulse .15s ease-out;':'')+'"><div style="color:#fff;">'+content+'</div></div>'
+    +'<div style="width:160px;height:160px;border-radius:50%;border:3px solid '+borderC+';background:'+bg+';display:flex;align-items:center;justify-content:center;margin:0 auto;box-shadow:'+shadow+';'+(state==='go'||state==='nogo'?'animation:mPulse .15s ease-out;':'')+'"><div style="color:#fff;">'+content+'</div></div>'
     +(subtext?'<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.5);margin-top:10px;">'+subtext+'</div>':'')+'</div>';
 }
 
@@ -190,6 +233,9 @@ function _startLevel(lv){
   if(_motionAbort) return;
   _gameLevel=lv;
   var cfg=_getLevelCfg(lv);
+  // Generuj cel dla trybu Wzorce
+  if(_motionMode==='pattern') _patternTarget=_genPattern();
+  if(_motionMode==='pattern'){ _runPatternLevel(0,cfg,[],function(trialResults){ if(_motionAbort) return; if(_gameLives<=0){ _showGameOver(); return; } _showLevelComplete(lv,trialResults); }); return; }
   _runTrial(0,cfg,[],function(trialResults){
     if(_motionAbort) return;
     if(_gameLives<=0){ _showGameOver(); return; }
@@ -297,17 +343,19 @@ function _finishTrial(clearFn,rc,rt,stimTime,correct,errType,trialResults,idx,cf
   var t=Date.now()-stimTime; _gameTotalTrials++;
   if(correct){
     _gameCorrect++; _gameTimes.push(t);
-    var pts=t<200?5:t<300?3:t<400?2:t<500?1:0;
+    var sc=_calcPoints(t); var pts=sc.pts;
     _gameCombo++; if(_gameCombo>_gameMaxCombo) _gameMaxCombo=_gameCombo;
     var mult=_gameCombo>=10?4:_gameCombo>=5?3:_gameCombo>=3?2:1;
     var earned=pts*mult; _gamePoints+=earned;
     if(mult>1){ _sndCombo(); _mPtsAnim('+'+earned+' ⚡ x'+_gameCombo,'#fb923c'); }
-    else if(earned>0){ _sndGood(); _mPtsAnim('+'+earned+' ⚡','var(--green-text)'); }
+    else if(earned>0){ _sndGood(); _mPtsAnim('+'+earned+' ⚡'+(sc.label?' '+sc.label:''),'var(--green-text)'); }
     else { _sndGood(); }
     var col=t<250?'var(--green-text)':t<400?'var(--accent)':t<600?'var(--amber-text)':'var(--red-text)';
     var ma=el('motion-active');
+    // Flash tła
+    if(t<350) ma.style.background='rgba(74,222,128,.1)'; else if(t<500) ma.style.background='rgba(59,130,246,.08)';
+    setTimeout(function(){ ma.style.background='#060606'; },200);
     ma.innerHTML=_mHUD()+_mCircle('result','<div style="font-size:32px;font-weight:900;color:'+col+';">'+t+'ms</div>','');
-    // Pulse na punkcie
     var pe=document.getElementById('m-pts'); if(pe){ pe.style.transform='scale(1.3)'; setTimeout(function(){ pe.style.transform='scale(1)'; },200); }
   } else {
     _gameLives--; _gameCombo=0;
@@ -325,19 +373,23 @@ function _finishTrial(clearFn,rc,rt,stimTime,correct,errType,trialResults,idx,cf
 var _LEVEL_MSGS=["Niezły refleks! 🔥","Maszyna! ⚡","Nie do zatrzymania!","Jak błyskawica! ⚡","Level up! Idziesz jak burza!","Twój mózg się dopiero rozgrzewa...","Spokojnie, to dopiero rozgrzewka 😏","Za szybki jesteś! 🏎️","Następny level będzie ciekawszy...","Czujesz to? To adrenalina! 💉"];
 function _showLevelComplete(lv,trialResults){
   _sndLevelUp();
+  var ch=getLevelCharacter(lv); var nextCh=getLevelCharacter(lv+1);
   var lvTimes=trialResults.filter(function(r){ return r.correct&&r.time>0; }).map(function(r){ return r.time; });
   var lvBest=lvTimes.length?Math.min.apply(null,lvTimes):0;
-  var lvPts=trialResults.reduce(function(s,r){ return s; },0);
   var msg=_LEVEL_MSGS[Math.floor(Math.random()*_LEVEL_MSGS.length)];
+  var moveHint=lv<4?'Delikatny ruch wystarczy 🤏':lv<7?'Ruszaj się zdecydowanie! 💪':lv<11?'Potrzeba mocnego ruchu! 🏋️':'Full power! Daj z siebie wszystko! 🔥';
   var ma=el('motion-active');
   ma.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 24px;box-sizing:border-box;">'
-    +'<div style="font-size:20px;font-weight:900;color:var(--green-text);margin-bottom:8px;">✅ LEVEL '+lv+' UKOŃCZONY!</div>'
-    +'<div style="font-size:40px;font-weight:900;color:var(--accent);margin-bottom:4px;">⚡ '+_gamePoints+'</div>'
-    +'<div style="font-size:14px;color:rgba(255,255,255,.5);">punktów łącznie</div>'
-    +(lvBest?'<div style="font-size:13px;color:var(--green-text);margin-top:8px;">Najlepszy czas: '+lvBest+'ms</div>':'')
-    +'<div style="font-size:13px;font-style:italic;color:rgba(255,255,255,.4);margin-top:10px;">'+msg+'</div>'
-    +'<div style="margin-top:24px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
-    +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' — GOTOWY?</button>'
+    +'<div style="font-size:56px;margin-bottom:4px;">'+ch.emoji+'</div>'
+    +'<div style="font-size:18px;font-weight:900;color:var(--green-text);margin-bottom:2px;">'+ch.name+'</div>'
+    +'<div style="font-size:13px;font-style:italic;color:rgba(255,255,255,.5);margin-bottom:8px;">'+ch.desc+'</div>'
+    +'<div style="font-size:16px;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:6px;">✅ LEVEL '+lv+' UKOŃCZONY!</div>'
+    +'<div style="font-size:36px;font-weight:900;color:var(--accent);">⚡ '+_gamePoints+'</div>'
+    +(lvBest?'<div style="font-size:12px;color:var(--green-text);margin-top:6px;">Najlepszy: '+lvBest+'ms</div>':'')
+    +'<div style="font-size:12px;color:rgba(255,255,255,.3);margin-top:6px;">'+msg+'</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:4px;">'+moveHint+'</div>'
+    +'<div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
+    +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
     +'<button onclick="_endGame()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏁 Zakończ grę</button></div></div>';
 }
 function _nextLevel(){
@@ -365,16 +417,23 @@ function _showGameOver(){
   if(isNewRecord&&prevBestLv>0) compareHtml='<div style="font-size:14px;font-weight:800;color:var(--green-text);margin-top:8px;">↑ Nowy rekord levelu! (było: '+prevBestLv+')</div>';
   else if(prevBestLv>0) compareHtml='<div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:8px;">Rekord: Level '+prevBestLv+'</div>';
 
+  var ch=getLevelCharacter(_gameLevel);
+  // Sprawdź czy nowa postać
+  var prevCh=prevBestLv>0?getLevelCharacter(prevBestLv):null;
+  var newCharUnlocked=isNewRecord&&(!prevCh||ch.emoji!==prevCh.emoji);
+
   var ma=el('motion-active'); ma.style.background='#060606';
   ma.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 24px;box-sizing:border-box;">'
-    +'<div style="font-size:22px;font-weight:900;color:'+(isOver?'var(--red-text)':'var(--green-text)')+';">'+(isOver?'💀 GAME OVER':'🏁 KONIEC GRY')+'</div>'
-    +'<div style="font-size:18px;font-weight:800;color:var(--accent);margin-top:4px;">Level '+_gameLevel+'</div>'
+    +'<div style="font-size:48px;margin-bottom:4px;">'+ch.emoji+'</div>'
+    +'<div style="font-size:22px;font-weight:900;color:'+(isOver?'var(--red-text)':'var(--green-text)')+';">'+(isOver?'GAME OVER':'KONIEC GRY')+'</div>'
+    +'<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.5);margin-top:2px;">'+ch.name+' • Level '+_gameLevel+'</div>'
     +'<div style="font-size:40px;font-weight:900;color:var(--accent);margin-top:8px;">⚡ '+_gamePoints+'</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;max-width:280px;margin-left:auto;margin-right:auto;">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<div style="font-size:13px;font-weight:700;color:'+col+';">Śr.: '+avg+'ms</div>'
     +'<div style="font-size:13px;font-weight:700;color:var(--green-text);">Best: '+best+'ms</div>'
     +'<div style="font-size:13px;font-weight:700;color:#fb923c;">Combo: x'+_gameMaxCombo+'</div>'
     +'<div style="font-size:13px;font-weight:700;color:#fff;">Celność: '+acc+'%</div></div>'
+    +(newCharUnlocked?'<div style="font-size:13px;font-weight:800;color:var(--accent);margin-top:10px;">🆕 Nowa postać: '+ch.emoji+' '+ch.name+'!</div>':'')
     +compareHtml
     +'<div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_motionRetry()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Zagraj ponownie</button>'
@@ -391,6 +450,72 @@ function _showGameOver(){
 }
 
 function _motionRetry(){ startMotionGame(); }
+
+// ── Tryb Wzorce ──
+function _genPattern(){ var p=[]; for(var i=0;i<4;i++) p.push(PATTERN_SYMBOLS[Math.floor(Math.random()*PATTERN_SYMBOLS.length)]); return p; }
+function _patternHtml(p,size){ return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:'+(size||'80')+'px;height:'+(size||'60')+'px;margin:0 auto;">'+p.map(function(s){ return '<div style="font-size:'+(parseInt(size||'80')/3)+'px;display:flex;align-items:center;justify-content:center;">'+s+'</div>'; }).join('')+'</div>'; }
+function _patternsMatch(a,b){ if(a.length!==b.length) return false; for(var i=0;i<a.length;i++) if(a[i]!==b[i]) return false; return true; }
+
+function _runPatternLevel(idx,cfg,results,cb){
+  if(_motionAbort||_gameLives<=0||idx>=cfg.trials){ cb(results); return; }
+  var ma=el('motion-active');
+  // Zmiana celu na wyższych levelach
+  if(_gameLevel>=11&&idx>0&&idx%3===0) _patternTarget=_genPattern();
+  else if(_gameLevel>=6&&_gameLevel<11&&idx>0&&idx%5===0) _patternTarget=_genPattern();
+  // Generuj bodziec
+  var isMatch=Math.random()<0.2; // 20% szans na match
+  var stim;
+  if(isMatch){ stim=_patternTarget.slice(); }
+  else {
+    stim=_genPattern();
+    // Na wyższych levelach: zmyłka — różni się 1 symbolem
+    if(_gameLevel>=5&&Math.random()<0.3){ stim=_patternTarget.slice(); stim[Math.floor(Math.random()*4)]=PATTERN_SYMBOLS[Math.floor(Math.random()*PATTERN_SYMBOLS.length)]; }
+    if(_patternsMatch(stim,_patternTarget)) stim=_genPattern(); // upewnij się
+  }
+  // Czas wyświetlania bodźca
+  var showTime=Math.max(500,2000-(_gameLevel-1)*100);
+  // Wyświetl
+  _motionState.listening=false; _motionState._keyPressed=null;
+  var stimTime=Date.now();
+  ma.innerHTML=_mHUD()
+    +'<div style="position:fixed;top:80px;right:16px;z-index:10;"><div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);text-align:center;margin-bottom:4px;">SZUKAJ:</div><div style="width:120px;border:2px solid var(--accent);border-radius:12px;padding:8px;">'+_patternHtml(_patternTarget,'60')+'</div></div>'
+    +_mCircle('wait','<div style="padding:10px;">'+_patternHtml(stim,'120')+'</div>','');
+  _sndStim();
+  _motionState.listening=true; _motionState._keyPressed=null;
+  var reacted=false;
+  var rc=setInterval(function(){
+    if(_motionAbort){ clearInterval(rc); return; }
+    if(detectMovement()||(_desktopFallback&&_motionState._keyPressed)){
+      clearInterval(rc); clearTimeout(rt); _motionState.listening=false; _motionState._keyPressed=null;
+      reacted=true; var t=Date.now()-stimTime; _gameTotalTrials++;
+      if(isMatch){
+        // Poprawna reakcja na cel
+        _gameCorrect++; _gameTimes.push(t);
+        var sc=_calcPoints(t); var mult=_gameCombo>=10?4:_gameCombo>=5?3:_gameCombo>=3?2:1;
+        _gameCombo++; if(_gameCombo>_gameMaxCombo) _gameMaxCombo=_gameCombo;
+        var earned=sc.pts*mult; _gamePoints+=earned;
+        _sndGood(); _mPtsAnim('+'+earned+' ⚡','var(--green-text)');
+        results.push({time:t,correct:true,type:'pattern_hit'});
+        ma.innerHTML=_mHUD()+_mCircle('result','<div style="font-size:28px;font-weight:900;color:var(--green-text);">'+t+'ms ✓</div>','');
+      } else {
+        // Fałszywy alarm — zareagował na nie-cel
+        _gameLives--; _gameCombo=0; _gamePoints=Math.max(0,_gamePoints-2);
+        _sndBad(); _mPtsAnim('-2 💥','var(--red-text)');
+        results.push({time:t,correct:false,type:'pattern_false'});
+        ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:24px;">Nie ten wzorzec!</div>','');
+      }
+      setTimeout(function(){ _runPatternLevel(idx+1,cfg,results,cb); },1200);
+    }
+  },16);
+  var rt=setTimeout(function(){
+    clearInterval(rc); _motionState.listening=false; _gameTotalTrials++;
+    if(!reacted){
+      if(isMatch){ _gameLives--; _gameCombo=0; _gamePoints=Math.max(0,_gamePoints-1); _mPtsAnim('-1','var(--red-text)'); results.push({time:showTime,correct:false,type:'pattern_miss'}); ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:20px;">Przegapiony cel!</div>',''); }
+      else { _gameCorrect++; _gamePoints+=1; _mPtsAnim('+1 ✓','var(--green-text)'); results.push({time:0,correct:true,type:'pattern_ignore'}); _sndGood(); ma.innerHTML=_mHUD()+_mCircle('result','<div style="font-size:24px;color:var(--green-text);">✓</div>',''); }
+    }
+    setTimeout(function(){ _runPatternLevel(idx+1,cfg,results,cb); },1000);
+  },showTime);
+}
 
 // ── Zapis wyników ──
 function _getMotionResults(athlete){ try{ var d=JSON.parse(localStorage.getItem('axs_motion_results')||'{}'); return (d[athlete]&&d[athlete].reaction)||[]; }catch(e){ return []; } }
