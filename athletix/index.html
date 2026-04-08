@@ -12,7 +12,7 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>AthletiX Simple — Sigma AthletiX</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=45">
+<link rel="stylesheet" href="css/app.css?v=46">
 </head>
 
 <!-- ════ SETTINGS ════ -->
@@ -627,12 +627,15 @@
   <div style="background:var(--s1);border:1px dashed var(--border2);border-radius:16px;padding:14px;margin-bottom:6px;opacity:.4;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:24px;">🏃</span><div><div style="font-size:15px;font-weight:800;color:var(--text);">Agility</div><div style="font-size:11px;color:var(--muted);">Zmiana kierunku, COD</div></div><span style="font-size:8px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-left:auto;">Wkrótce</span></div></div>
 
   <div id="motion-reaction-opts" style="display:block;margin-top:12px;">
-    <div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Tryb</div>
-    <div style="display:flex;gap:6px;margin-bottom:12px;">
-      <button class="chip on-blue" id="mt-simple" onclick="_setMotionMode('simple')">Prosty</button>
-      <button class="chip" id="mt-dirs" onclick="_setMotionMode('directions')">Kierunki</button>
-      <button class="chip" id="mt-gonogo" onclick="_setMotionMode('gonogo')">Go/No-Go</button>
-      <button class="chip" id="mt-pattern" onclick="_setMotionMode('pattern')">🧩 Wzorce</button>
+    <div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Wybierz grę</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+      <button id="mt-simple" onclick="_setMotionMode('simple')" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:2px solid var(--accent);border-radius:14px;cursor:pointer;text-align:left;font-family:Montserrat,sans-serif;"><span style="font-size:28px;">⚡</span><div><div style="font-size:13px;font-weight:800;color:var(--text);">Reakcja</div><div style="font-size:10px;color:var(--muted);">Reaguj na bodźce. Klasyka.</div></div></button>
+      <button id="mt-dirs" onclick="_setMotionMode('directions')" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px solid var(--border);border-radius:14px;cursor:pointer;text-align:left;font-family:Montserrat,sans-serif;"><span style="font-size:28px;">🧭</span><div><div style="font-size:13px;font-weight:800;color:var(--text);">Kierunki</div><div style="font-size:10px;color:var(--muted);">Przechyl w stronę strzałki.</div></div></button>
+      <button id="mt-gonogo" onclick="_setMotionMode('gonogo')" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px solid var(--border);border-radius:14px;cursor:pointer;text-align:left;font-family:Montserrat,sans-serif;"><span style="font-size:28px;">👁</span><div><div style="font-size:13px;font-weight:800;color:var(--text);">Go/No-Go</div><div style="font-size:10px;color:var(--muted);">Reaguj lub hamuj. Trening decyzji.</div></div></button>
+      <button id="mt-pattern" onclick="_setMotionMode('pattern')" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px solid var(--border);border-radius:14px;cursor:pointer;text-align:left;font-family:Montserrat,sans-serif;"><span style="font-size:28px;">🧩</span><div><div style="font-size:13px;font-weight:800;color:var(--text);">Wzorce</div><div style="font-size:10px;color:var(--muted);">Znajdź wzorzec w chaosie.</div></div></button>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px dashed var(--border2);border-radius:14px;opacity:.4;"><span style="font-size:28px;">🎯</span><div><div style="font-size:13px;font-weight:800;color:var(--text);">Snajper</div><div style="font-size:10px;color:var(--muted);">Celuj i trafiaj. Wkrótce.</div></div></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px dashed var(--border2);border-radius:14px;opacity:.4;"><span style="font-size:28px;">🧱</span><div><div style="font-size:13px;font-weight:800;color:var(--text);">Breaker</div><div style="font-size:10px;color:var(--muted);">Zbijaj spadające bloki. Wkrótce.</div></div></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px dashed var(--border2);border-radius:14px;opacity:.4;"><span style="font-size:28px;">🏃</span><div><div style="font-size:13px;font-weight:800;color:var(--text);">Dash</div><div style="font-size:10px;color:var(--muted);">Biegnij, skacz, ślizgaj się. Wkrótce.</div></div></div>
     </div>
     <div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Zawodnik</div>
     <select class="crm-input" id="motion-athlete" style="margin-bottom:12px;"><option value="">Bez zawodnika</option></select>
@@ -817,23 +820,23 @@
 </div>
 
 
-<script src="js/storage.js?v=45"></script>
-<script src="js/core.js?v=45"></script>
-<script src="js/timers.js?v=45"></script>
-<script src="js/athletes.js?v=45"></script>
-<script src="js/wallet.js?v=45"></script>
-<script src="js/status.js?v=45"></script>
-<script src="js/gamification.js?v=45"></script>
-<script src="js/exercises.js?v=45"></script>
-<script src="js/diary.js?v=45"></script>
-<script src="js/reports.js?v=45"></script>
-<script src="js/plans.js?v=45"></script>
-<script src="js/data.js?v=45"></script>
-<script src="js/settings.js?v=45"></script>
-<script src="js/supabase-config.js?v=45"></script>
-<script src="js/sync.js?v=45"></script>
-<script src="js/autogrow.js?v=45"></script>
-<script src="js/motion.js?v=45"></script>
+<script src="js/storage.js?v=46"></script>
+<script src="js/core.js?v=46"></script>
+<script src="js/timers.js?v=46"></script>
+<script src="js/athletes.js?v=46"></script>
+<script src="js/wallet.js?v=46"></script>
+<script src="js/status.js?v=46"></script>
+<script src="js/gamification.js?v=46"></script>
+<script src="js/exercises.js?v=46"></script>
+<script src="js/diary.js?v=46"></script>
+<script src="js/reports.js?v=46"></script>
+<script src="js/plans.js?v=46"></script>
+<script src="js/data.js?v=46"></script>
+<script src="js/settings.js?v=46"></script>
+<script src="js/supabase-config.js?v=46"></script>
+<script src="js/sync.js?v=46"></script>
+<script src="js/autogrow.js?v=46"></script>
+<script src="js/motion.js?v=46"></script>
 
 </body>
 </html>

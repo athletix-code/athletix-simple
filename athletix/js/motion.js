@@ -61,7 +61,13 @@ function _getLevelCfg(lv){
 // ── UI ustawień ──
 function _setMotionMode(m){
   _motionMode=m;
-  ['simple','dirs','gonogo','pattern'].forEach(function(k){ var b=el('mt-'+k); if(b) b.className='chip'+((k==='simple'&&m==='simple')||(k==='dirs'&&m==='directions')||(k==='gonogo'&&m==='gonogo')||(k==='pattern'&&m==='pattern')?' on-blue':''); });
+  var map={simple:'simple',directions:'dirs',gonogo:'gonogo',pattern:'pattern'};
+  ['simple','dirs','gonogo','pattern'].forEach(function(k){
+    var b=el('mt-'+k); if(!b) return;
+    var active=(map[m]===k);
+    b.style.borderColor=active?'var(--accent)':'var(--border)';
+    b.style.borderWidth=active?'2px':'1px';
+  });
 }
 
 // ── Modal "Jak grać?" ──
@@ -234,7 +240,7 @@ function _startLevel(lv){
   _gameLevel=lv;
   var cfg=_getLevelCfg(lv);
   // Generuj cel dla trybu Wzorce
-  if(_motionMode==='pattern') _patternTarget=_genPattern();
+  if(_motionMode==='pattern'){ var pc2=_patCfg(lv); _patternTarget=_genPattern(pc2.count,pc2.syms); }
   if(_motionMode==='pattern'){ _runPatternLevel(0,cfg,[],function(trialResults){ if(_motionAbort) return; if(_gameLives<=0){ _showGameOver(); return; } _showLevelComplete(lv,trialResults); }); return; }
   _runTrial(0,cfg,[],function(trialResults){
     if(_motionAbort) return;
@@ -451,35 +457,52 @@ function _showGameOver(){
 
 function _motionRetry(){ startMotionGame(); }
 
-// ── Tryb Wzorce ──
-function _genPattern(){ var p=[]; for(var i=0;i<4;i++) p.push(PATTERN_SYMBOLS[Math.floor(Math.random()*PATTERN_SYMBOLS.length)]); return p; }
-function _patternHtml(p,size){ return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:'+(size||'80')+'px;height:'+(size||'60')+'px;margin:0 auto;">'+p.map(function(s){ return '<div style="font-size:'+(parseInt(size||'80')/3)+'px;display:flex;align-items:center;justify-content:center;">'+s+'</div>'; }).join('')+'</div>'; }
+// ── Tryb Wzorce (progresywny) ──
+function _patCfg(lv){
+  if(lv<=2) return {cols:2,count:2,syms:['⬜','⬛'],showMs:2500,changeCel:999};
+  if(lv<=4) return {cols:2,count:4,syms:['🔴','🟢','🔵'],showMs:2000,changeCel:999};
+  if(lv<=6) return {cols:2,count:4,syms:['🔴','🟢','🔵','🟡'],showMs:1500,changeCel:999};
+  if(lv<=8) return {cols:2,count:4,syms:['🔴','🟢','🔵','🟡','🟣'],showMs:1200,changeCel:4};
+  if(lv<=10) return {cols:3,count:9,syms:['🔴','🟢','🔵','🟡','🟣','🟠'],showMs:1000,changeCel:3};
+  return {cols:3,count:9,syms:PATTERN_SYMBOLS,showMs:Math.max(500,1000-(lv-10)*50),changeCel:2};
+}
+function _genPattern(cnt,syms){ cnt=cnt||4; syms=syms||PATTERN_SYMBOLS; var p=[]; for(var i=0;i<cnt;i++) p.push(syms[Math.floor(Math.random()*syms.length)]); return p; }
+function _patternHtml(p,cols,fontSize){
+  cols=cols||2; fontSize=fontSize||'32';
+  return '<div style="display:grid;grid-template-columns:repeat('+cols+',1fr);gap:4px;">'+p.map(function(s){ return '<div style="font-size:'+fontSize+'px;display:flex;align-items:center;justify-content:center;line-height:1;">'+s+'</div>'; }).join('')+'</div>';
+}
 function _patternsMatch(a,b){ if(a.length!==b.length) return false; for(var i=0;i<a.length;i++) if(a[i]!==b[i]) return false; return true; }
 
 function _runPatternLevel(idx,cfg,results,cb){
   if(_motionAbort||_gameLives<=0||idx>=cfg.trials){ cb(results); return; }
   var ma=el('motion-active');
+  var pc=_patCfg(_gameLevel);
   // Zmiana celu na wyższych levelach
-  if(_gameLevel>=11&&idx>0&&idx%3===0) _patternTarget=_genPattern();
-  else if(_gameLevel>=6&&_gameLevel<11&&idx>0&&idx%5===0) _patternTarget=_genPattern();
+  if(pc.changeCel<999&&idx>0&&idx%pc.changeCel===0){ _patternTarget=_genPattern(pc.count,pc.syms);
+    ma.innerHTML=_mHUD()+'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;font-size:18px;font-weight:900;color:var(--accent);">🔄 NOWY CEL!</div>';
+    setTimeout(function(){ _runPatternLevel(idx,cfg,results,cb); },800); return;
+  }
   // Generuj bodziec
-  var isMatch=Math.random()<0.2; // 20% szans na match
+  var isMatch=Math.random()<0.2;
   var stim;
   if(isMatch){ stim=_patternTarget.slice(); }
   else {
-    stim=_genPattern();
-    // Na wyższych levelach: zmyłka — różni się 1 symbolem
-    if(_gameLevel>=5&&Math.random()<0.3){ stim=_patternTarget.slice(); stim[Math.floor(Math.random()*4)]=PATTERN_SYMBOLS[Math.floor(Math.random()*PATTERN_SYMBOLS.length)]; }
-    if(_patternsMatch(stim,_patternTarget)) stim=_genPattern(); // upewnij się
+    stim=_genPattern(pc.count,pc.syms);
+    if(_gameLevel>=5&&Math.random()<0.3){ stim=_patternTarget.slice(); stim[Math.floor(Math.random()*pc.count)]=pc.syms[Math.floor(Math.random()*pc.syms.length)]; }
+    if(_patternsMatch(stim,_patternTarget)) stim=_genPattern(pc.count,pc.syms);
   }
-  // Czas wyświetlania bodźca
-  var showTime=Math.max(500,2000-(_gameLevel-1)*100);
-  // Wyświetl
+  var showTime=pc.showMs;
   _motionState.listening=false; _motionState._keyPressed=null;
   var stimTime=Date.now();
+  var targetFs=pc.cols<=2?'28':'20'; var stimFs=pc.cols<=2?'40':'28';
+  // Layout: górna połowa = CEL, dolna = BODZIEC
   ma.innerHTML=_mHUD()
-    +'<div style="position:fixed;top:80px;right:16px;z-index:10;"><div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);text-align:center;margin-bottom:4px;">SZUKAJ:</div><div style="width:120px;border:2px solid var(--accent);border-radius:12px;padding:8px;">'+_patternHtml(_patternTarget,'60')+'</div></div>'
-    +_mCircle('wait','<div style="padding:10px;">'+_patternHtml(stim,'120')+'</div>','');
+    +'<div style="position:absolute;top:15%;left:50%;transform:translateX(-50%);text-align:center;z-index:5;">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">SZUKAJ</div>'
+    +'<div style="width:70%;max-width:180px;margin:0 auto;border:3px solid var(--accent);border-radius:16px;padding:12px;background:rgba(59,130,246,.08);">'+_patternHtml(_patternTarget,pc.cols,targetFs)+'</div></div>'
+    +'<div style="position:absolute;top:55%;left:50%;transform:translateX(-50%);text-align:center;z-index:5;">'
+    +'<div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;">OBSERWUJ</div>'
+    +'<div id="pat-stim-box" style="width:70%;max-width:200px;margin:0 auto;border:2px solid rgba(255,255,255,.15);border-radius:16px;padding:14px;">'+_patternHtml(stim,pc.cols,stimFs)+'</div></div>';
   _sndStim();
   _motionState.listening=true; _motionState._keyPressed=null;
   var reacted=false;
@@ -489,20 +512,20 @@ function _runPatternLevel(idx,cfg,results,cb){
       clearInterval(rc); clearTimeout(rt); _motionState.listening=false; _motionState._keyPressed=null;
       reacted=true; var t=Date.now()-stimTime; _gameTotalTrials++;
       if(isMatch){
-        // Poprawna reakcja na cel
         _gameCorrect++; _gameTimes.push(t);
         var sc=_calcPoints(t); var mult=_gameCombo>=10?4:_gameCombo>=5?3:_gameCombo>=3?2:1;
         _gameCombo++; if(_gameCombo>_gameMaxCombo) _gameMaxCombo=_gameCombo;
         var earned=sc.pts*mult; _gamePoints+=earned;
         _sndGood(); _mPtsAnim('+'+earned+' ⚡','var(--green-text)');
         results.push({time:t,correct:true,type:'pattern_hit'});
-        ma.innerHTML=_mHUD()+_mCircle('result','<div style="font-size:28px;font-weight:900;color:var(--green-text);">'+t+'ms ✓</div>','');
+        // Flash oba boxy zielono
+        var sb=document.getElementById('pat-stim-box'); if(sb) sb.style.borderColor='#4ade80';
+        ma.style.background='rgba(74,222,128,.08)'; setTimeout(function(){ ma.style.background='#060606'; },300);
       } else {
-        // Fałszywy alarm — zareagował na nie-cel
         _gameLives--; _gameCombo=0; _gamePoints=Math.max(0,_gamePoints-2);
-        _sndBad(); _mPtsAnim('-2 💥','var(--red-text)');
+        _sndBad(); _mPtsAnim('-2 💥','var(--red-text)'); if(navigator.vibrate) navigator.vibrate(200);
         results.push({time:t,correct:false,type:'pattern_false'});
-        ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:24px;">Nie ten wzorzec!</div>','');
+        ma.style.background='rgba(248,113,113,.08)'; setTimeout(function(){ ma.style.background='#060606'; },300);
       }
       setTimeout(function(){ _runPatternLevel(idx+1,cfg,results,cb); },1200);
     }
