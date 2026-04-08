@@ -299,12 +299,12 @@ function _addInputListeners(){
   // Swipe detection dla dotyk
   _motionTouchStartFn=function(e){
     if(!_motionState.listening) return;
-    if(e.target.closest('button')) return;
+    if(e.target.closest('button,#motion-close-x')) return;
     _swipeStart={x:e.touches[0].clientX,y:e.touches[0].clientY,time:Date.now()};
   };
   _motionTouchEndFn=function(e){
     if(!_motionState.listening||!_swipeStart) return;
-    if(e.target.closest('button')) return;
+    if(e.target.closest('button,#motion-close-x')) return;
     var dx=e.changedTouches[0].clientX-_swipeStart.x;
     var dy=e.changedTouches[0].clientY-_swipeStart.y;
     var dt=Date.now()-_swipeStart.time;
@@ -338,14 +338,17 @@ function _onDesktopKey(e){
   if(e.key===' '||e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'||e.key==='Enter'){ e.preventDefault(); _motionState._keyPressed=e.key; }
 }
 
-function _ensureCloseBtn(container){
-  if(document.getElementById('motion-close-btn')) return;
-  var btn=document.createElement('div'); btn.id='motion-close-btn';
-  btn.style.cssText='position:fixed;top:14px;right:14px;z-index:100;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);color:#ffffff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+function _spawnCloseX(){
+  var old=document.getElementById('motion-close-x'); if(old) old.remove();
+  var btn=document.createElement('div'); btn.id='motion-close-x';
   btn.textContent='\u2715';
-  btn.onclick=_confirmCloseMotion;
+  btn.style.cssText='position:fixed !important;top:14px !important;right:14px !important;z-index:99999 !important;width:48px !important;height:48px !important;border-radius:50% !important;background:rgba(255,255,255,0.15) !important;border:2px solid rgba(255,255,255,0.4) !important;color:#ffffff !important;font-size:22px !important;font-weight:700 !important;display:flex !important;align-items:center !important;justify-content:center !important;cursor:pointer !important;-webkit-tap-highlight-color:transparent !important;';
+  btn.onclick=function(){ _confirmCloseMotion(); };
   btn.ontouchstart=function(e){ e.stopPropagation(); };
-  (container||el('motion-active')).appendChild(btn);
+  document.body.appendChild(btn);
+}
+function _removeCloseX(){
+  var btn=document.getElementById('motion-close-x'); if(btn) btn.remove();
 }
 function startMotionGame(){
   requestMotionPermission(function(ok){
@@ -355,29 +358,20 @@ function startMotionGame(){
     _gamePoints=0; _gameLives=3; _gameLevel=1; _gameCombo=0; _gameMaxCombo=0; _gameTotalTrials=0; _gameCorrect=0; _gameTimes=[]; _gameLastTime=0;
     el('settings').style.display='none'; el('motion-active').style.display='block';
     reqWL(); goFS();
-    // Przycisk zamknij ✕ — ZAWSZE tworzony na nowo
-    var oldClose=document.getElementById('motion-close-btn'); if(oldClose) oldClose.remove();
-    var closeBtn=document.createElement('div'); closeBtn.id='motion-close-btn';
-    closeBtn.style.cssText='position:fixed;top:14px;right:14px;z-index:100;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);color:#ffffff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;';
-    closeBtn.textContent='✕';
-    closeBtn.onclick=_confirmCloseMotion;
-    closeBtn.ontouchstart=function(e){ e.stopPropagation(); };
-    closeBtn.onmouseenter=function(){ closeBtn.style.background='rgba(255,255,255,.25)'; };
-    closeBtn.onmouseleave=function(){ closeBtn.style.background='rgba(255,255,255,.12)'; };
-    el('motion-active').appendChild(closeBtn);
+    // Przycisk zamknij ✕ — na document.body, z-index 99999
+    _spawnCloseX();
     // Input
     if(_motionInputMode==='motion'&&!_desktopFallback){
       _motionHandler=onMotionData; window.addEventListener('devicemotion',_motionHandler);
     }
     _addInputListeners();
     // Briefing → Countdown → Kalibracja/Start
-    _showBriefing(closeBtn, function(){
+    _showBriefing(function(){
       if(_motionInputMode==='touch'||_desktopFallback){
         _motionCountdown(function(){ _startLevel(_gameLevel); });
       } else {
         _motionCountdown(function(){
           el('motion-active').innerHTML=_mScreen('Kalibracja...','Trzymaj telefon nieruchomo','');
-          _ensureCloseBtn(el('motion-active'));
           calibrateMotion(function(){ _startLevel(_gameLevel); });
         });
       }
@@ -388,7 +382,7 @@ function stopMotion(){
   _motionAbort=true; _motionRunning=false; _motionBlockSwipeClose=false;
   if(_motionHandler) window.removeEventListener('devicemotion',_motionHandler);
   _removeInputListeners();
-  var cb=document.getElementById('motion-close-btn'); if(cb) cb.remove();
+  _removeCloseX();
   var cm=document.getElementById('motion-confirm-close'); if(cm) cm.remove();
   el('motion-active').style.display='none'; el('settings').style.display='flex';
   relWL(); exitFS();
@@ -398,7 +392,7 @@ function _confirmCloseMotion(){
   // Pauza gry
   _motionAbort=true;
   var ov=document.createElement('div'); ov.id='motion-confirm-close';
-  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:20px;';
   ov.innerHTML='<div style="max-width:300px;width:100%;background:#1a1a1a;border-radius:16px;padding:20px;text-align:center;">'
     +'<div style="font-size:16px;font-weight:800;color:#f2f2f2;margin-bottom:6px;">Zakończyć grę?</div>'
     +'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:14px;">Twój postęp zostanie zapisany.</div>'
@@ -416,7 +410,7 @@ function _showSwipeTip(){
   document.body.appendChild(tip);
   setTimeout(function(){ tip.style.opacity='0'; setTimeout(function(){ tip.remove(); },300); },3000);
 }
-function _showBriefing(closeBtn, onReady){
+function _showBriefing(onReady){
   var ma=el('motion-active');
   var modeNames={simple:'⚡ Reakcja',directions:'🧭 Kierunki',gonogo:'👁 Go / No-Go',pattern:'🧩 Wzorce'};
   var modeName=modeNames[_motionMode]||'Gra';
@@ -437,7 +431,6 @@ function _showBriefing(closeBtn, onReady){
     +'<div style="margin-top:14px;font-size:12px;font-weight:600;font-style:italic;color:rgba(255,255,255,.45);line-height:1.5;padding:0 8px;">\u201E'+quote+'\u201D</div>'
     +'<button id="briefing-go-btn" style="margin-top:20px;width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.04em;">DAWAJ! \uD83D\uDE80</button>'
     +'</div>';
-  _ensureCloseBtn(ma);
   document.getElementById('briefing-go-btn').onclick=function(){ onReady(); };
 }
 
@@ -706,7 +699,7 @@ function _nextLevel(){
 }
 
 // ── Game Over / End ──
-function _endGame(){ _showGameOver(); }
+function _endGame(){ _removeCloseX(); _showGameOver(); }
 function _showGameOver(){
   _motionRunning=false;
   if(_motionHandler) window.removeEventListener('devicemotion',_motionHandler);
