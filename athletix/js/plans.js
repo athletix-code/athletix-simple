@@ -785,15 +785,19 @@ function _renderExecCards(container){
       var hasNote=s._note&&s._note.trim();
       h+='<button onclick="_openSetNote('+ei+','+si+')" title="Notatka" style="width:32px;height:32px;background:'+(hasNote?'rgba(59,130,246,.1)':'transparent')+';border:none;cursor:pointer;font-size:14px;opacity:'+(hasNote?'0.8':'0.3')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:var(--r-xs);">📝</button>';
       h+='</div>';
-      // Indicator zmiany pod wierszem
-      if(changed) h+='<div class="exec-changed-indicator" style="font-size:11px;font-weight:600;color:var(--amber-text);padding:3px 0 3px 8px;border-left:2px solid var(--amber);margin-top:2px;">⚠ Było: '+origDesc+'</div>';
-      // Notatka serii — tekst pod wierszem
-      if(hasNote) h+='<div onclick="_openSetNote('+ei+','+si+')" style="font-size:12px;font-weight:500;color:var(--muted);line-height:1.4;padding:4px 0 4px 8px;border-left:2px solid rgba(59,130,246,.3);margin-top:2px;cursor:pointer;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">'+s._note.replace(/</g,'&lt;')+'</div>';
+      // Notatka: zmiana + ręczna w jednej linii
+      if(changed||hasNote){
+        var noteHtml=''; var blColor=changed?'var(--amber)':'var(--accent)';
+        if(changed) noteHtml+='<span style="color:var(--amber-text);">⚠ Było: '+origDesc+'</span>';
+        if(changed&&hasNote) noteHtml+='<span style="color:var(--text);"> · </span>';
+        if(hasNote) noteHtml+='<span style="color:var(--text);">'+s._note.replace(/</g,'&lt;')+'</span>';
+        h+='<div class="exec-changed-indicator" onclick="_openSetNote('+ei+','+si+')" style="font-size:11px;font-weight:600;line-height:1.3;padding:2px 0 2px 8px;border-left:2px solid '+blColor+';margin:1px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;">'+noteHtml+'</div>';
+      }
       h+='</div>';
     });
     // + Seria ekstra
     h+='<button onclick="_addExecSet('+ei+')" style="margin-top:3px;padding:4px 10px;background:transparent;border:1px dashed var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:10px;font-weight:700;color:var(--muted);min-height:28px;">+ Seria ekstra</button>';
-    if(ex.note) h+='<div style="font-size:13px;font-weight:500;font-style:italic;color:var(--muted);line-height:1.5;padding:8px 10px;background:rgba(59,130,246,.03);border-radius:8px;margin-top:6px;">'+ex.note+'</div>';
+    if(ex.note) h+='<div style="font-size:12px;font-weight:500;font-style:italic;color:var(--text);opacity:.7;line-height:1.4;padding:6px 10px;background:rgba(59,130,246,.04);border-radius:8px;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">'+ex.note+'</div>';
     card.innerHTML=h; container.appendChild(card);
   });
   // Przyciski dodawania poza planem
@@ -893,10 +897,10 @@ function _upExec(ei,si,f,v){
   if(changed){
     var desc=os?_origSetText(os,fields):'';
     if(!indic){ indic=document.createElement('div'); indic.className='exec-changed-indicator'; parent.appendChild(indic); }
-    // Przenieś indicator za wiersz (nie na koniec parent)
     if(indic.previousElementSibling!==row){ row.after(indic); }
-    indic.style.cssText='font-size:11px;font-weight:600;color:var(--amber-text);padding:3px 0 3px 8px;border-left:2px solid var(--amber);margin-top:2px;';
-    indic.textContent='⚠ Było: '+desc;
+    indic.style.cssText='font-size:11px;font-weight:600;line-height:1.3;padding:2px 0 2px 8px;border-left:2px solid var(--amber);margin:1px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;';
+    var noteVal=ex.targetSets[si]._note||'';
+    indic.innerHTML='<span style="color:var(--amber-text);">⚠ Było: '+desc+'</span>'+(noteVal?'<span style="color:var(--text);"> · '+noteVal.replace(/</g,'&lt;')+'</span>':'');
   } else {
     if(indic) indic.remove();
   }
@@ -947,6 +951,48 @@ function _confirmSaveExec(){
     return;
   }
   saveExecutedPlan();
+}
+
+// ── Podgląd sesji ──
+function _openExecPreview(){
+  if(!_execPlan) return;
+  var st=_getExecStats(); var pct=st.total?Math.round(st.done/st.total*100):0;
+  var ton=0; _execPlan.exercises.forEach(function(ex){ if(ex.type==='note') return; (ex.targetSets||[]).forEach(function(s){ var r=parseFloat(s.reps)||0; var l=parseFloat(s.load)||0; ton+=r*l; }); }); ton=Math.round(ton);
+  var existing=document.getElementById('exec-preview-modal'); if(existing) existing.remove();
+  var modal=document.createElement('div'); modal.id='exec-preview-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.onclick=function(e){ if(e.target===modal) modal.remove(); };
+  var html='<div style="max-width:500px;width:calc(100% - 32px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:18px;max-height:80vh;overflow-y:auto;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'
+    +'<div style="font-size:15px;font-weight:800;color:var(--text);">👁 Podgląd sesji</div>'
+    +'<button onclick="document.getElementById(\'exec-preview-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</button></div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">'+_execPlan.name+'</div>'
+    +'<div style="display:flex;gap:12px;margin-bottom:12px;">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--text);">'+st.done+'/'+st.total+' serii · '+pct+'%</div>'
+    +(ton>0?'<div style="font-size:13px;font-weight:700;color:var(--accent);">📊 '+(ton>=1000?(ton/1000).toFixed(1)+'t':ton+' kg')+'</div>':'')
+    +'</div>';
+  // Lista ćwiczeń kompaktowa
+  _execPlan.exercises.forEach(function(ex){
+    if(ex.type==='note'){ html+='<div style="font-size:11px;color:var(--muted);font-style:italic;padding:3px 0;">📝 '+(ex.text||'').substring(0,60)+'</div>'; return; }
+    var cat=EXERCISE_LIBRARY[ex.exCat]||{color:'#888',fields:['reps','load']}; var fields=cat.fields;
+    var done=0,total2=(ex.targetSets||[]).length; (ex.targetSets||[]).forEach(function(s){ if(s._checked) done++; });
+    var setsDesc=(ex.targetSets||[]).map(function(s,si){
+      var pp=[]; if(s.reps) pp.push(s.reps); if(s.load) pp.push(s.load+'kg'); if(s.rir) pp.push('RIR'+s.rir); if(s.time) pp.push(s.time+'s');
+      return pp.join('×')||'—';
+    }).join(', ');
+    var statusColor=done>=total2?'var(--green-text)':done>0?'var(--amber-text)':'var(--dim)';
+    var statusTxt=done>=total2?'✓':done+'/'+total2;
+    html+='<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);">'
+      +'<span style="font-size:11px;font-weight:800;color:'+statusColor+';min-width:24px;">'+statusTxt+'</span>'
+      +(ex.label?'<span style="font-size:10px;font-weight:900;color:var(--dim);">'+ex.label+'</span>':'')
+      +'<span style="font-size:12px;font-weight:700;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+ex.exercise+'</span>'
+      +'<span style="font-size:10px;color:var(--dim);">'+setsDesc+'</span>'
+      +'</div>';
+  });
+  html+='<button onclick="document.getElementById(\'exec-preview-modal\').remove()" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;margin-top:12px;">Zamknij</button></div>';
+  var box=document.createElement('div'); box.innerHTML=html;
+  modal.appendChild(box.firstChild);
+  document.body.appendChild(modal);
 }
 
 // ── Zapis wykonanej sesji ──
