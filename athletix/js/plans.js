@@ -191,7 +191,7 @@ function _renderPlanEditorOverlay(ov,isNew){
 function _peFilterAllEx(){
   var zone=(document.getElementById('pe-zone-sel')||{}).value||'';
   var sel=document.getElementById('pe-all-ex-sel'); if(!sel) return;
-  sel.innerHTML='<option value="">+ Dodaj ćwiczenie...</option>';
+  sel.innerHTML='<option value="">+ Dodaj ćwiczenie...</option><option value="__custom__">✏️ Wpisz własne...</option>';
   var favOg=_buildFavOptgroup(zone); if(favOg) sel.appendChild(favOg);
   Object.keys(EXERCISE_LIBRARY).forEach(function(catKey){
     var cat=EXERCISE_LIBRARY[catKey]; var icon=_catIcon(catKey);
@@ -208,6 +208,7 @@ function _peFilterAllEx(){
 }
 function _peQuickAdd(){
   var sel=document.getElementById('pe-all-ex-sel'); if(!sel||!sel.value) return;
+  if(sel.value==='__custom__'){ sel.value=''; _showCustomExInput('pe-all-ex-sel',function(name){ var s={note:'',reps:'',load:''}; _editingPlan.exercises.push({type:'exercise',label:'',exCat:null,exZone:null,exercise:name,isCustomEntry:true,targetSets:[s],note:''}); _rfPeEx(); }); return; }
   var opt=sel.options[sel.selectedIndex];
   var catKey=opt.getAttribute('data-cat'); var zone=opt.getAttribute('data-zone');
   var name=sel.value.replace(/^★ /,'');
@@ -813,7 +814,7 @@ function _showExecAddEx(){
 function _execFilterSel(){
   var zone=(document.getElementById('exec-zone-sel')||{}).value||'';
   var sel=document.getElementById('exec-ex-sel'); if(!sel) return;
-  sel.innerHTML='<option value="">Wybierz ćwiczenie...</option>';
+  sel.innerHTML='<option value="">Wybierz ćwiczenie...</option><option value="__custom__">✏️ Wpisz własne...</option>';
   var favOg=_buildFavOptgroup(zone); if(favOg) sel.appendChild(favOg);
   Object.keys(EXERCISE_LIBRARY).forEach(function(catKey){
     var cat=EXERCISE_LIBRARY[catKey]; var icon=_catIcon(catKey);
@@ -829,6 +830,7 @@ function _execFilterSel(){
 }
 function _execPickEx(){
   var sel=document.getElementById('exec-ex-sel'); if(!sel||!sel.value) return;
+  if(sel.value==='__custom__'){ sel.value=''; _showCustomExInput('exec-ex-sel',function(name){ var s={_note:'',_checked:false,reps:'',load:''}; _execPlan.exercises.push({type:'exercise',label:'',exCat:null,exZone:null,exercise:name,note:'',_origSets:[],targetSets:[s],isExtra:true}); document.getElementById('exec-add-inline').style.display='none'; var c=el('plan-exec-list'); if(c) _renderExecCards(c); }); return; }
   var opt=sel.options[sel.selectedIndex];
   var catKey=opt.getAttribute('data-cat')||''; var zone=opt.getAttribute('data-zone')||'';
   var name=sel.value.replace(/^★ /,'');

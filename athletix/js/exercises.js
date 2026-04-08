@@ -131,7 +131,7 @@ function _catIcon(key){ return {sila:'🏋️',wyt_sil:'💪',eksplozywnosc:'⚡
 function _strFilterAllEx(){
   var zone=(el('str-zone-sel')||{}).value||'';
   var sel=el('str-exercise-sel'); if(!sel) return;
-  sel.innerHTML='<option value="">Wybierz ćwiczenie...</option>';
+  sel.innerHTML='<option value="">Wybierz ćwiczenie...</option><option value="__custom__">✏️ Wpisz własne...</option>';
   loadCustomExercises();
   // Ulubione na górze
   var favOg=_buildFavOptgroup(zone); if(favOg) sel.appendChild(favOg);
@@ -150,6 +150,7 @@ function _strFilterAllEx(){
 }
 function _strQuickSelect(){
   var sel=el('str-exercise-sel'); if(!sel||!sel.value) return;
+  if(sel.value==='__custom__'){ sel.value=''; _showCustomExInput('str-exercise-sel',function(name){ _exCat=''; _exZone=''; _exName=name; initExSets(); el('ex-sets-wrap').style.display='block'; el('ex-general-wrap').style.display='block'; el('ex-save-wrap').style.display='block'; }); return; }
   var opt=sel.options[sel.selectedIndex];
   var catKey=opt.getAttribute('data-cat'); var zone=opt.getAttribute('data-zone');
   _exCat=catKey||''; _exZone=zone||''; _exName=sel.value.replace(/^★ /,'');
@@ -642,4 +643,23 @@ function _renderStrengthReportEntry(n, idx){
 }
 
 // Init on load
+// ── Wspólna funkcja: inline input "Wpisz własne" zamiast selecta ──
+function _showCustomExInput(selectId, onConfirm){
+  var sel=document.getElementById(selectId); if(!sel) return;
+  sel.style.display='none';
+  var wrap=document.createElement('div'); wrap.id=selectId+'-custom-wrap';
+  wrap.style.cssText='display:flex;gap:6px;align-items:center;';
+  wrap.innerHTML='<input id="'+selectId+'-custom-inp" type="text" placeholder="Nazwa ćwiczenia..." style="flex:1;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:600;outline:none;box-sizing:border-box;min-height:40px;"/>'
+    +'<button id="'+selectId+'-custom-ok" style="width:36px;height:36px;background:var(--accent);border:none;border-radius:10px;cursor:pointer;font-size:16px;color:#fff;display:flex;align-items:center;justify-content:center;">✓</button>'
+    +'<button id="'+selectId+'-custom-cancel" style="width:36px;height:36px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;cursor:pointer;font-size:14px;color:var(--muted);display:flex;align-items:center;justify-content:center;">✕</button>';
+  sel.parentNode.insertBefore(wrap,sel.nextSibling);
+  var inp=document.getElementById(selectId+'-custom-inp');
+  setTimeout(function(){ inp.focus(); },50);
+  function confirm(){ var name=(inp.value||'').trim(); if(!name) return; wrap.remove(); sel.style.display=''; sel.value=''; onConfirm(name); }
+  function cancel(){ wrap.remove(); sel.style.display=''; sel.value=''; }
+  document.getElementById(selectId+'-custom-ok').onclick=confirm;
+  document.getElementById(selectId+'-custom-cancel').onclick=cancel;
+  inp.onkeydown=function(e){ if(e.key==='Enter'){ e.preventDefault(); confirm(); } if(e.key==='Escape') cancel(); };
+}
+
 document.addEventListener('DOMContentLoaded',function(){ loadCustomExercises(); loadFavEx(); initExCatChips(); _strFilterAllEx(); _renderStrFavChips(); });
