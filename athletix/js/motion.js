@@ -212,11 +212,22 @@ function _mHUD(){
   var lives=''; for(var i=0;i<3;i++) lives+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(i<_gameLives?'var(--red)':'rgba(255,255,255,.15)')+';margin-left:3px;"></span>';
   var ch=getLevelCharacter(_gameLevel);
   var comboHtml=_gameCombo>=3?'<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);z-index:11;font-size:14px;font-weight:900;color:#f59e0b;background:rgba(245,158,11,.1);padding:4px 14px;border-radius:20px;animation:mBtnPulse .6s infinite;">🔥 x'+_gameCombo+' COMBO</div>':'';
+  var avgMs=_gameTimes.length?Math.round(_gameTimes.reduce(function(a,b){return a+b;},0)/_gameTimes.length):0;
+  var prMs=_gameTimes.length?Math.min.apply(null,_gameTimes):0;
+  var statsHtml=_gameTimes.length?'<div style="position:absolute;top:44px;left:16px;z-index:10;display:flex;gap:10px;"><span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);">Śr: '+avgMs+'ms</span><span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);">PR: '+prMs+'ms</span></div>':'';
   return '<div style="position:absolute;top:0;left:0;right:0;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10;background:linear-gradient(to bottom,rgba(6,6,6,.9),transparent);height:42px;">'
     +'<span style="font-size:20px;font-weight:900;color:var(--accent);transition:transform .2s;" id="m-pts">⚡ '+_gamePoints+'</span>'
     +'<span style="font-size:12px;font-weight:700;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);padding:3px 10px;border-radius:12px;">'+ch.emoji+' Lv.'+_gameLevel+'</span>'
     +'<div style="display:flex;align-items:center;gap:4px;">'+lives+'<button class="lock-btn" onclick="lockScreen()" style="margin-left:4px;font-size:12px;">🔒</button></div></div>'
-    +comboHtml;
+    +statsHtml+comboHtml;
+}
+function _mTimeAnim(ms){
+  var col=ms<250?'var(--green-text)':ms<400?'var(--accent)':ms<600?'var(--amber-text)':'var(--red-text)';
+  var d=document.createElement('div'); d.style.cssText='position:fixed;top:52%;left:50%;transform:translate(-50%,0);font-size:20px;font-weight:800;color:'+col+';z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;';
+  d.textContent=ms+'ms'; document.getElementById('motion-active').appendChild(d);
+  requestAnimationFrame(function(){ d.style.opacity='1'; });
+  setTimeout(function(){ d.style.transition='opacity .3s'; d.style.opacity='0'; },700);
+  setTimeout(function(){ d.remove(); },1000);
 }
 function _mPtsAnim(text,color){
   var d=document.createElement('div'); d.style.cssText='position:fixed;top:45%;left:50%;transform:translate(-50%,0);font-size:28px;font-weight:900;color:'+color+';z-index:20;pointer-events:none;transition:all .6s ease-out;opacity:1;';
@@ -358,6 +369,8 @@ function _finishTrial(clearFn,rc,rt,stimTime,correct,errType,trialResults,idx,cf
     if(mult>1){ _sndCombo(); _mPtsAnim('+'+earned+' ⚡ x'+_gameCombo,'#fb923c'); }
     else if(earned>0){ _sndGood(); _mPtsAnim('+'+earned+' ⚡'+(sc.label?' '+sc.label:''),'var(--green-text)'); }
     else { _sndGood(); }
+    // Animacja czasu pod punktami
+    _mTimeAnim(t);
     var col=t<250?'var(--green-text)':t<400?'var(--accent)':t<600?'var(--amber-text)':'var(--red-text)';
     var ma=el('motion-active');
     // Flash tła
@@ -436,11 +449,12 @@ function _showGameOver(){
     +'<div style="font-size:22px;font-weight:900;color:'+(isOver?'var(--red-text)':'var(--green-text)')+';">'+(isOver?'GAME OVER':'KONIEC GRY')+'</div>'
     +'<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.5);margin-top:2px;">'+ch.name+' • Level '+_gameLevel+'</div>'
     +'<div style="font-size:40px;font-weight:900;color:var(--accent);margin-top:8px;">⚡ '+_gamePoints+'</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;max-width:280px;margin-left:auto;margin-right:auto;">'
-    +'<div style="font-size:13px;font-weight:700;color:'+col+';">Śr.: '+avg+'ms</div>'
-    +'<div style="font-size:13px;font-weight:700;color:var(--green-text);">Best: '+best+'ms</div>'
-    +'<div style="font-size:13px;font-weight:700;color:#fb923c;">Combo: x'+_gameMaxCombo+'</div>'
-    +'<div style="font-size:13px;font-weight:700;color:#fff;">Celność: '+acc+'%</div></div>'
+    +'<div style="font-size:16px;font-weight:800;color:'+col+';margin-top:10px;">⚡ Średni czas: '+avg+'ms</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;max-width:280px;margin-left:auto;margin-right:auto;">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--green-text);">🏆 Best: '+best+'ms</div>'
+    +'<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.5);">📊 Worst: '+(_gameTimes.length?Math.max.apply(null,_gameTimes):0)+'ms</div>'
+    +'<div style="font-size:14px;font-weight:700;color:#fff;">🎯 Celność: '+acc+'%</div>'
+    +'<div style="font-size:14px;font-weight:700;color:#f59e0b;">🔥 Combo: x'+_gameMaxCombo+'</div></div>'
     +(newCharUnlocked?'<div style="font-size:13px;font-weight:800;color:var(--accent);margin-top:10px;">🆕 Nowa postać: '+ch.emoji+' '+ch.name+'!</div>':'')
     +compareHtml
     +'<div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
