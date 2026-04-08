@@ -4,7 +4,17 @@
 // ═══════════════════════════════════════
 
 var gamificationData={};
-function loadGamification(){ try{ gamificationData=JSON.parse(localStorage.getItem('axs_gamification')||'{}'); }catch(e){ gamificationData={}; } }
+function loadGamification(){
+  try{ gamificationData=JSON.parse(localStorage.getItem('axs_gamification')||'{}'); }catch(e){ gamificationData={}; }
+  // Auto-korekta poziomów po zmianie tabeli rang
+  var changed=false;
+  Object.keys(gamificationData).forEach(function(name){
+    var gp=gamificationData[name]; if(!gp) return;
+    var rank=getRank(gp.totalPoints||0);
+    if(gp.level!==rank.level){ gp.level=rank.level; changed=true; }
+  });
+  if(changed) saveGamification();
+}
 function saveGamification(){ localStorage.setItem('axs_gamification',JSON.stringify(gamificationData)); }
 
 function getGamProfile(name){
@@ -14,17 +24,19 @@ function getGamProfile(name){
 
 // ── Tabela rang ──
 var RANK_TABLE=[
-  {level:1,points:0,name:'Nowicjusz',color:'#9ca3af',emoji:'🌱'},
-  {level:3,points:100,name:'Początkujący',color:'#6b7280',emoji:'🌿'},
-  {level:5,points:300,name:'Adept',color:'#3b82f6',emoji:'💧'},
-  {level:8,points:700,name:'Regularny',color:'#2563eb',emoji:'💪'},
-  {level:12,points:1500,name:'Wojownik',color:'#7c3aed',emoji:'⚔️'},
-  {level:16,points:3000,name:'Weteran',color:'#9333ea',emoji:'🛡️'},
-  {level:20,points:5000,name:'Gladiator',color:'#d97706',emoji:'🏛️'},
-  {level:25,points:8000,name:'Spartanin',color:'#ea580c',emoji:'🔥'},
-  {level:30,points:12000,name:'Mistrz',color:'#dc2626',emoji:'👑'},
-  {level:40,points:20000,name:'Legenda',color:'#eab308',emoji:'⭐'},
-  {level:50,points:35000,name:'Bóg Olimpu',color:'#fbbf24',emoji:'🏆'}
+  {level:1,points:0,name:'Nowicjusz',color:'#9ca3af',emoji:'🌱',desc:'Każda legenda zaczynała od pierwszego powtórzenia. Chodź, rozgrzewka czeka.'},
+  {level:2,points:200,name:'Debiutant',color:'#6b7280',emoji:'🌿',desc:'Zakwasy to dowód, że mięśnie wiedzą, że istniejesz. Brawo.'},
+  {level:3,points:500,name:'Początkujący',color:'#22c55e',emoji:'🍀',desc:'Trening to już nawyk, nie kara. Tak trzymaj.'},
+  {level:5,points:1000,name:'Regularny',color:'#3b82f6',emoji:'💧',desc:'Konsekwencja bije talent. A Ty jesteś konsekwentny.'},
+  {level:7,points:2000,name:'Adept',color:'#2563eb',emoji:'💪',desc:'Zaczynasz czuć różnicę. Inni zaczynają ją widzieć.'},
+  {level:10,points:4000,name:'Wojownik',color:'#7c3aed',emoji:'⚔️',desc:'Nie trenujesz bo musisz. Trenujesz bo to część tego kim jesteś.'},
+  {level:13,points:7000,name:'Weteran',color:'#9333ea',emoji:'🛡️',desc:'Rok za rokiem, seria za serią. Twoja dyscyplina jest inspiracją.'},
+  {level:16,points:12000,name:'Gladiator',color:'#d97706',emoji:'🏛️',desc:'Arena jest Twoja. Każdy trening to kolejna walka — i kolejne zwycięstwo.'},
+  {level:20,points:20000,name:'Spartanin',color:'#ea580c',emoji:'🔥',desc:'Nie znasz słowa "odpuszczam". Twoje ciało jest Twoją twierdzą.'},
+  {level:25,points:35000,name:'Mistrz',color:'#dc2626',emoji:'👑',desc:'Lata treningu. Tysiące powtórzeń. Jesteś dowodem na to, że się da.'},
+  {level:30,points:55000,name:'Legenda',color:'#eab308',emoji:'⭐',desc:'Twoje imię jest synonimem determinacji. Elevate Your Game — i innych.'},
+  {level:40,points:85000,name:'Titan',color:'#f59e0b',emoji:'🏔️',desc:'Góry się nie przesuwają. Ale Ty owszem. Od lat.'},
+  {level:50,points:130000,name:'Bóg Olimpu',color:'#fbbf24',emoji:'🏆',desc:'Jeśli ktoś mówi że to niemożliwe — pokaż mu swój profil. Elevate Your Game. ⚡'}
 ];
 function getRank(pts){ var r=RANK_TABLE[0]; for(var i=RANK_TABLE.length-1;i>=0;i--){ if(pts>=RANK_TABLE[i].points){ r=RANK_TABLE[i]; break; } } return r; }
 function getNextRank(pts){ for(var i=0;i<RANK_TABLE.length;i++){ if(pts<RANK_TABLE[i].points) return RANK_TABLE[i]; } return null; }
@@ -91,9 +103,8 @@ function showLevelUp(athleteName,rank){
   box.innerHTML='<div style="font-size:56px;margin-bottom:8px;">'+rank.emoji+'</div>'
     +'<div style="font-size:22px;font-weight:900;color:'+rank.color+';margin-bottom:4px;">⚡ AWANS!</div>'
     +'<div style="font-size:16px;font-weight:700;color:var(--text);">'+rank.name+' • Poziom '+rank.level+'</div>'
-    +'<div style="font-size:13px;color:var(--muted);margin-top:6px;">Twój ATP rośnie!</div>'
-    +'<div style="font-size:12px;font-weight:800;color:var(--accent);margin-top:8px;">Elevate Your Game ⚡</div>'
-    +'<div style="font-size:11px;color:var(--dim);margin-top:4px;">'+athleteName+'</div>';
+    +(rank.desc?'<div style="font-size:13px;font-weight:500;font-style:italic;color:var(--muted);line-height:1.5;margin-top:10px;max-width:280px;margin-left:auto;margin-right:auto;">'+rank.desc+'</div>':'')
+    +'<div style="font-size:11px;font-weight:800;color:var(--accent);margin-top:12px;">Elevate Your Game ⚡</div>';
   ov.appendChild(box); document.body.appendChild(ov);
   requestAnimationFrame(function(){ ov.style.opacity='1'; box.style.transform='scale(1)'; });
   launchConfetti();
@@ -159,13 +170,17 @@ function openATPInfoModal(athleteName){
     +'🔥 Regularny trening co tydzień → bonus ATP<br>'
     +'📝 Notatka treningowa → +ATP</div>'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:14px;margin-bottom:6px;">Rangi</div>';
-  RANK_TABLE.forEach(function(r){
+  RANK_TABLE.forEach(function(r,ri){
     var isCurrent=r.level===curRank.level;
-    h+='<div style="padding:7px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">'
+    h+='<div style="padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="var d=this.querySelector(\'.rank-desc\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\';">'
+      +'<div style="display:flex;align-items:center;gap:8px;">'
       +'<span style="font-size:20px;">'+r.emoji+'</span>'
-      +'<span style="font-size:13px;font-weight:700;color:'+r.color+';flex:1;">'+r.name+'</span>'
-      +'<span style="font-size:10px;color:var(--dim);">'+r.points+' ATP</span>'
-      +(isCurrent?'<span style="font-size:9px;font-weight:800;color:var(--accent);background:var(--accent-bg);border-radius:10px;padding:2px 8px;">← Tu jesteś</span>':'')
+      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:'+r.color+';">'+r.name+'</div>'
+      +(r.desc?'<div style="font-size:10px;font-style:italic;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+r.desc+'</div>':'')+'</div>'
+      +'<span style="font-size:10px;color:var(--dim);">'+r.points+'</span>'
+      +(isCurrent?'<span style="font-size:9px;font-weight:800;color:var(--accent);background:var(--accent-bg);border-radius:10px;padding:2px 8px;flex-shrink:0;">← Tu</span>':'')
+      +'</div>'
+      +(r.desc?'<div class="rank-desc" style="display:none;font-size:11px;font-style:italic;color:var(--muted);line-height:1.4;padding:4px 0 2px 28px;">'+r.desc+'</div>':'')
       +'</div>';
   });
   h+='<div style="font-size:11px;font-style:italic;color:var(--muted);margin-top:8px;">🏆 Osiągnij szczyt. Elevate Your Game!</div>'
