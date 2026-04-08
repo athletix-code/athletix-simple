@@ -12,7 +12,7 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>AthletiX Simple — Sigma AthletiX</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=53">
+<link rel="stylesheet" href="css/app.css?v=54">
 </head>
 
 <!-- ════ SETTINGS ════ -->
@@ -627,6 +627,11 @@
   <div style="background:var(--s1);border:1px dashed var(--border2);border-radius:16px;padding:14px;margin-bottom:6px;opacity:.4;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:24px;">🏃</span><div><div style="font-size:15px;font-weight:800;color:var(--text);">Agility</div><div style="font-size:11px;color:var(--muted);">Zmiana kierunku, COD</div></div><span style="font-size:8px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-left:auto;">Wkrótce</span></div></div>
 
   <div id="motion-reaction-opts" style="display:block;margin-top:12px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Reakcja na</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;">
+      <button class="chip on-blue" id="mi-motion" onclick="_setMotionInput('motion')">📱 Ruch</button>
+      <button class="chip" id="mi-touch" onclick="_setMotionInput('touch')">👆 Dotyk</button>
+    </div>
     <div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Wybierz grę</div>
     <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
       <div id="mt-simple" onclick="_setMotionMode('simple')" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:2px solid var(--accent);border-radius:14px;cursor:pointer;font-family:Montserrat,sans-serif;"><span style="font-size:28px;">⚡</span><div style="flex:1;"><div style="font-size:13px;font-weight:800;color:var(--text);">Reakcja</div><div style="font-size:10px;color:var(--muted);">Reaguj na bodźce. Klasyka.</div></div><button onclick="event.stopPropagation();_setMotionMode('simple');startMotionGame()" style="width:44px;height:44px;border-radius:12px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(59,130,246,.3);">▶</button></div>
@@ -823,23 +828,23 @@
 </div>
 
 
-<script src="js/storage.js?v=53"></script>
-<script src="js/core.js?v=53"></script>
-<script src="js/timers.js?v=53"></script>
-<script src="js/athletes.js?v=53"></script>
-<script src="js/wallet.js?v=53"></script>
-<script src="js/status.js?v=53"></script>
-<script src="js/gamification.js?v=53"></script>
-<script src="js/exercises.js?v=53"></script>
-<script src="js/diary.js?v=53"></script>
-<script src="js/reports.js?v=53"></script>
-<script src="js/plans.js?v=53"></script>
-<script src="js/data.js?v=53"></script>
-<script src="js/settings.js?v=53"></script>
-<script src="js/supabase-config.js?v=53"></script>
-<script src="js/sync.js?v=53"></script>
-<script src="js/autogrow.js?v=53"></script>
-<script src="js/motion.js?v=53"></script>
+<script src="js/storage.js?v=54"></script>
+<script src="js/core.js?v=54"></script>
+<script src="js/timers.js?v=54"></script>
+<script src="js/athletes.js?v=54"></script>
+<script src="js/wallet.js?v=54"></script>
+<script src="js/status.js?v=54"></script>
+<script src="js/gamification.js?v=54"></script>
+<script src="js/exercises.js?v=54"></script>
+<script src="js/diary.js?v=54"></script>
+<script src="js/reports.js?v=54"></script>
+<script src="js/plans.js?v=54"></script>
+<script src="js/data.js?v=54"></script>
+<script src="js/settings.js?v=54"></script>
+<script src="js/supabase-config.js?v=54"></script>
+<script src="js/sync.js?v=54"></script>
+<script src="js/autogrow.js?v=54"></script>
+<script src="js/motion.js?v=54"></script>
 
 </body>
 </html>

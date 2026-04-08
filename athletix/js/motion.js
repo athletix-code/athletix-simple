@@ -146,13 +146,7 @@ function requestMotionPermission(cb){
   } else if(typeof DeviceMotionEvent!=='undefined'){ cb(true); }
   else { _desktopFallback=true; _setupDesktop(); cb(true); }
 }
-function _setupDesktop(){
-  if(_desktopFallback) return; _desktopFallback=true;
-  document.addEventListener('keydown',function(e){
-    if(!_motionState.listening) return;
-    if(e.key===' '||e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'){ e.preventDefault(); _motionState._keyPressed=e.key; }
-  });
-}
+function _setupDesktop(){ _desktopFallback=true; }
 
 // ── Akcelerometr ──
 function onMotionData(e){ var a=e.accelerationIncludingGravity; if(!a) return; _motionState.ax=a.x||0; _motionState.ay=a.y||0; _motionState.az=a.z||0; }
@@ -164,7 +158,10 @@ function calibrateMotion(cb){
     cb();
   },1000);
 }
-function detectMovement(){ var dx=Math.abs(_motionState.ax-_motionState.baseline.x),dy=Math.abs(_motionState.ay-_motionState.baseline.y); var th=_movementThreshold(_gameLevel); return dx>th||dy>th; }
+function detectMovement(){
+  if(_motionInputMode==='touch'||_desktopFallback) return !!_motionState._keyPressed;
+  var dx=Math.abs(_motionState.ax-_motionState.baseline.x),dy=Math.abs(_motionState.ay-_motionState.baseline.y); var th=_movementThreshold(_gameLevel); return dx>th||dy>th;
+}
 function detectDirection(){ var dx=_motionState.ax-_motionState.baseline.x,dy=_motionState.ay-_motionState.baseline.y,th=2.0+(5-_motionState.sensitivity)*0.6; if(Math.abs(dx)>Math.abs(dy)){ if(dx>th) return 'left'; if(dx<-th) return 'right'; } else { if(dy>th) return 'up'; if(dy<-th) return 'down'; } return null; }
 
 // ── Dźwięki ──
@@ -177,28 +174,95 @@ function _sndLevelUp(){ [500,600,700,800,1000].forEach(function(f,i){ setTimeout
 function _sndGameOver(){ _mBeep(400,0.1); setTimeout(function(){_mBeep(200,0.15);},100); }
 
 // ── Start gry ──
+// Input mode: 'motion' lub 'touch'
+var _motionInputMode='motion';
+function _setMotionInput(m){
+  _motionInputMode=m;
+  var mb=el('mi-motion'),mt=el('mi-touch');
+  if(mb){ mb.className='chip'+(m==='motion'?' on-blue':''); }
+  if(mt){ mt.className='chip'+(m==='touch'?' on-blue':''); }
+}
+// Desktop/touch click handler
+function _onMotionClick(e){
+  if(!_motionState.listening) return;
+  if(e.target.closest('.lock-btn,.pause-btn,button[onclick*="stop"],button[onclick*="Level"],button[onclick*="endGame"],button[onclick*="Retry"]')) return;
+  _motionState._keyPressed=' ';
+}
+function _addInputListeners(){
+  document.addEventListener('keydown',_onDesktopKey);
+  el('motion-active').addEventListener('click',_onMotionClick);
+  el('motion-active').addEventListener('touchstart',function _ts(e){
+    if(!_motionState.listening) return;
+    if(e.target.closest('button')) return;
+    _motionState._keyPressed=' ';
+  },{passive:true});
+}
+function _removeInputListeners(){
+  document.removeEventListener('keydown',_onDesktopKey);
+}
+function _onDesktopKey(e){
+  if(!_motionState.listening) return;
+  if(e.key===' '||e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'||e.key==='Enter'){ e.preventDefault(); _motionState._keyPressed=e.key; }
+}
+
 function startMotionGame(){
-  var maSel=el('motion-athlete');
-  if(maSel&&!maSel.value){ maSel.style.borderColor='var(--red)'; setTimeout(function(){ maSel.style.borderColor=''; },500); return; }
   requestMotionPermission(function(ok){
-    if(!ok){ alert('Zezwól na czujniki ruchu.'); return; }
+    if(!ok&&_motionInputMode==='motion'){ _motionInputMode='touch'; }
     _motionAbort=false; _motionRunning=true;
     _gamePoints=0; _gameLives=3; _gameLevel=1; _gameCombo=0; _gameMaxCombo=0; _gameTotalTrials=0; _gameCorrect=0; _gameTimes=[];
     el('settings').style.display='none'; el('motion-active').style.display='block';
     reqWL(); goFS();
-    _motionHandler=onMotionData;
-    if(!_desktopFallback) window.addEventListener('devicemotion',_motionHandler); else _setupDesktop();
-    _motionCountdown(function(){
-      el('motion-active').innerHTML=_mScreen('Kalibracja...','Trzymaj telefon nieruchomo','');
-      calibrateMotion(function(){ _startLevel(_gameLevel); });
-    });
+    // Przycisk zamknij ✕
+    var closeBtn=document.createElement('button'); closeBtn.id='motion-close-btn';
+    closeBtn.style.cssText='position:fixed;top:12px;right:12px;z-index:20;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+    closeBtn.textContent='✕'; closeBtn.onclick=_confirmCloseMotion;
+    el('motion-active').appendChild(closeBtn);
+    // Input
+    if(_motionInputMode==='motion'&&!_desktopFallback){
+      _motionHandler=onMotionData; window.addEventListener('devicemotion',_motionHandler);
+    }
+    _addInputListeners();
+    // Kalibracja lub od razu
+    if(_motionInputMode==='touch'||_desktopFallback){
+      _motionCountdown(function(){ _startLevel(_gameLevel); });
+    } else {
+      _motionCountdown(function(){
+        el('motion-active').innerHTML=_mScreen('Kalibracja...','Trzymaj telefon nieruchomo','');
+        var cb2=document.getElementById('motion-close-btn'); if(!cb2){ cb2=closeBtn.cloneNode(true); cb2.onclick=_confirmCloseMotion; el('motion-active').appendChild(cb2); }
+        calibrateMotion(function(){ _startLevel(_gameLevel); });
+      });
+    }
   });
 }
 function stopMotion(){
   _motionAbort=true; _motionRunning=false;
   if(_motionHandler) window.removeEventListener('devicemotion',_motionHandler);
+  _removeInputListeners();
+  var cb=document.getElementById('motion-close-btn'); if(cb) cb.remove();
+  var cm=document.getElementById('motion-confirm-close'); if(cm) cm.remove();
   el('motion-active').style.display='none'; el('settings').style.display='flex';
   relWL(); exitFS();
+}
+function _confirmCloseMotion(){
+  var existing=document.getElementById('motion-confirm-close'); if(existing) existing.remove();
+  var ov=document.createElement('div'); ov.id='motion-confirm-close';
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML='<div style="max-width:300px;width:100%;background:#1a1a1a;border-radius:16px;padding:20px;text-align:center;">'
+    +'<div style="font-size:16px;font-weight:800;color:#f2f2f2;margin-bottom:6px;">Zakończyć grę?</div>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:14px;">Twój postęp zostanie zapisany.</div>'
+    +'<button id="mc-end" style="width:100%;padding:12px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Zakończ</button>'
+    +'<button id="mc-resume" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:10px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:6px;">Wracam do gry!</button></div>';
+  document.body.appendChild(ov);
+  document.getElementById('mc-end').onclick=function(){ ov.remove(); _endGame(); _showSwipeTip(); };
+  document.getElementById('mc-resume').onclick=function(){ ov.remove(); };
+}
+function _showSwipeTip(){
+  try{ if(localStorage.getItem('axs_motion_swipe_tip_shown')) return; localStorage.setItem('axs_motion_swipe_tip_shown','1'); }catch(e){}
+  var tip=document.createElement('div');
+  tip.style.cssText='position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;padding:8px 16px;border-radius:20px;z-index:30;transition:opacity .3s;';
+  tip.textContent='💡 Tip: możesz też zamykać ściągając palcem w dół';
+  document.body.appendChild(tip);
+  setTimeout(function(){ tip.style.opacity='0'; setTimeout(function(){ tip.remove(); },300); },3000);
 }
 
 function _motionCountdown(cb){
@@ -470,10 +534,12 @@ function _showGameOver(){
     +_mResultTiles(avg,best,acc)
     +'<div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_motionRetry()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Zagraj ponownie</button>'
-    +'<button onclick="stopMotion()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">🏠 Wróć</button></div></div>';
+    +'<button onclick="stopMotion()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">🏠 Wróć</button>'
+    +(!athlete?'<div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:8px;">Wybierz zawodnika żeby zapisywać wyniki i zdobywać ATP</div>':'')
+    +'</div></div>';
 
-  // Zapis + ATP
-  _saveMotionResult(athlete,avg,best,_gameLevel,acc,_gameMaxCombo);
+  // Zapis + ATP (tylko z zawodnikiem)
+  if(athlete) _saveMotionResult(athlete,avg,best,_gameLevel,acc,_gameMaxCombo);
   if(athlete&&typeof addPoints==='function'){
     var atpEarned=15+Math.max(0,(_gameLevel-3)*5);
     addPoints(athlete,'motion',atpEarned,'Reakcja Lv.'+_gameLevel+': '+avg+'ms');
