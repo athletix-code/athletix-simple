@@ -12,7 +12,7 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>AthletiX Simple — Sigma AthletiX</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=41">
+<link rel="stylesheet" href="css/app.css?v=42">
 </head>
 
 <!-- ════ SETTINGS ════ -->
@@ -619,8 +619,9 @@
     <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px;">Performance & Rehab Movement System</div>
   </div>
   <div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Moduł</div>
-  <div onclick="document.getElementById('motion-reaction-opts').style.display='block'" style="background:var(--s1);border:2px solid var(--accent);border-radius:16px;padding:16px;margin-bottom:6px;cursor:pointer;">
-    <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:24px;">⚡</span><div><div style="font-size:15px;font-weight:800;color:var(--text);">Reakcja</div><div style="font-size:11px;color:var(--muted);">Czas reakcji, decyzje, Go/No-Go</div></div></div>
+  <div onclick="document.getElementById('motion-reaction-opts').style.display='block'" style="background:var(--s1);border:2px solid var(--accent);border-radius:16px;padding:16px;margin-bottom:6px;cursor:pointer;position:relative;">
+    <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:24px;">⚡</span><div><div style="font-size:15px;font-weight:800;color:var(--text);">Reakcja</div><div style="font-size:11px;color:var(--muted);">Czas reakcji, decyzje, Go/No-Go · Nieskończone levele</div></div></div>
+    <button onclick="event.stopPropagation();openMotionInfo()" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:16px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;">ℹ️</button>
   </div>
   <div style="background:var(--s1);border:1px dashed var(--border2);border-radius:16px;padding:14px;margin-bottom:6px;opacity:.4;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:24px;">🎯</span><div><div style="font-size:15px;font-weight:800;color:var(--text);">Stabilność</div><div style="font-size:11px;color:var(--muted);">Kontrola postawy, równowaga</div></div><span style="font-size:8px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-left:auto;">Wkrótce</span></div></div>
   <div style="background:var(--s1);border:1px dashed var(--border2);border-radius:16px;padding:14px;margin-bottom:6px;opacity:.4;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:24px;">🏃</span><div><div style="font-size:15px;font-weight:800;color:var(--text);">Agility</div><div style="font-size:11px;color:var(--muted);">Zmiana kierunku, COD</div></div><span style="font-size:8px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-left:auto;">Wkrótce</span></div></div>
@@ -631,13 +632,6 @@
       <button class="chip on-blue" id="mt-simple" onclick="_setMotionMode('simple')">Prosty</button>
       <button class="chip" id="mt-dirs" onclick="_setMotionMode('directions')">Kierunki</button>
       <button class="chip" id="mt-gonogo" onclick="_setMotionMode('gonogo')">Go/No-Go</button>
-    </div>
-    <div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Ilość prób</div>
-    <div style="display:flex;gap:6px;margin-bottom:12px;">
-      <button class="chip" id="mt-t5" onclick="_setMotionTrials(5)">5</button>
-      <button class="chip on-blue" id="mt-t10" onclick="_setMotionTrials(10)">10</button>
-      <button class="chip" id="mt-t15" onclick="_setMotionTrials(15)">15</button>
-      <button class="chip" id="mt-t20" onclick="_setMotionTrials(20)">20</button>
     </div>
     <div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Zawodnik</div>
     <select class="crm-input" id="motion-athlete" style="margin-bottom:12px;"><option value="">Bez zawodnika</option></select>
@@ -822,23 +816,23 @@
 </div>
 
 
-<script src="js/storage.js?v=41"></script>
-<script src="js/core.js?v=41"></script>
-<script src="js/timers.js?v=41"></script>
-<script src="js/athletes.js?v=41"></script>
-<script src="js/wallet.js?v=41"></script>
-<script src="js/status.js?v=41"></script>
-<script src="js/gamification.js?v=41"></script>
-<script src="js/exercises.js?v=41"></script>
-<script src="js/diary.js?v=41"></script>
-<script src="js/reports.js?v=41"></script>
-<script src="js/plans.js?v=41"></script>
-<script src="js/data.js?v=41"></script>
-<script src="js/settings.js?v=41"></script>
-<script src="js/supabase-config.js?v=41"></script>
-<script src="js/sync.js?v=41"></script>
-<script src="js/autogrow.js?v=41"></script>
-<script src="js/motion.js?v=41"></script>
+<script src="js/storage.js?v=42"></script>
+<script src="js/core.js?v=42"></script>
+<script src="js/timers.js?v=42"></script>
+<script src="js/athletes.js?v=42"></script>
+<script src="js/wallet.js?v=42"></script>
+<script src="js/status.js?v=42"></script>
+<script src="js/gamification.js?v=42"></script>
+<script src="js/exercises.js?v=42"></script>
+<script src="js/diary.js?v=42"></script>
+<script src="js/reports.js?v=42"></script>
+<script src="js/plans.js?v=42"></script>
+<script src="js/data.js?v=42"></script>
+<script src="js/settings.js?v=42"></script>
+<script src="js/supabase-config.js?v=42"></script>
+<script src="js/sync.js?v=42"></script>
+<script src="js/autogrow.js?v=42"></script>
+<script src="js/motion.js?v=42"></script>
 
 </body>
 </html>
