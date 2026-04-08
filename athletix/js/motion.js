@@ -407,23 +407,23 @@ function _showLevelComplete(lv,trialResults){
   var moveHint=lv<4?'Delikatny ruch wystarczy 🤏':lv<7?'Ruszaj się zdecydowanie! 💪':lv<11?'Potrzeba mocnego ruchu! 🏋️':'Full power! Daj z siebie wszystko! 🔥';
   var avgCol=lvAvg<250?'#4ade80':lvAvg<400?'#3b82f6':lvAvg<600?'#d97706':'#dc2626';
   var accCol=lvAcc>90?'#4ade80':lvAcc>70?'#3b82f6':'#d97706';
-  var tileS='flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:8px 6px;text-align:center;';
+  var tileS='background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;text-align:center;';
   var ma=el('motion-active');
   ma.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 20px;box-sizing:border-box;">'
     +'<div style="font-size:48px;margin-bottom:4px;">'+ch.emoji+'</div>'
-    +'<div style="font-size:18px;font-weight:900;color:var(--green-text);margin-bottom:2px;">'+ch.name+'</div>'
-    +'<div style="font-size:12px;font-style:italic;color:rgba(255,255,255,.5);margin-bottom:6px;">'+ch.desc+'</div>'
+    +'<div style="font-size:20px;font-weight:900;color:#f2f2f2;margin-bottom:2px;">'+ch.name+'</div>'
+    +'<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,.65);margin-bottom:8px;">'+ch.desc+'</div>'
     +'<div style="font-size:14px;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:4px;">✅ LEVEL '+lv+' UKOŃCZONY!</div>'
-    +'<div style="font-size:32px;font-weight:900;color:var(--accent);">⚡ '+_gamePoints+'</div>'
-    // Kafelki statystyk levelu
-    +'<div style="display:flex;gap:6px;margin:12px auto 8px;max-width:320px;">'
-    +'<div style="'+tileS+'"><div style="font-size:14px;font-weight:800;color:'+avgCol+';">'+lvAvg+'ms</div><div style="font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:3px;">Średni</div></div>'
-    +'<div style="'+tileS+'"><div style="font-size:14px;font-weight:800;color:#4ade80;">'+lvBest+'ms</div><div style="font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:3px;">PR</div></div>'
-    +'<div style="'+tileS+'"><div style="font-size:14px;font-weight:800;color:'+accCol+';">'+lvAcc+'%</div><div style="font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:3px;">🎯 Celność</div></div>'
-    +'<div style="'+tileS+'"><div style="font-size:14px;font-weight:800;color:#f59e0b;">x'+lvCombo+'</div><div style="font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:3px;">🔥 Combo</div></div>'
+    +'<div style="font-size:18px;font-weight:800;color:var(--accent);">⚡ '+_gamePoints+' punktów</div>'
+    // Kafelki statystyk levelu — grid 2×2
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px auto 10px;max-width:300px;">'
+    +'<div style="'+tileS+'"><div style="font-size:20px;font-weight:900;color:'+avgCol+';">'+lvAvg+'ms</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;">Średni czas</div><div style="font-size:9px;font-weight:500;color:rgba(255,255,255,.4);margin-top:2px;">średnia reakcja w tym levelu</div></div>'
+    +'<div style="'+tileS+'"><div style="font-size:20px;font-weight:900;color:#4ade80;">'+lvBest+'ms</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;">Najlepszy</div><div style="font-size:9px;font-weight:500;color:rgba(255,255,255,.4);margin-top:2px;">Twój najszybszy moment</div></div>'
+    +'<div style="'+tileS+'"><div style="font-size:20px;font-weight:900;color:'+accCol+';">'+lvAcc+'%</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;">Celność</div><div style="font-size:9px;font-weight:500;color:rgba(255,255,255,.4);margin-top:2px;">poprawne / wszystkie</div></div>'
+    +'<div style="'+tileS+'"><div style="font-size:20px;font-weight:900;color:#f59e0b;">x'+lvCombo+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;">Max combo</div><div style="font-size:9px;font-weight:500;color:rgba(255,255,255,.4);margin-top:2px;">reakcji z rzędu &lt; 350ms</div></div>'
     +'</div>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,.25);margin-bottom:2px;">'+msg+'</div>'
-    +'<div style="font-size:10px;color:rgba(255,255,255,.2);">'+moveHint+'</div>'
+    +'<div style="font-size:13px;font-weight:600;font-style:italic;color:rgba(255,255,255,.55);margin-bottom:2px;">'+msg+'</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.3);">'+moveHint+'</div>'
     +'<div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
     +'<button onclick="_endGame()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏁 Zakończ grę</button></div></div>';
