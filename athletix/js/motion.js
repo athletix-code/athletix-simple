@@ -41,20 +41,25 @@ function getFinalFeedback(avg,maxLv){
 }
 function _getBriefingRules(){
   var isTouch=(_motionInputMode==='touch'||_desktopFallback);
+  var isDsk=_isDesktopDetected;
   if(_motionMode==='simple'){
+    if(isDsk) return '• Czekaj na zielony sygnał<br>• Kliknij myszą lub naciśnij dowolny klawisz<br>• Im szybciej — tym więcej punktów<br>• Masz 3 życia — fałszywy start = tracisz jedno';
     if(isTouch) return '• Czekaj na zielony sygnał<br>• Tapnij w ekran jak najszybciej!<br>• Im szybciej — tym więcej punktów<br>• Masz 3 życia — fałszywy start = tracisz jedno';
     return '• Czekaj na zielony sygnał<br>• Przechyl telefon w dowolną stronę<br>• Trzymaj telefon w wyprostowanej ręce<br>• Masz 3 życia — fałszywy start = tracisz jedno';
   }
   if(_motionMode==='directions'){
+    if(isDsk) return '• Pojawi się strzałka ← → ↑ ↓<br>• Użyj strzałek ← → ↑ ↓ na klawiaturze<br>• Liczy się szybkość I precyzja<br>• Zły kierunek = błąd';
     if(isTouch) return '• Pojawi się strzałka ← → ↑ ↓<br>• Przesuń palcem w kierunku strzałki (swipe)<br>• Liczy się szybkość I precyzja<br>• Zły kierunek = błąd';
     return '• Pojawi się strzałka ← → ↑ ↓<br>• Przechyl telefon W KIERUNKU strzałki<br>• Trzymaj telefon w wyprostowanej ręce<br>• Zły kierunek = błąd';
   }
   if(_motionMode==='gonogo'){
+    if(isDsk) return '• 🟢 Zielone = kliknij lub naciśnij klawisz!<br>• 🔴 Czerwone = nie ruszaj się!<br>• Twój mózg będzie chciał zareagować na czerwone — nie daj się nabrać';
     if(isTouch) return '• 🟢 Zielone = tapnij w ekran!<br>• 🔴 Czerwone = NIE dotykaj ekranu!<br>• Twój mózg będzie chciał zareagować na czerwone — nie daj się nabrać';
     return '• 🟢 Zielone = przechyl telefon szybko!<br>• 🔴 Czerwone = STÓJ! Nie ruszaj się!<br>• Twój mózg będzie chciał zareagować na czerwone — nie daj się nabrać';
   }
   if(_motionMode==='pattern'){
     var pc=_patCfg(_gameLevel);
+    if(isDsk) return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → kliknij lub naciśnij klawisz!<br>• Gdy nie pasuje → czekaj';
     if(isTouch&&pc.pos==='quad') return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → przesuń palcem w kierunku wzorca (swipe)<br>• Gdy nie pasuje → nie dotykaj ekranu';
     if(isTouch) return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → tapnij w ekran!<br>• Gdy nie pasuje → nie dotykaj ekranu';
     return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → REAGUJ ruchem!<br>• Gdy nie pasuje → STÓJ nieruchomo';
@@ -241,7 +246,38 @@ function _sndGameOver(){ _mBeep(400,0.1); setTimeout(function(){_mBeep(200,0.15)
 // ── Start gry ──
 // Input mode: 'motion' lub 'touch'
 var _motionInputMode='motion';
+var _isDesktopDetected=false;
+function _isDesktop(){
+  var hasTouch='ontouchstart' in window||navigator.maxTouchPoints>0;
+  var hasMotion=typeof DeviceMotionEvent!=='undefined';
+  var isLargeScreen=window.innerWidth>=1024;
+  return isLargeScreen&&!hasTouch;
+}
+function _initMotionInputMode(){
+  _isDesktopDetected=_isDesktop();
+  if(_isDesktopDetected){
+    _setMotionInput('touch');
+    var mb=el('mi-motion');
+    if(mb){ mb.style.opacity='0.4'; mb.style.pointerEvents='none'; }
+    var hint=document.getElementById('motion-desktop-hint');
+    if(!hint){
+      var chipRow=mb?mb.parentElement:null;
+      if(chipRow){
+        hint=document.createElement('div'); hint.id='motion-desktop-hint';
+        hint.style.cssText='font-size:10px;font-weight:600;color:var(--accent);margin-top:4px;';
+        hint.textContent='💻 Wykryto komputer — tryb dotyku aktywny. Klikaj lub używaj klawiatury.';
+        chipRow.parentElement.insertBefore(hint,chipRow.nextSibling);
+      }
+    }
+  } else {
+    var mb2=el('mi-motion');
+    if(mb2){ mb2.style.opacity=''; mb2.style.pointerEvents=''; }
+    var hint2=document.getElementById('motion-desktop-hint');
+    if(hint2) hint2.remove();
+  }
+}
 function _setMotionInput(m){
+  if(_isDesktopDetected&&m==='motion') return;
   _motionInputMode=m;
   var mb=el('mi-motion'),mt=el('mi-touch');
   if(mb){ mb.className='chip'+(m==='motion'?' on-blue':''); }
@@ -302,6 +338,15 @@ function _onDesktopKey(e){
   if(e.key===' '||e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'||e.key==='Enter'){ e.preventDefault(); _motionState._keyPressed=e.key; }
 }
 
+function _ensureCloseBtn(container){
+  if(document.getElementById('motion-close-btn')) return;
+  var btn=document.createElement('div'); btn.id='motion-close-btn';
+  btn.style.cssText='position:fixed;top:14px;right:14px;z-index:100;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);color:#ffffff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+  btn.textContent='\u2715';
+  btn.onclick=_confirmCloseMotion;
+  btn.ontouchstart=function(e){ e.stopPropagation(); };
+  (container||el('motion-active')).appendChild(btn);
+}
 function startMotionGame(){
   requestMotionPermission(function(ok){
     if(!ok&&_motionInputMode==='motion'){ _motionInputMode='touch'; }
@@ -310,10 +355,15 @@ function startMotionGame(){
     _gamePoints=0; _gameLives=3; _gameLevel=1; _gameCombo=0; _gameMaxCombo=0; _gameTotalTrials=0; _gameCorrect=0; _gameTimes=[]; _gameLastTime=0;
     el('settings').style.display='none'; el('motion-active').style.display='block';
     reqWL(); goFS();
-    // Przycisk zamknij ✕
-    var closeBtn=document.createElement('button'); closeBtn.id='motion-close-btn';
-    closeBtn.style.cssText='position:fixed;top:12px;right:12px;z-index:20;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
-    closeBtn.textContent='✕'; closeBtn.onclick=_confirmCloseMotion;
+    // Przycisk zamknij ✕ — ZAWSZE tworzony na nowo
+    var oldClose=document.getElementById('motion-close-btn'); if(oldClose) oldClose.remove();
+    var closeBtn=document.createElement('div'); closeBtn.id='motion-close-btn';
+    closeBtn.style.cssText='position:fixed;top:14px;right:14px;z-index:100;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);color:#ffffff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+    closeBtn.textContent='✕';
+    closeBtn.onclick=_confirmCloseMotion;
+    closeBtn.ontouchstart=function(e){ e.stopPropagation(); };
+    closeBtn.onmouseenter=function(){ closeBtn.style.background='rgba(255,255,255,.25)'; };
+    closeBtn.onmouseleave=function(){ closeBtn.style.background='rgba(255,255,255,.12)'; };
     el('motion-active').appendChild(closeBtn);
     // Input
     if(_motionInputMode==='motion'&&!_desktopFallback){
@@ -327,7 +377,7 @@ function startMotionGame(){
       } else {
         _motionCountdown(function(){
           el('motion-active').innerHTML=_mScreen('Kalibracja...','Trzymaj telefon nieruchomo','');
-          var cb2=document.getElementById('motion-close-btn'); if(!cb2){ cb2=closeBtn.cloneNode(true); cb2.onclick=_confirmCloseMotion; el('motion-active').appendChild(cb2); }
+          _ensureCloseBtn(el('motion-active'));
           calibrateMotion(function(){ _startLevel(_gameLevel); });
         });
       }
@@ -374,7 +424,7 @@ function _showBriefing(closeBtn, onReady){
   var quote=_pick(BRIEFING_QUOTES);
   var ch=getLevelCharacter(_gameLevel);
   var isTouch=(_motionInputMode==='touch'||_desktopFallback);
-  var inputHint=isTouch?'👆 Reaguj dotykiem ekranu':'📱 Reaguj ruchem telefonu';
+  var inputHint=_isDesktopDetected?'💻 Klikaj lub używaj klawiatury':isTouch?'👆 Reaguj dotykiem ekranu':'📱 Reaguj ruchem telefonu';
   ma.style.background='#060606';
   ma.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 28px;box-sizing:border-box;max-width:360px;">'
     +'<div style="font-size:40px;margin-bottom:4px;">'+ch.emoji+'</div>'
@@ -387,8 +437,7 @@ function _showBriefing(closeBtn, onReady){
     +'<div style="margin-top:14px;font-size:12px;font-weight:600;font-style:italic;color:rgba(255,255,255,.45);line-height:1.5;padding:0 8px;">\u201E'+quote+'\u201D</div>'
     +'<button id="briefing-go-btn" style="margin-top:20px;width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.04em;">DAWAJ! \uD83D\uDE80</button>'
     +'</div>';
-  var cb2=document.getElementById('motion-close-btn');
-  if(!cb2){ cb2=closeBtn.cloneNode(true); cb2.onclick=_confirmCloseMotion; ma.appendChild(cb2); }
+  _ensureCloseBtn(ma);
   document.getElementById('briefing-go-btn').onclick=function(){ onReady(); };
 }
 
@@ -400,7 +449,6 @@ function _motionCountdown(cb){
 // ── Ekran helper ──
 function _mScreen(title,sub,extra){ return '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;"><div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.4);">'+title+'</div>'+(sub?'<div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:4px;">'+sub+'</div>':'')+(extra||'')+'</div>'; }
 function _mHUD(){
-  var lives=''; for(var i=0;i<3;i++) lives+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(i<_gameLives?'var(--red)':'rgba(255,255,255,.15)')+';margin-left:3px;"></span>';
   var ch=getLevelCharacter(_gameLevel);
   var comboHtml=_gameCombo>=3?'<div style="position:fixed;top:108px;left:50%;transform:translateX(-50%);z-index:16;font-size:14px;font-weight:900;color:#f59e0b;background:rgba(245,158,11,.1);padding:4px 14px;border-radius:20px;animation:mBtnPulse .6s infinite;">🔥 x'+_gameCombo+' COMBO</div>':'';
   var hasData=_gameTimes.length>0;
@@ -426,11 +474,18 @@ function _mHUD(){
     +'<div style="'+avgTile+'"><div style="font-size:'+tValFs+';font-weight:800;color:'+(hasData?_tc(avgMs):'rgba(255,255,255,.25)')+';">'+(hasData?avgMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">ŚREDNIA</div></div>'
     +'<div style="'+bestTile+'"><div style="font-size:'+bestValFs+';font-weight:800;color:'+(hasData?'#4ade80':'rgba(255,255,255,.25)')+';">'+(hasData?bestMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">NAJLEPSZY</div></div>'
     +'</div>';
+  var hudLbl='font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);';
   return '<div style="position:absolute;top:0;left:0;right:0;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10;background:linear-gradient(to bottom,rgba(6,6,6,.9),transparent);height:42px;">'
-    +'<span style="font-size:20px;font-weight:900;color:var(--accent);transition:transform .2s;" id="m-pts">⚡ '+_gamePoints+'</span>'
+    +'<div style="text-align:center;"><div style="font-size:20px;font-weight:900;color:var(--accent);transition:transform .2s;" id="m-pts">⚡ '+_gamePoints+'</div><div style="'+hudLbl+'">PUNKTY</div></div>'
     +'<span style="font-size:12px;font-weight:700;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);padding:3px 10px;border-radius:12px;">'+ch.emoji+' Lv.'+_gameLevel+'</span>'
-    +'<div style="display:flex;align-items:center;">'+lives+'</div></div>'
+    +'<div style="text-align:center;"><div style="font-size:14px;font-weight:800;color:#f87171;transition:transform .2s;" id="m-lives">❤️ '+_gameLives+'</div><div style="'+hudLbl+'">ŻYCIA</div></div>'
+    +'</div>'
     +tilesHtml+comboHtml;
+}
+function _flashLives(){
+  var lv=document.getElementById('m-lives'); if(!lv) return;
+  lv.style.color='#ff0000'; lv.style.transform='scale(1.3)';
+  setTimeout(function(){ lv.style.color='#f87171'; lv.style.transform='scale(1)'; },300);
 }
 function _mTimeAnim(ms){
   var col=ms<250?'#4ade80':ms<400?'#3b82f6':ms<600?'#d97706':'#dc2626';
@@ -494,7 +549,7 @@ function _runTrial(idx,cfg,trialResults,cb){
     clearInterval(wc); _motionState.listening=false;
     if(_motionAbort) return;
     if(falseStart){
-      _gameLives--; _gamePoints=Math.max(0,_gamePoints-2); _gameCombo=0;
+      _gameLives--; setTimeout(_flashLives,50); _gamePoints=Math.max(0,_gamePoints-2); _gameCombo=0;
       _sndBad(); if(navigator.vibrate) navigator.vibrate(200);
       _mPtsAnim('-2 💥','var(--red-text)');
       ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:48px;">✕</div>','Za wcześnie!');
@@ -515,7 +570,7 @@ function _runTrial(idx,cfg,trialResults,cb){
       setTimeout(function(){
         clearInterval(fc); _motionState.listening=false;
         _gameTotalTrials++;
-        if(fakeReacted){ _gameLives--; _gamePoints=Math.max(0,_gamePoints-3); _gameCombo=0; _mPtsAnim('-3 💥','var(--red-text)'); _sndBad(); ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:32px;">Fałszywy alarm!</div>',''); }
+        if(fakeReacted){ _gameLives--; setTimeout(_flashLives,50); _gamePoints=Math.max(0,_gamePoints-3); _gameCombo=0; _mPtsAnim('-3 💥','var(--red-text)'); _sndBad(); ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:32px;">Fałszywy alarm!</div>',''); }
         else { _gameCorrect++; _mPtsAnim('✓','var(--green-text)'); ma.innerHTML=_mHUD()+_mCircle('result','<div style="font-size:24px;font-weight:700;color:var(--green-text);">✓ Dobrze!</div>',''); _sndGood(); }
         trialResults.push({time:0,correct:!fakeReacted,type:'fake'});
         setTimeout(function(){ _runTrial(idx+1,cfg,trialResults,cb); },1200);
@@ -536,7 +591,7 @@ function _runTrial(idx,cfg,trialResults,cb){
       var nc=setInterval(function(){ if(detectMovement()||(_desktopFallback&&_motionState._keyPressed)){ nogoReacted=true; _motionState._keyPressed=null; } },16);
       setTimeout(function(){
         clearInterval(nc); _motionState.listening=false; _gameTotalTrials++;
-        if(nogoReacted){ _gameLives--; _gamePoints=Math.max(0,_gamePoints-3); _gameCombo=0; _mPtsAnim('-3 💥','var(--red-text)'); _sndBad(); ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:24px;">Fałszywy alarm!</div>',''); }
+        if(nogoReacted){ _gameLives--; setTimeout(_flashLives,50); _gamePoints=Math.max(0,_gamePoints-3); _gameCombo=0; _mPtsAnim('-3 💥','var(--red-text)'); _sndBad(); ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:24px;">Fałszywy alarm!</div>',''); }
         else { _gameCorrect++; _mPtsAnim('✓','var(--green-text)'); _sndGood(); ma.innerHTML=_mHUD()+_mCircle('result','<div style="font-size:24px;font-weight:700;color:var(--green-text);">✓</div>',''); }
         trialResults.push({time:0,correct:!nogoReacted,type:'nogo'});
         setTimeout(function(){ _runTrial(idx+1,cfg,trialResults,cb); },1200);
@@ -563,7 +618,7 @@ function _runTrial(idx,cfg,trialResults,cb){
     },16);
     var rt=setTimeout(function(){
       clearInterval(rc); _motionState.listening=false; _motionState._keyPressed=null;
-      _gameLives--; _gamePoints=Math.max(0,_gamePoints-1); _gameCombo=0; _gameTotalTrials++;
+      _gameLives--; setTimeout(_flashLives,50); _gamePoints=Math.max(0,_gamePoints-1); _gameCombo=0; _gameTotalTrials++;
       _mPtsAnim('-1','var(--red-text)');
       ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:20px;">Brak reakcji</div>','');
       trialResults.push({time:cfg.window,correct:false,type:'timeout'});
@@ -595,7 +650,7 @@ function _finishTrial(clearFn,rc,rt,stimTime,correct,errType,trialResults,idx,cf
     var pe=document.getElementById('m-pts'); if(pe){ pe.style.transform='scale(1.3)'; setTimeout(function(){ pe.style.transform='scale(1)'; },200); }
     var lv=document.getElementById('m-last-val'); if(lv){ lv.style.transform='scale(1.15)'; setTimeout(function(){ lv.style.transform='scale(1)'; },200); }
   } else {
-    _gameLives--; _gameCombo=0;
+    _gameLives--; setTimeout(_flashLives,50); _gameCombo=0;
     _gamePoints=Math.max(0,_gamePoints-(errType==='wrong_dir'?2:1));
     _sndBad(); if(navigator.vibrate) navigator.vibrate(200);
     _mPtsAnim(errType==='wrong_dir'?'-2 ✕':'- 💥','var(--red-text)');
@@ -834,7 +889,7 @@ function _runPatternLevel(idx,cfg,results,cb){
         var tb=document.getElementById('pat-target-box'); if(tb){ tb.style.borderColor='#4ade80'; }
         ma.style.background='rgba(74,222,128,.06)'; setTimeout(function(){ ma.style.background='#060606'; },300);
       } else {
-        _gameLives--; _gameCombo=0; _gamePoints=Math.max(0,_gamePoints-2);
+        _gameLives--; setTimeout(_flashLives,50); _gameCombo=0; _gamePoints=Math.max(0,_gamePoints-2);
         _sndBad(); _mPtsAnim('✕ -2','var(--red-text)'); if(navigator.vibrate) navigator.vibrate(200);
         results.push({time:t,correct:false,type:'pattern_false'});
         var sb2=document.getElementById('pat-stim-box'); if(sb2){ sb2.style.borderColor='#f87171'; sb2.style.boxShadow='0 0 20px rgba(248,113,113,.3)'; }
@@ -846,7 +901,7 @@ function _runPatternLevel(idx,cfg,results,cb){
   var rt=setTimeout(function(){
     clearInterval(rc); _motionState.listening=false; _gameTotalTrials++;
     if(!reacted){
-      if(isMatch){ _gameLives--; _gameCombo=0; _gamePoints=Math.max(0,_gamePoints-1); _mPtsAnim('MISS -1','var(--red-text)'); _sndBad(); results.push({time:pc.interval,correct:false,type:'pattern_miss'});
+      if(isMatch){ _gameLives--; setTimeout(_flashLives,50); _gameCombo=0; _gamePoints=Math.max(0,_gamePoints-1); _mPtsAnim('MISS -1','var(--red-text)'); _sndBad(); results.push({time:pc.interval,correct:false,type:'pattern_miss'});
         var sb3=document.getElementById('pat-stim-box'); if(sb3) sb3.style.borderColor='#f87171';
       } else { _gameCorrect++; _gamePoints+=1; _mPtsAnim('+1 ✓','var(--green-text)'); results.push({time:0,correct:true,type:'pattern_ignore'}); _sndGood(); }
     }

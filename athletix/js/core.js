@@ -98,7 +98,7 @@ function setMode(m){
   if(m==='diary'){ loadCRM(); loadNotes(); populateAthleteSelect(); if(activeAthlete) syncFormToActiveAthlete(activeAthlete); if(!selectedDay) selectedDay=getDayKey(new Date()); renderCal(); renderDayDetail(selectedDay); }
   if(m==='plans'){ initPlansTab(); }
   if(m==='data'){ refreshDataStats(); refreshAutoBackupUI(); }
-  if(m==='motion'){ loadCRM(); var ms=el('motion-athlete'); if(ms){ ms.innerHTML='<option value="">Bez zawodnika</option>'; athletes.forEach(function(a){ var o=document.createElement('option'); o.value=a.name; o.textContent=a.name; ms.appendChild(o); }); if(activeAthlete) ms.value=activeAthlete; } var mb=el('motion-bottom-bar'); if(mb) mb.style.display='block'; }
+  if(m==='motion'){ loadCRM(); var ms=el('motion-athlete'); if(ms){ ms.innerHTML='<option value="">Bez zawodnika</option>'; athletes.forEach(function(a){ var o=document.createElement('option'); o.value=a.name; o.textContent=a.name; ms.appendChild(o); }); if(activeAthlete) ms.value=activeAthlete; } var mb=el('motion-bottom-bar'); if(mb) mb.style.display='block'; if(typeof _initMotionInputMode==='function') _initMotionInputMode(); }
   else { var mb2=el('motion-bottom-bar'); if(mb2) mb2.style.display='none'; }
   var gb=el('go-btn-main');
   if(m==='interval') gb.style.background='#c2410c'; else gb.style.background='var(--accent)';
