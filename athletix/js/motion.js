@@ -7,7 +7,7 @@ var _motionMode='simple';
 var _motionRunning=false, _motionAbort=false, _desktopFallback=false, _motionHandler=null;
 var _motionState={listening:false,ax:0,ay:0,az:0,baseline:{x:0,y:0,z:0},sensitivity:3,_keyPressed:null};
 // Stan gry
-var _gamePoints=0, _gameLives=3, _gameLevel=1, _gameCombo=0, _gameMaxCombo=0, _gameTotalTrials=0, _gameCorrect=0, _gameTimes=[], _gameBestLevel=0;
+var _gamePoints=0, _gameLives=3, _gameLevel=1, _gameCombo=0, _gameMaxCombo=0, _gameTotalTrials=0, _gameCorrect=0, _gameTimes=[], _gameBestLevel=0, _gameLastTime=0;
 // Tryb Wzorce
 var PATTERN_SYMBOLS=['🔴','🟢','🔵','🟡','🟣','🟠','⬜','⬛'];
 
@@ -258,7 +258,7 @@ function startMotionGame(){
   requestMotionPermission(function(ok){
     if(!ok&&_motionInputMode==='motion'){ _motionInputMode='touch'; }
     _motionAbort=false; _motionRunning=true;
-    _gamePoints=0; _gameLives=3; _gameLevel=1; _gameCombo=0; _gameMaxCombo=0; _gameTotalTrials=0; _gameCorrect=0; _gameTimes=[];
+    _gamePoints=0; _gameLives=3; _gameLevel=1; _gameCombo=0; _gameMaxCombo=0; _gameTotalTrials=0; _gameCorrect=0; _gameTimes=[]; _gameLastTime=0;
     el('settings').style.display='none'; el('motion-active').style.display='block';
     reqWL(); goFS();
     // Przycisk zamknij ✕
@@ -296,19 +296,21 @@ function stopMotion(){
 }
 function _confirmCloseMotion(){
   var existing=document.getElementById('motion-confirm-close'); if(existing) existing.remove();
+  // Pauza gry
+  _motionAbort=true;
   var ov=document.createElement('div'); ov.id='motion-confirm-close';
   ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:20px;';
   ov.innerHTML='<div style="max-width:300px;width:100%;background:#1a1a1a;border-radius:16px;padding:20px;text-align:center;">'
     +'<div style="font-size:16px;font-weight:800;color:#f2f2f2;margin-bottom:6px;">Zakończyć grę?</div>'
     +'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:14px;">Twój postęp zostanie zapisany.</div>'
-    +'<button id="mc-end" style="width:100%;padding:12px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Zakończ</button>'
+    +'<button id="mc-end" style="width:100%;padding:12px;background:#dc2626;color:#fff;border:none;border-radius:10px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Zakończ</button>'
     +'<button id="mc-resume" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:10px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:6px;">Wracam do gry!</button></div>';
   document.body.appendChild(ov);
-  document.getElementById('mc-end').onclick=function(){ ov.remove(); _endGame(); _showSwipeTip(); };
-  document.getElementById('mc-resume').onclick=function(){ ov.remove(); };
+  document.getElementById('mc-end').onclick=function(){ ov.remove(); _motionAbort=false; _endGame(); _showSwipeTip(); };
+  document.getElementById('mc-resume').onclick=function(){ ov.remove(); _motionAbort=false; _motionRunning=true; _motionCountdown(function(){ _startLevel(_gameLevel); }); };
 }
 function _showSwipeTip(){
-  try{ if(localStorage.getItem('axs_motion_swipe_tip_shown')) return; localStorage.setItem('axs_motion_swipe_tip_shown','1'); }catch(e){}
+  try{ if(localStorage.getItem('axs_motion_swipe_tip')) return; localStorage.setItem('axs_motion_swipe_tip','1'); }catch(e){}
   var tip=document.createElement('div');
   tip.style.cssText='position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;padding:8px 16px;border-radius:20px;z-index:30;transition:opacity .3s;';
   tip.textContent='💡 Tip: możesz też zamykać ściągając palcem w dół';
@@ -348,15 +350,26 @@ function _mScreen(title,sub,extra){ return '<div style="position:absolute;top:50
 function _mHUD(){
   var lives=''; for(var i=0;i<3;i++) lives+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(i<_gameLives?'var(--red)':'rgba(255,255,255,.15)')+';margin-left:3px;"></span>';
   var ch=getLevelCharacter(_gameLevel);
-  var comboHtml=_gameCombo>=3?'<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);z-index:11;font-size:14px;font-weight:900;color:#f59e0b;background:rgba(245,158,11,.1);padding:4px 14px;border-radius:20px;animation:mBtnPulse .6s infinite;">🔥 x'+_gameCombo+' COMBO</div>':'';
-  var avgMs=_gameTimes.length?Math.round(_gameTimes.reduce(function(a,b){return a+b;},0)/_gameTimes.length):0;
-  var prMs=_gameTimes.length?Math.min.apply(null,_gameTimes):0;
-  var statsHtml=_gameTimes.length?'<div style="position:absolute;top:44px;left:16px;z-index:10;display:flex;gap:10px;"><span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);">Śr: '+avgMs+'ms</span><span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);">PR: '+prMs+'ms</span></div>':'';
+  var comboHtml=_gameCombo>=3?'<div style="position:fixed;top:104px;left:50%;transform:translateX(-50%);z-index:11;font-size:14px;font-weight:900;color:#f59e0b;background:rgba(245,158,11,.1);padding:4px 14px;border-radius:20px;animation:mBtnPulse .6s infinite;">🔥 x'+_gameCombo+' COMBO</div>':'';
+  // Oblicz wartości kafelków
+  var hasData=_gameTimes.length>0;
+  var lastMs=_gameLastTime;
+  var validTimes=_gameTimes.filter(function(t){ return t<3000; });
+  var avgMs=validTimes.length?Math.round(validTimes.reduce(function(a,b){return a+b;},0)/validTimes.length):0;
+  var bestMs=_gameTimes.length?Math.min.apply(null,_gameTimes):0;
+  function _tc(ms){ return ms<250?'#4ade80':ms<400?'#3b82f6':ms<600?'#d97706':'#dc2626'; }
+  var tileS='background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:6px 4px;text-align:center;flex:1;';
+  var labelS='font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-top:2px;';
+  var tilesHtml='<div style="position:fixed;top:52px;left:10px;right:10px;display:flex;gap:6px;z-index:10;">'
+    +'<div style="'+tileS+'" id="m-tile-last"><div style="font-size:16px;font-weight:800;color:'+(hasData?_tc(lastMs):'rgba(255,255,255,.25)')+';transition:transform .2s;" id="m-last-val">'+(hasData?lastMs+'<span style="font-size:10px;font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">OSTATNI</div></div>'
+    +'<div style="'+tileS+'"><div style="font-size:16px;font-weight:800;color:'+(hasData?_tc(avgMs):'rgba(255,255,255,.25)')+';">'+(hasData?avgMs+'<span style="font-size:10px;font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">ŚREDNIA</div></div>'
+    +'<div style="'+tileS+'"><div style="font-size:16px;font-weight:800;color:'+(hasData?'#4ade80':'rgba(255,255,255,.25)')+';">'+(hasData?bestMs+'<span style="font-size:10px;font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">NAJLEPSZY</div></div>'
+    +'</div>';
   return '<div style="position:absolute;top:0;left:0;right:0;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10;background:linear-gradient(to bottom,rgba(6,6,6,.9),transparent);height:42px;">'
     +'<span style="font-size:20px;font-weight:900;color:var(--accent);transition:transform .2s;" id="m-pts">⚡ '+_gamePoints+'</span>'
     +'<span style="font-size:12px;font-weight:700;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);padding:3px 10px;border-radius:12px;">'+ch.emoji+' Lv.'+_gameLevel+'</span>'
     +'<div style="display:flex;align-items:center;gap:4px;">'+lives+'<button class="lock-btn" onclick="lockScreen()" style="margin-left:4px;font-size:12px;">🔒</button></div></div>'
-    +statsHtml+comboHtml;
+    +tilesHtml+comboHtml;
 }
 function _mTimeAnim(ms){
   var col=ms<250?'#4ade80':ms<400?'#3b82f6':ms<600?'#d97706':'#dc2626';
@@ -498,7 +511,7 @@ function _finishTrial(clearFn,rc,rt,stimTime,correct,errType,trialResults,idx,cf
   clearFn(rc); clearTimeout(rt); _motionState.listening=false; _motionState._keyPressed=null;
   var t=Date.now()-stimTime; _gameTotalTrials++;
   if(correct){
-    _gameCorrect++; _gameTimes.push(t);
+    _gameCorrect++; _gameTimes.push(t); _gameLastTime=t;
     var sc=_calcPoints(t); var pts=sc.pts;
     _gameCombo++; if(_gameCombo>_gameMaxCombo) _gameMaxCombo=_gameCombo;
     var mult=_gameCombo>=10?4:_gameCombo>=5?3:_gameCombo>=3?2:1;
@@ -515,6 +528,7 @@ function _finishTrial(clearFn,rc,rt,stimTime,correct,errType,trialResults,idx,cf
     setTimeout(function(){ ma.style.background='#060606'; },200);
     ma.innerHTML=_mHUD()+_mCircle('result','<div style="font-size:32px;font-weight:900;color:'+col+';">'+t+'ms</div>','');
     var pe=document.getElementById('m-pts'); if(pe){ pe.style.transform='scale(1.3)'; setTimeout(function(){ pe.style.transform='scale(1)'; },200); }
+    var lv=document.getElementById('m-last-val'); if(lv){ lv.style.transform='scale(1.15)'; setTimeout(function(){ lv.style.transform='scale(1)'; },200); }
   } else {
     _gameLives--; _gameCombo=0;
     _gamePoints=Math.max(0,_gamePoints-(errType==='wrong_dir'?2:1));
@@ -745,7 +759,7 @@ function _runPatternLevel(idx,cfg,results,cb){
       clearInterval(rc); clearTimeout(rt); _motionState.listening=false; _motionState._keyPressed=null;
       reacted=true; var t=Date.now()-stimTime; _gameTotalTrials++;
       if(isMatch){
-        _gameCorrect++; _gameTimes.push(t);
+        _gameCorrect++; _gameTimes.push(t); _gameLastTime=t;
         var sc=_calcPoints(t); var mult=_gameCombo>=10?4:_gameCombo>=5?3:_gameCombo>=3?2:1;
         _gameCombo++; if(_gameCombo>_gameMaxCombo) _gameMaxCombo=_gameCombo;
         var earned=sc.pts*mult; _gamePoints+=earned;
