@@ -871,7 +871,8 @@ function openFullStatsModal(athleteName){
     var srcMap={}; (gp2.history||[]).forEach(function(h2){ var k=h2.source; if(!srcMap[k]) srcMap[k]=0; srcMap[k]+=h2.points; });
     var srcLabels={session:'💪 Treningi',plan_session:'📋 Sesje z planu',entry:'🚪 Wejścia',test:'🧪 Testy',note:'📝 Notatki',streak:'🔥 Streak',entry_removed:'⛔ Cofnięcia'};
     var srcOrder=['session','plan_session','entry','test','note','streak','entry_removed'];
-    srcOrder.forEach(function(k){ var v=srcMap[k]||0; if(!v) return; var pct=gp2.totalPoints?Math.round(Math.abs(v)/gp2.totalPoints*100):'—';
+    var posTotal=0; srcOrder.forEach(function(k){ var v2=srcMap[k]||0; if(v2>0) posTotal+=v2; });
+    srcOrder.forEach(function(k){ var v=srcMap[k]||0; if(!v) return; var pct=v>0&&posTotal?Math.round(v/posTotal*100)+'%':'—';
       h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;">'
         +'<span style="font-weight:500;">'+(srcLabels[k]||k)+'</span>'
         +'<div style="display:flex;gap:12px;"><span style="font-weight:700;min-width:50px;text-align:right;">'+(v>0?'+':'')+v+'</span>'
