@@ -863,6 +863,85 @@ function openFullStatsModal(athleteName){
       +'<span style="font-size:11px;color:var(--muted);min-width:60px;text-align:right;">'+(p.a==='—'?'':p.a+'/tyg.')+'</span></div></div>';
   });
 
+  // A2. ATP breakdown
+  if(typeof getGamProfile==='function'){
+    loadGamification(); var gp2=getGamProfile(athleteName); var rank2=getRank(gp2.totalPoints);
+    h+='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:14px;margin-bottom:6px;">⚡ Twoje ATP</div>'
+      +'<div style="font-size:14px;font-weight:800;color:'+rank2.color+';margin-bottom:8px;">⚡ '+gp2.totalPoints+' ATP łącznie • Poziom '+gp2.level+' — '+rank2.name+'</div>';
+    var srcMap={}; (gp2.history||[]).forEach(function(h2){ var k=h2.source; if(!srcMap[k]) srcMap[k]=0; srcMap[k]+=h2.points; });
+    var srcLabels={session:'💪 Treningi',plan_session:'📋 Sesje z planu',entry:'🚪 Wejścia',test:'🧪 Testy',note:'📝 Notatki',streak:'🔥 Streak',entry_removed:'⛔ Cofnięcia'};
+    var srcOrder=['session','plan_session','entry','test','note','streak','entry_removed'];
+    srcOrder.forEach(function(k){ var v=srcMap[k]||0; if(!v) return; var pct=gp2.totalPoints?Math.round(Math.abs(v)/gp2.totalPoints*100):'—';
+      h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;">'
+        +'<span style="font-weight:500;">'+(srcLabels[k]||k)+'</span>'
+        +'<div style="display:flex;gap:12px;"><span style="font-weight:700;min-width:50px;text-align:right;">'+(v>0?'+':'')+v+'</span>'
+        +'<span style="font-size:10px;color:var(--muted);min-width:35px;text-align:right;">'+(k==='entry_removed'?'':''+pct+'%')+'</span></div></div>';
+    });
+  }
+
+  // A3. Osiągnięcia
+  var totalTonnage=0; notes.forEach(function(n){ if(n.athlete!==athleteName||!n.sets) return; n.sets.forEach(function(s){ totalTonnage+=((parseFloat(s.reps)||0)*(parseFloat(s.load)||0)); }); }); totalTonnage=Math.round(totalTonnage);
+  var gp3=typeof getGamProfile==='function'?getGamProfile(athleteName):{totalPoints:0,bestStreak:0};
+  var testCnt2=(testResults||[]).filter(function(t){ return t.athlete===athleteName; }).length;
+  var totalDays2=tDays.length;
+  var achs=[];
+  // Regularność
+  if(totalDays2>=1) achs.push({icon:'🎯',text:'Pierwszy trening',desc:'Każda podróż zaczyna się od pierwszego kroku'});
+  if(totalDays2>=10) achs.push({icon:'🔟',text:'10 dni treningowych',desc:'Dwucyfrowy klub!'});
+  if(totalDays2>=25) achs.push({icon:'📅',text:'25 dni treningowych',desc:'Prawie miesiąc non-stop!'});
+  if(totalDays2>=50) achs.push({icon:'💪',text:'50 dni treningowych',desc:'Pół setki. Poważna sprawa.'});
+  if(totalDays2>=100) achs.push({icon:'💯',text:'100 dni treningowych',desc:'Setka. Respekt.'});
+  if(totalDays2>=200) achs.push({icon:'🏔️',text:'200 dni treningowych',desc:'Góra za górą.'});
+  if(totalDays2>=365) achs.push({icon:'🗓️',text:'365 dni treningowych',desc:'Rok treningów!'});
+  // Tonaż
+  if(totalTonnage>=1000) achs.push({icon:'🏋️',text:'1 tona tonażu',desc:'Przesunąłeś tonę.'});
+  if(totalTonnage>=10000) achs.push({icon:'🚛',text:'10 ton tonażu',desc:'Ciężar ciężarówki.'});
+  if(totalTonnage>=50000) achs.push({icon:'🐘',text:'50 ton tonażu',desc:'Masa 10 słoni.'});
+  if(totalTonnage>=100000) achs.push({icon:'🚂',text:'100 ton tonażu',desc:'Lokomotywa.'});
+  if(totalTonnage>=500000) achs.push({icon:'🏗️',text:'500 ton',desc:'Budujesz legendę.'});
+  if(totalTonnage>=1000000) achs.push({icon:'🌍',text:'1000 ton',desc:'Milion kilo!'});
+  // Streak
+  if(gp3.bestStreak>=2) achs.push({icon:'🔥',text:'2 tyg. z rzędu',desc:'Nawyk się kształtuje!'});
+  if(gp3.bestStreak>=4) achs.push({icon:'🔥',text:'Miesiąc z rzędu',desc:'4 tygodnie non-stop.'});
+  if(gp3.bestStreak>=8) achs.push({icon:'🔥',text:'2 miesiące z rzędu',desc:'Konsekwencja.'});
+  if(gp3.bestStreak>=13) achs.push({icon:'🔥',text:'Kwartał z rzędu',desc:'Żelazna wola.'});
+  if(gp3.bestStreak>=26) achs.push({icon:'🔥',text:'Pół roku z rzędu',desc:'Nie do zatrzymania.'});
+  if(gp3.bestStreak>=52) achs.push({icon:'🔥',text:'Rok z rzędu',desc:'Legenda żywa.'});
+  // Testy
+  if(testCnt2>=1) achs.push({icon:'🧪',text:'Pierwszy test',desc:'Pomiar to podstawa.'});
+  if(testCnt2>=10) achs.push({icon:'🧪',text:'10 testów',desc:'Regularne testowanie.'});
+  if(testCnt2>=25) achs.push({icon:'🧪',text:'25 testów',desc:'Dane mówią za siebie.'});
+  // ATP
+  if(gp3.totalPoints>=100) achs.push({icon:'⚡',text:'100 ATP',desc:'Silnik się rozkręca!'});
+  if(gp3.totalPoints>=500) achs.push({icon:'⚡',text:'500 ATP',desc:'Energia rośnie.'});
+  if(gp3.totalPoints>=1000) achs.push({icon:'⚡',text:'1000 ATP',desc:'Moc na obrotach!'});
+  if(gp3.totalPoints>=5000) achs.push({icon:'⚡',text:'5000 ATP',desc:'Elektrownia!'});
+
+  h+='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:14px;margin-bottom:6px;">🏅 Osiągnięcia</div>';
+  if(achs.length){
+    achs.forEach(function(a3){ h+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">'
+      +'<span style="font-size:20px;">'+a3.icon+'</span>'
+      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:var(--text);">'+a3.text+'</div>'
+      +'<div style="font-size:11px;font-style:italic;color:var(--muted);">'+a3.desc+'</div></div></div>'; });
+  } else { h+='<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px;">Trenuj dalej — osiągnięcia czekają! 💪</div>'; }
+
+  // Następny cel
+  var nextGoals=[
+    {req:10,cur:totalDays2,text:'10 dni treningowych',left:' dni'},
+    {req:25,cur:totalDays2,text:'25 dni treningowych',left:' dni'},
+    {req:50,cur:totalDays2,text:'50 dni treningowych',left:' dni'},
+    {req:100,cur:totalDays2,text:'100 dni treningowych',left:' dni'},
+    {req:1000,cur:totalTonnage,text:'1 tona tonażu',left:' kg'},
+    {req:10000,cur:totalTonnage,text:'10 ton tonażu',left:' kg'}
+  ];
+  var nextGoal=null;
+  for(var ng=0;ng<nextGoals.length;ng++){ if(nextGoals[ng].cur<nextGoals[ng].req){ nextGoal=nextGoals[ng]; break; } }
+  if(nextGoal){
+    h+='<div style="background:rgba(59,130,246,.04);border-radius:8px;padding:10px;margin-top:8px;">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--text);">🎯 Następny cel:</div>'
+      +'<div style="font-size:12px;font-weight:600;color:var(--accent);margin-top:2px;">'+nextGoal.text+' — brakuje '+(nextGoal.req-nextGoal.cur)+nextGoal.left+'</div></div>';
+  }
+
   // B. Tonaż
   h+='<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:14px;margin-bottom:6px;">Tonaż</div>';
   tonPeriods.forEach(function(p){
