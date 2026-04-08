@@ -222,12 +222,12 @@ function _mHUD(){
     +statsHtml+comboHtml;
 }
 function _mTimeAnim(ms){
-  var col=ms<250?'var(--green-text)':ms<400?'var(--accent)':ms<600?'var(--amber-text)':'var(--red-text)';
-  var d=document.createElement('div'); d.style.cssText='position:fixed;top:52%;left:50%;transform:translate(-50%,0);font-size:20px;font-weight:800;color:'+col+';z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;';
-  d.textContent=ms+'ms'; document.getElementById('motion-active').appendChild(d);
+  var col=ms<250?'#4ade80':ms<400?'#3b82f6':ms<600?'#d97706':'#dc2626';
+  var d=document.createElement('div'); d.style.cssText='position:fixed;top:55%;left:50%;transform:translate(-50%,0);font-size:24px;font-weight:900;color:'+col+';z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;text-shadow:0 0 12px '+col+'40;';
+  d.textContent=ms+' ms'; document.getElementById('motion-active').appendChild(d);
   requestAnimationFrame(function(){ d.style.opacity='1'; });
   setTimeout(function(){ d.style.transition='opacity .3s'; d.style.opacity='0'; },700);
-  setTimeout(function(){ d.remove(); },1000);
+  setTimeout(function(){ d.remove(); },1100);
 }
 function _mPtsAnim(text,color){
   var d=document.createElement('div'); d.style.cssText='position:fixed;top:45%;left:50%;transform:translate(-50%,0);font-size:28px;font-weight:900;color:'+color+';z-index:20;pointer-events:none;transition:all .6s ease-out;opacity:1;';
@@ -448,15 +448,11 @@ function _showGameOver(){
     +'<div style="font-size:48px;margin-bottom:4px;">'+ch.emoji+'</div>'
     +'<div style="font-size:22px;font-weight:900;color:'+(isOver?'var(--red-text)':'var(--green-text)')+';">'+(isOver?'GAME OVER':'KONIEC GRY')+'</div>'
     +'<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.5);margin-top:2px;">'+ch.name+' • Level '+_gameLevel+'</div>'
-    +'<div style="font-size:40px;font-weight:900;color:var(--accent);margin-top:8px;">⚡ '+_gamePoints+'</div>'
-    +'<div style="font-size:16px;font-weight:800;color:'+col+';margin-top:10px;">⚡ Średni czas: '+avg+'ms</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;max-width:280px;margin-left:auto;margin-right:auto;">'
-    +'<div style="font-size:14px;font-weight:700;color:var(--green-text);">🏆 Best: '+best+'ms</div>'
-    +'<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.5);">📊 Worst: '+(_gameTimes.length?Math.max.apply(null,_gameTimes):0)+'ms</div>'
-    +'<div style="font-size:14px;font-weight:700;color:#fff;">🎯 Celność: '+acc+'%</div>'
-    +'<div style="font-size:14px;font-weight:700;color:#f59e0b;">🔥 Combo: x'+_gameMaxCombo+'</div></div>'
-    +(newCharUnlocked?'<div style="font-size:13px;font-weight:800;color:var(--accent);margin-top:10px;">🆕 Nowa postać: '+ch.emoji+' '+ch.name+'!</div>':'')
+    +'<div style="font-size:36px;font-weight:900;color:var(--accent);margin-top:6px;">⚡ '+_gamePoints+'</div>'
+    +(newCharUnlocked?'<div style="font-size:13px;font-weight:800;color:var(--accent);margin-top:6px;">🆕 '+ch.emoji+' '+ch.name+' odblokowany!</div>':'')
     +compareHtml
+    // Kafelki wyników
+    +_mResultTiles(avg,best,acc)
     +'<div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_motionRetry()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Zagraj ponownie</button>'
     +'<button onclick="stopMotion()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">🏠 Wróć</button></div></div>';
@@ -471,6 +467,31 @@ function _showGameOver(){
   if(isNewRecord||_gamePoints>50) launchConfetti();
 }
 
+function _mResultTiles(avg,best,acc){
+  var worst=_gameTimes.length?Math.max.apply(null,_gameTimes):0;
+  var stdDev=0; if(_gameTimes.length>1){ var mean=avg; stdDev=Math.round(Math.sqrt(_gameTimes.reduce(function(s,t){return s+(t-mean)*(t-mean);},0)/(_gameTimes.length-1))); }
+  var avgCol=avg<250?'#4ade80':avg<400?'#3b82f6':avg<600?'#d97706':'#dc2626';
+  var accCol=acc>90?'#4ade80':acc>70?'#3b82f6':'#d97706';
+  var ts='background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;text-align:center;cursor:pointer;';
+  var descs={avg:'Średni czas Twojej reakcji na bodźce w tej sesji. Niższy = szybszy mózg. Regularny trening poprawia tę wartość.',best:'Twoja najszybsza reakcja w tej sesji. Pokazuje Twój potencjał gdy jesteś w pełni skupiony.',worst:'Najwolniejsza reakcja. Może wskazywać na chwilową utratę skupienia lub zmęczenie.',acc:'Procent poprawnych reakcji. Uwzględnia fałszywe starty i brak reakcji. 100% = perfekcja.',combo:'Najdłuższa seria szybkich reakcji z rzędu (<350ms). Combo daje mnożnik punktów: ×2 przy 3+, ×3 przy 5+, ×4 przy 10+.',sd:'Odchylenie standardowe — mierzy POWTARZALNOŚĆ Twoich reakcji. Niskie = stabilny czas. Wysokie = duże wahania.'};
+  function tile(icon,val,unit,label,color,key,sub){
+    return '<div style="'+ts+'" onclick="var d=this.querySelector(\'.td\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\'">'
+      +'<div style="font-size:20px;">'+icon+'</div>'
+      +'<div style="font-size:28px;font-weight:900;color:'+color+';margin:4px 0;">'+val+'<span style="font-size:14px;font-weight:700;"> '+unit+'</span></div>'
+      +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);">'+label+'</div>'
+      +(sub?'<div style="font-size:8px;color:rgba(255,255,255,.3);margin-top:2px;">'+sub+'</div>':'')
+      +'<div class="td" style="display:none;font-size:11px;font-weight:500;line-height:1.5;color:rgba(255,255,255,.5);padding:8px 0 4px;border-top:1px solid rgba(255,255,255,.06);margin-top:6px;">'+descs[key]+'</div>'
+      +'</div>';
+  }
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;max-width:320px;margin-left:auto;margin-right:auto;">'
+    +tile('⚡',avg,'ms','Średni czas',avgCol,'avg','')
+    +tile('🏆',best,'ms','Najlepszy','#4ade80','best','')
+    +tile('📊',worst,'ms','Najgorszy','rgba(255,255,255,.5)','worst','')
+    +tile('🎯',acc,'%','Celność',accCol,'acc','')
+    +tile('🔥','x'+_gameMaxCombo,'','Najdłuższe combo','#f59e0b','combo','reakcji z rzędu < 350ms')
+    +tile('📈','±'+stdDev,'ms','Odchylenie','rgba(255,255,255,.5)','sd','im niższe tym lepiej')
+    +'</div>';
+}
 function _motionRetry(){ startMotionGame(); }
 
 // ── Tryb Wzorce (przebudowa) ──
