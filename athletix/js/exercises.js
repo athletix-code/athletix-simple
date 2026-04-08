@@ -540,7 +540,10 @@ function _renderStrengthCard(n){
       +'<span style="font-size:12px;font-weight:600;color:var(--text);">'+(parts.join('  ·  ')||'—')+'</span>'
       +(s.note?'<span style="font-size:12px;opacity:.4;">📝</span>':'')
       +'</div>';
-    if(s.note) html+='<div style="font-size:11px;color:var(--muted);font-style:italic;margin-left:28px;margin-bottom:2px;">'+s.note.replace(/</g,'&lt;')+'</div>';
+    if(s.note){
+      var isChange=s.note.charAt(0)==='⚠'; var blc=isChange?'var(--amber)':'var(--accent)';
+      html+='<div onclick="this.style.maxHeight=this.style.maxHeight===\'none\'?\'2.8em\':\'none\';this.style.overflow=this.style.maxHeight===\'none\'?\'visible\':\'hidden\'" style="font-size:11px;font-weight:500;color:var(--muted);line-height:1.4;padding:3px 0 3px 8px;border-left:2px solid '+blc+';margin-left:28px;margin-bottom:2px;max-height:2.8em;overflow:hidden;cursor:pointer;">'+s.note.replace(/</g,'&lt;')+'</div>';
+    }
   });
   html+='</div>';
   // Tonaż
@@ -633,7 +636,8 @@ function _renderStrengthReportEntry(n, idx){
   n.sets.forEach(function(s,si){
     html+='<tr style="border-bottom:1px solid #eee;"><td style="padding:4px 6px;font-weight:700;color:#999;">S'+(si+1)+'</td>';
     cat.fields.forEach(function(f){ html+='<td style="text-align:center;padding:4px 6px;font-weight:600;">'+(s[f]||(f==='load'?'':'—'))+(f==='load'&&s[f]?'kg':f==='time'&&s[f]?'s':f==='dist'&&s[f]?'m':'')+'</td>'; });
-    html+='<td style="padding:4px 6px;color:#888;font-style:italic;font-size:11px;">'+(s.note||'')+'</td></tr>';
+    var sn=s.note||''; var snColor=sn.charAt(0)==='⚠'?'#b45309':'#888';
+    html+='<td style="padding:4px 6px;color:'+snColor+';font-style:italic;font-size:10px;'+(sn.charAt(0)==='⚠'?'border-left:2px solid #d97706;':'')+'">'+sn+'</td></tr>';
   });
   html+='</table>';
   if(_hasLoad(n.exCat)){ var rton=calcTonnage(n.sets); if(rton>0) html+='<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-top:4px;">Tonaż: '+rton.toLocaleString('pl-PL')+' kg</div>'; }

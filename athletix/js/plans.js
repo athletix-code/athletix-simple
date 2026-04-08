@@ -961,9 +961,27 @@ function saveExecutedPlan(){
   _execPlan.exercises.forEach(function(ex,ei){
     if(ex.type==='note'){ if(ex.text&&ex.text.trim()){ notes.push({id:Date.now()+ei,date:saveDay,time:hh+':'+mm,athlete:athlete,type:'strength',text:ex.text,label:ex.label||'',fromPlan:_execPlan.id}); count++; } return; }
     var cat=EXERCISE_LIBRARY[ex.exCat]||{fields:['reps','load']};
-    // Rozdzielanie serii (_sCount > 1) i filtrowanie pustych
+    // Rozdzielanie serii + notatki zmian vs plan
     var rawSets=ex.targetSets.filter(function(s){ return cat.fields.some(function(f){ return s[f]&&String(s[f]).trim(); }); });
-    var sets=[]; rawSets.forEach(function(s){ var cnt=parseInt(s._sCount)||1; if(cnt<1) cnt=1; if(cnt>20) cnt=20; for(var i=0;i<cnt;i++){ var o={note:s._note||''}; cat.fields.forEach(function(f){ o[f]=s[f]||''; }); sets.push(o); } });
+    var origSets=ex._origSets||[];
+    var sets=[]; rawSets.forEach(function(s,si){
+      var cnt=parseInt(s._sCount)||1; if(cnt<1) cnt=1; if(cnt>20) cnt=20;
+      // Buduj notatkę zmiany
+      var os=origSets[si]||null; var changeNote=''; var manualNote=s._note||'';
+      if(os&&!ex.isExtra){
+        var changed=false; cat.fields.forEach(function(ff){ if(String(s[ff]||'').trim()!==String(os[ff]||'').trim()) changed=true; });
+        if(changed){
+          var pp=[]; if(cat.fields.indexOf('reps')>=0&&os.reps) pp.push(os.reps);
+          if(cat.fields.indexOf('load')>=0&&os.load) pp.push(os.load+'kg');
+          if(cat.fields.indexOf('rir')>=0&&os.rir) pp.push('RIR '+os.rir);
+          if(cat.fields.indexOf('time')>=0&&os.time) pp.push(os.time+'s');
+          if(cat.fields.indexOf('dist')>=0&&os.dist) pp.push(os.dist+'m');
+          if(pp.length) changeNote='⚠ Było: '+pp.join(' × ');
+        }
+      }
+      var finalNote=changeNote&&manualNote?changeNote+'. '+manualNote:changeNote||manualNote;
+      for(var ii=0;ii<cnt;ii++){ var o={note:finalNote}; cat.fields.forEach(function(f){ o[f]=s[f]||''; }); sets.push(o); }
+    });
     if(!sets.length) return;
     var entry={id:Date.now()+ei,date:saveDay,time:hh+':'+mm,athlete:athlete,type:'strength',exCat:ex.exCat,exZone:ex.exZone,exercise:ex.exercise,sets:sets,generalNote:ex.note||'',label:ex.label||'',fromPlan:_execPlan.id,fromPlanName:_execPlan.name};
     if(ex.isCustomEntry) entry.isCustomEntry=true;
