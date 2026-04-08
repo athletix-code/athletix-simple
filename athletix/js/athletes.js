@@ -105,8 +105,11 @@ function renderAthleteBar(){
     wrap.style.cssText='display:flex;align-items:center;flex-shrink:0;margin-bottom:4px;';
     var btn=document.createElement('button'); btn.title=name;
     btn.style.cssText='display:flex;align-items:center;gap:6px;padding:3px 10px 3px 3px;border-radius:24px;border:2px solid '+(isActive?'#3b82f6':'rgba(255,255,255,.15)')+';background:'+(isActive?'rgba(59,130,246,.2)':'rgba(255,255,255,.04)')+';cursor:pointer;transition:all .15s;white-space:nowrap;';
+    // Badge poziomu gamifikacji
+    var lvBadge='';
+    if(typeof getGamProfile==='function'){ var gp=getGamProfile(name); if(gp.totalPoints>0){ var rk=getRank(gp.totalPoints); lvBadge='<span style="font-size:7px;font-weight:800;background:'+rk.color+';color:#fff;border-radius:6px;padding:1px 3px;line-height:1.2;margin-left:2px;vertical-align:top;">Lv.'+gp.level+'</span>'; } }
     btn.innerHTML='<div style="width:30px;height:30px;border-radius:50%;background:'+(isActive?'#3b82f6':'rgba(255,255,255,.12)')+';display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;color:'+(isActive?'#fff':'rgba(255,255,255,.45)')+';flex-shrink:0;">'+initials+'</div>'
-      +'<span style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:'+(isActive?'800':'600')+';color:'+(isActive?'#fff':'rgba(255,255,255,.4)')+';letter-spacing:.04em;-webkit-user-select:none;user-select:none;">'+firstName+'</span>';
+      +'<span style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:'+(isActive?'800':'600')+';color:'+(isActive?'#fff':'rgba(255,255,255,.4)')+';letter-spacing:.04em;-webkit-user-select:none;user-select:none;">'+firstName+lvBadge+'</span>';
     btn.onclick=function(){ setActiveAthlete(name); };
     wrap.appendChild(btn);
     var profBtn=document.createElement('button');
@@ -293,8 +296,11 @@ function renderAthleteProfile(a, allSess){
   var catOpts=CATEGORIES.map(function(c){ return '<option value="'+c+'"'+(a.category===c?' selected':'')+'>'+c+'</option>'; }).join('');
   var discOpts=DISCIPLINES.map(function(d){ return '<option value="'+d+'"'+(a.discipline===d?' selected':'')+'>'+d+'</option>'; }).join('');
 
-  el('ap-content').innerHTML=
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;">'
+  // Widget gamifikacji na górze profilu
+  var gamHtml=typeof buildGamificationWidget==='function'?buildGamificationWidget(a.name):'';
+
+  el('ap-content').innerHTML=gamHtml
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;">'
     +'<div class="ap-stat"><div class="ap-stat-val">'+sessCnt+'</div><div class="ap-stat-lbl">Sesji</div></div>'
     +'<div class="ap-stat"><div class="ap-stat-val">'+notesCnt+'</div><div class="ap-stat-lbl">Wpisów</div></div>'
     +'<div class="ap-stat"><div class="ap-stat-val" style="font-size:13px;">'+lastSessDate+'</div><div class="ap-stat-lbl">Ostatnia</div></div></div>'
@@ -508,7 +514,7 @@ function openTestHistory(athleteName){
 
 // ── DELETE TEST + UNDO/REDO ──
 var _undoStack=[], _redoStack=[], _UNDO_MAX=30;
-var _ALL_DATA_KEYS=['axs_athletes','axs_sessions','axs_groups','axs_tests','axs_notes','axs_custom_tests','axs_packages','axs_int_presets','axs_custom_exercises','axs_plans','axs_favorite_exercises'];
+var _ALL_DATA_KEYS=['axs_athletes','axs_sessions','axs_groups','axs_tests','axs_notes','axs_custom_tests','axs_packages','axs_int_presets','axs_custom_exercises','axs_plans','axs_favorite_exercises','axs_gamification'];
 function _pushUndo(label){
   var snapshot=_ALL_DATA_KEYS.map(function(k){ return {key:k, val:localStorage.getItem(k)}; });
   _undoStack.push({label:label, data:snapshot, time:Date.now()});

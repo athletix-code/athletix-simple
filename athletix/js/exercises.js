@@ -508,6 +508,9 @@ function saveStrengthEntry(){
   el('ex-save-wrap').style.display='none';
   el('ex-general-note').value=''; el('ex-general-note').style.display='none';
   el('ex-general-toggle').textContent='📝 Notatka ogólna';
+  // Gamifikacja
+  if(typeof addPoints==='function') addPoints(athlete,'session',10,'Wpis: '+cleanName);
+  if(typeof updateWeeklyStreak==='function') updateWeeklyStreak(athlete);
   var btn=el('ex-save-btn'); var orig=btn.textContent; btn.textContent='✓ Zapisano!'; btn.style.background='var(--green)';
   setTimeout(function(){ btn.textContent=orig; btn.style.background=''; },1200);
   selectExZone('');

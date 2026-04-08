@@ -1039,6 +1039,11 @@ function saveExecutedPlan(){
   var tonTxt=ton>0?' • Tonaż: '+(ton>=1000?(ton/1000).toFixed(1)+'t':ton+' kg'):'';
   var btn=el('plan-exec-save-btn');
   if(btn){ var o=btn.textContent; btn.textContent='✅ Zapisano! '+count+' ćwicz.'+tonTxt; btn.style.background='var(--green)'; setTimeout(function(){ btn.textContent=o; btn.style.background=''; },2500); }
+  // Gamifikacja
+  var st2=_getExecStats(); var allChecked=st2.done>=st2.total;
+  var planPts=count*10+(allChecked?25:0);
+  if(typeof addPoints==='function') addPoints(athlete,'plan_session',planPts,'Sesja z planu: '+_execPlan.name);
+  if(typeof updateWeeklyStreak==='function') updateWeeklyStreak(athlete);
   launchConfetti();
   setTimeout(function(){ var s=el('plan-select'); if(s) s.value=''; var c=el('plan-exec-list'); if(c) c.innerHTML=''; el('plan-exec-save-wrap').style.display='none'; el('plan-exec-progress').style.display='none'; _execPlan=null; },3000);
 }

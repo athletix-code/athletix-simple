@@ -80,6 +80,8 @@ function saveTestResult(){
   // Flash confirmation
   var btn=document.querySelector('#diary-test-form button[onclick*="saveTestResult"]');
   if(btn){ var orig=btn.textContent; btn.textContent='✓ Zapisano!'; btn.style.background='var(--green)'; setTimeout(function(){ btn.textContent=orig; btn.style.background='#a855f7'; },1200); }
+  // Gamifikacja
+  if(typeof addPoints==='function') addPoints(athlete,'test',15,'Test: '+_selTestName);
 }
 function openAddCustomTest(){
   var ov=_ensureOverlay();
@@ -115,6 +117,8 @@ function saveNote(){
   _pushUndo('Wpis: '+text.substring(0,30));
   notes.push({id:Date.now(),date:day,athlete:athlete,text:text,type:_diaryMode,time:hh+':'+mm});
   saveNotes(); el('note-text').value=''; renderCal(); renderDayDetail(day);
+  // Gamifikacja
+  if(athlete&&typeof addPoints==='function') addPoints(athlete,'note',5,'Notatka treningowa');
 }
 
 function deleteNote(id){
