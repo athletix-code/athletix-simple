@@ -178,6 +178,8 @@ function _sndGameOver(){ _mBeep(400,0.1); setTimeout(function(){_mBeep(200,0.15)
 
 // ── Start gry ──
 function startMotionGame(){
+  var maSel=el('motion-athlete');
+  if(maSel&&!maSel.value){ maSel.style.borderColor='var(--red)'; setTimeout(function(){ maSel.style.borderColor=''; },500); return; }
   requestMotionPermission(function(ok){
     if(!ok){ alert('Zezwól na czujniki ruchu.'); return; }
     _motionAbort=false; _motionRunning=true;
