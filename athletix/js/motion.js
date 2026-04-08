@@ -45,7 +45,32 @@ function openMotionInfo(){
     +'<div style="font-size:12px;color:var(--text);line-height:1.8;margin-bottom:12px;">&lt;200ms = 5 pkt ⚡<br>&lt;300ms = 3 pkt<br>&lt;400ms = 2 pkt<br>&lt;500ms = 1 pkt<br>🔥 Combo 3+ szybkich = podwójne!<br>🔥 Combo 5+ = potrójne!<br>❌ Fałszywy start = -2 pkt<br>❌ Błąd Go/No-Go = -3 pkt</div>'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">🏆 Poziomy</div>'
     +'<div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:14px;">Gra ma nieskończoną ilość poziomów. Każdy kolejny jest trudniejszy: szybsze bodźce, krótsze okno reakcji, fałszywe sygnały. Masz 3 życia — fałszywy start lub brak reakcji = stracone życie.</div>'
-    +'<button onclick="document.getElementById(\'motion-info-modal\').remove()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;">Rozumiem! 💪</button></div>';
+    +'<button onclick="var nd=document.getElementById(\'mi-nerd\');nd.style.display=nd.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🤓 Chcesz wiedzieć jak to NAPRAWDĘ działa?</button>'
+    +'<div id="mi-nerd" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:14px;margin-top:8px;font-size:12px;font-weight:500;line-height:1.7;color:var(--text);">'
+    +'<div style="font-weight:800;margin-bottom:4px;">📱 AKCELEROMETR MEMS</div>'
+    +'Twój telefon ma wbudowany mikroskopijny czujnik ruchu — akcelerometr MEMS (Micro-Electro-Mechanical System). To maleńka struktura krzemowa (mniejsza niż ziarno ryżu!), która mierzy przyspieszenie w trzech osiach: przód-tył, lewo-prawo, góra-dół. Próbkuje ~60 razy na sekundę.<br><br>'
+    +'Gdy przechylasz telefon, akcelerometr wykrywa zmianę siły grawitacji na swoich osiach. Aplikacja porównuje odczyty z Twoją pozycją wyjściową (kalibracja przed grą) i oblicza czy nastąpił ruch powyżej ustalonego progu.'
+    +'<div style="font-weight:800;margin-top:14px;margin-bottom:4px;">⏱️ CZAS REAKCJI — NAUKA</div>'
+    +'Średni prosty czas reakcji człowieka to 200-300ms na bodziec wzrokowy. To suma: oko widzi sygnał (~50ms) → mózg przetwarza (~100ms) → wysyła impuls do mięśni (~50ms) → mięsień się kurczy (~50ms).<br><br>'
+    +'Najszybszy zmierzony czas reakcji sportowca to ~120ms (sprinterzy na sygnał startowy). Poniżej 100ms uznaje się za fałszywy start — bo ludzki mózg fizycznie nie jest w stanie przetworzyć bodźca tak szybko.'
+    +'<div style="font-weight:800;margin-top:14px;margin-bottom:4px;">🏅 CZY WIESZ ŻE...</div>'
+    +'• Sprinterzy trenują czas reakcji na start — próg IAAF na fałszywy start to 100ms<br>'
+    +'• Piłkarze mają średni czas reakcji ~250ms — lepszy niż populacja ogólna (~350ms)<br>'
+    +'• Piloci myśliwców: ~200ms — selekcja + trening<br>'
+    +'• Twój czas reakcji jest GORSZY gdy: jesteś zmęczony, odwodniony, po alkoholu, nie wyspany<br>'
+    +'• Twój czas reakcji jest LEPSZY gdy: jesteś rozgrzany, skupiony, po kofeinie, wyspany<br>'
+    +'• Trening POPRAWIA czas reakcji — nawet o 10-20% w ciągu kilku tygodni!'
+    +'<div style="font-weight:800;margin-top:14px;margin-bottom:4px;">📊 NORMY ORIENTACYJNE</div>'
+    +'&lt; 200ms — Elita sportowa<br>'
+    +'200-280ms — Bardzo dobry<br>'
+    +'280-350ms — Dobry<br>'
+    +'350-450ms — Przeciętny<br>'
+    +'&gt; 450ms — Do poprawy (ale trenowalny!)'
+    +'<div style="font-weight:800;margin-top:14px;margin-bottom:4px;">🔬 ŹRÓDŁA</div>'
+    +'Pomiary oparte na standardach naukowych z zakresu psychomotoryki i fizjologii sportu. Implementacja wykorzystuje Web API DeviceMotionEvent (W3C).'
+    +'<div style="font-weight:800;color:var(--accent);margin-top:14px;text-align:center;">⚡ Elevate Your Game — trenuj swój mózg tak jak trenujesz ciało!</div>'
+    +'</div>'
+    +'<button onclick="document.getElementById(\'motion-info-modal\').remove()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
   var box=document.createElement('div'); box.innerHTML=h; modal.appendChild(box.firstChild);
   document.body.appendChild(modal);
 }
