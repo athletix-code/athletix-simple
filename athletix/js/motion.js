@@ -5,6 +5,7 @@
 
 var _motionMode='simple';
 var _motionRunning=false, _motionAbort=false, _desktopFallback=false, _motionHandler=null;
+var _motionBlockSwipeClose=false;
 var _motionState={listening:false,ax:0,ay:0,az:0,baseline:{x:0,y:0,z:0},sensitivity:3,_keyPressed:null};
 // Stan gry
 var _gamePoints=0, _gameLives=3, _gameLevel=1, _gameCombo=0, _gameMaxCombo=0, _gameTotalTrials=0, _gameCorrect=0, _gameTimes=[], _gameBestLevel=0, _gameLastTime=0;
@@ -39,10 +40,25 @@ function getFinalFeedback(avg,maxLv){
   return t;
 }
 function _getBriefingRules(){
-  if(_motionMode==='simple') return '• Czekaj na zielony sygnał<br>• Reaguj ruchem telefonu (lub tapnięciem)<br>• Im szybciej — tym więcej punktów<br>• Masz 3 życia — fałszywy start = tracisz jedno';
-  if(_motionMode==='directions') return '• Pojawi się strzałka ← → ↑ ↓<br>• Przechyl telefon W KIERUNKU strzałki<br>• Liczy się szybkość I precyzja<br>• Zły kierunek = błąd';
-  if(_motionMode==='gonogo') return '• 🟢 Zielone = REAGUJ szybko!<br>• 🔴 Czerwone = STÓJ! Nie ruszaj się!<br>• Twój mózg będzie chciał zareagować na czerwone — nie daj się nabrać';
-  if(_motionMode==='pattern') return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → REAGUJ!<br>• Gdy nie pasuje → STÓJ nieruchomo';
+  var isTouch=(_motionInputMode==='touch'||_desktopFallback);
+  if(_motionMode==='simple'){
+    if(isTouch) return '• Czekaj na zielony sygnał<br>• Tapnij w ekran jak najszybciej!<br>• Im szybciej — tym więcej punktów<br>• Masz 3 życia — fałszywy start = tracisz jedno';
+    return '• Czekaj na zielony sygnał<br>• Przechyl telefon w dowolną stronę<br>• Trzymaj telefon w wyprostowanej ręce<br>• Masz 3 życia — fałszywy start = tracisz jedno';
+  }
+  if(_motionMode==='directions'){
+    if(isTouch) return '• Pojawi się strzałka ← → ↑ ↓<br>• Przesuń palcem w kierunku strzałki (swipe)<br>• Liczy się szybkość I precyzja<br>• Zły kierunek = błąd';
+    return '• Pojawi się strzałka ← → ↑ ↓<br>• Przechyl telefon W KIERUNKU strzałki<br>• Trzymaj telefon w wyprostowanej ręce<br>• Zły kierunek = błąd';
+  }
+  if(_motionMode==='gonogo'){
+    if(isTouch) return '• 🟢 Zielone = tapnij w ekran!<br>• 🔴 Czerwone = NIE dotykaj ekranu!<br>• Twój mózg będzie chciał zareagować na czerwone — nie daj się nabrać';
+    return '• 🟢 Zielone = przechyl telefon szybko!<br>• 🔴 Czerwone = STÓJ! Nie ruszaj się!<br>• Twój mózg będzie chciał zareagować na czerwone — nie daj się nabrać';
+  }
+  if(_motionMode==='pattern'){
+    var pc=_patCfg(_gameLevel);
+    if(isTouch&&pc.pos==='quad') return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → przesuń palcem w kierunku wzorca (swipe)<br>• Gdy nie pasuje → nie dotykaj ekranu';
+    if(isTouch) return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → tapnij w ekran!<br>• Gdy nie pasuje → nie dotykaj ekranu';
+    return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → REAGUJ ruchem!<br>• Gdy nie pasuje → STÓJ nieruchomo';
+  }
   return '';
 }
 function _getNextLevelHint(lv){
@@ -232,22 +248,54 @@ function _setMotionInput(m){
   if(mt){ mt.className='chip'+(m==='touch'?' on-blue':''); }
 }
 // Desktop/touch click handler
+var _swipeStart=null, _motionTouchStartFn=null, _motionTouchEndFn=null;
 function _onMotionClick(e){
   if(!_motionState.listening) return;
-  if(e.target.closest('.lock-btn,.pause-btn,button[onclick*="stop"],button[onclick*="Level"],button[onclick*="endGame"],button[onclick*="Retry"]')) return;
+  if(e.target.closest('button')) return;
+  // W trybie dotyk reakcja idzie przez touchend — click ignoruj aby nie podwajać
+  if(_motionInputMode==='touch') return;
   _motionState._keyPressed=' ';
 }
 function _addInputListeners(){
   document.addEventListener('keydown',_onDesktopKey);
-  el('motion-active').addEventListener('click',_onMotionClick);
-  el('motion-active').addEventListener('touchstart',function _ts(e){
+  var ma=el('motion-active');
+  ma.addEventListener('click',_onMotionClick);
+  // Swipe detection dla dotyk
+  _motionTouchStartFn=function(e){
     if(!_motionState.listening) return;
     if(e.target.closest('button')) return;
-    _motionState._keyPressed=' ';
-  },{passive:true});
+    _swipeStart={x:e.touches[0].clientX,y:e.touches[0].clientY,time:Date.now()};
+  };
+  _motionTouchEndFn=function(e){
+    if(!_motionState.listening||!_swipeStart) return;
+    if(e.target.closest('button')) return;
+    var dx=e.changedTouches[0].clientX-_swipeStart.x;
+    var dy=e.changedTouches[0].clientY-_swipeStart.y;
+    var dt=Date.now()-_swipeStart.time;
+    _swipeStart=null;
+    if(dt>1000) return;
+    var minDist=30;
+    if(_motionInputMode==='touch'&&(_motionMode==='directions'||(_motionMode==='pattern'&&_patCfg(_gameLevel).pos==='quad'))){
+      if(Math.abs(dx)<minDist&&Math.abs(dy)<minDist) return; // za krótki swipe — ignoruj
+      if(Math.abs(dx)>Math.abs(dy)){
+        _motionState._keyPressed=dx>0?'ArrowRight':'ArrowLeft';
+      } else {
+        _motionState._keyPressed=dy>0?'ArrowDown':'ArrowUp';
+      }
+    } else {
+      // Tap = reakcja (prosty, gonogo, wzorce center)
+      _motionState._keyPressed=' ';
+    }
+  };
+  ma.addEventListener('touchstart',_motionTouchStartFn,{passive:true});
+  ma.addEventListener('touchend',_motionTouchEndFn,{passive:true});
 }
 function _removeInputListeners(){
   document.removeEventListener('keydown',_onDesktopKey);
+  var ma=el('motion-active');
+  if(_motionTouchStartFn) ma.removeEventListener('touchstart',_motionTouchStartFn);
+  if(_motionTouchEndFn) ma.removeEventListener('touchend',_motionTouchEndFn);
+  _motionTouchStartFn=null; _motionTouchEndFn=null;
 }
 function _onDesktopKey(e){
   if(!_motionState.listening) return;
@@ -258,6 +306,7 @@ function startMotionGame(){
   requestMotionPermission(function(ok){
     if(!ok&&_motionInputMode==='motion'){ _motionInputMode='touch'; }
     _motionAbort=false; _motionRunning=true;
+    _motionBlockSwipeClose=(_motionInputMode==='touch'&&_motionMode==='directions');
     _gamePoints=0; _gameLives=3; _gameLevel=1; _gameCombo=0; _gameMaxCombo=0; _gameTotalTrials=0; _gameCorrect=0; _gameTimes=[]; _gameLastTime=0;
     el('settings').style.display='none'; el('motion-active').style.display='block';
     reqWL(); goFS();
@@ -286,7 +335,7 @@ function startMotionGame(){
   });
 }
 function stopMotion(){
-  _motionAbort=true; _motionRunning=false;
+  _motionAbort=true; _motionRunning=false; _motionBlockSwipeClose=false;
   if(_motionHandler) window.removeEventListener('devicemotion',_motionHandler);
   _removeInputListeners();
   var cb=document.getElementById('motion-close-btn'); if(cb) cb.remove();
@@ -324,6 +373,8 @@ function _showBriefing(closeBtn, onReady){
   var rules=_getBriefingRules();
   var quote=_pick(BRIEFING_QUOTES);
   var ch=getLevelCharacter(_gameLevel);
+  var isTouch=(_motionInputMode==='touch'||_desktopFallback);
+  var inputHint=isTouch?'👆 Reaguj dotykiem ekranu':'📱 Reaguj ruchem telefonu';
   ma.style.background='#060606';
   ma.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 28px;box-sizing:border-box;max-width:360px;">'
     +'<div style="font-size:40px;margin-bottom:4px;">'+ch.emoji+'</div>'
@@ -331,7 +382,8 @@ function _showBriefing(closeBtn, onReady){
     +'<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4);margin-top:2px;">Level '+_gameLevel+' • '+ch.name+'</div>'
     +'<div style="margin-top:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;text-align:left;">'
     +'<div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">ZASADY</div>'
-    +'<div style="font-size:12px;font-weight:500;line-height:1.7;color:rgba(255,255,255,.7);">'+rules+'</div></div>'
+    +'<div style="font-size:12px;font-weight:500;line-height:1.7;color:rgba(255,255,255,.7);">'+rules+'</div>'
+    +'<div style="font-size:11px;font-weight:600;color:var(--accent);margin-top:6px;">'+inputHint+'</div></div>'
     +'<div style="margin-top:14px;font-size:12px;font-weight:600;font-style:italic;color:rgba(255,255,255,.45);line-height:1.5;padding:0 8px;">\u201E'+quote+'\u201D</div>'
     +'<button id="briefing-go-btn" style="margin-top:20px;width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.04em;">DAWAJ! \uD83D\uDE80</button>'
     +'</div>';
@@ -350,25 +402,34 @@ function _mScreen(title,sub,extra){ return '<div style="position:absolute;top:50
 function _mHUD(){
   var lives=''; for(var i=0;i<3;i++) lives+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(i<_gameLives?'var(--red)':'rgba(255,255,255,.15)')+';margin-left:3px;"></span>';
   var ch=getLevelCharacter(_gameLevel);
-  var comboHtml=_gameCombo>=3?'<div style="position:fixed;top:104px;left:50%;transform:translateX(-50%);z-index:11;font-size:14px;font-weight:900;color:#f59e0b;background:rgba(245,158,11,.1);padding:4px 14px;border-radius:20px;animation:mBtnPulse .6s infinite;">🔥 x'+_gameCombo+' COMBO</div>':'';
-  // Oblicz wartości kafelków
+  var comboHtml=_gameCombo>=3?'<div style="position:fixed;top:108px;left:50%;transform:translateX(-50%);z-index:16;font-size:14px;font-weight:900;color:#f59e0b;background:rgba(245,158,11,.1);padding:4px 14px;border-radius:20px;animation:mBtnPulse .6s infinite;">🔥 x'+_gameCombo+' COMBO</div>':'';
   var hasData=_gameTimes.length>0;
   var lastMs=_gameLastTime;
   var validTimes=_gameTimes.filter(function(t){ return t<3000; });
   var avgMs=validTimes.length?Math.round(validTimes.reduce(function(a,b){return a+b;},0)/validTimes.length):0;
   var bestMs=_gameTimes.length?Math.min.apply(null,_gameTimes):0;
   function _tc(ms){ return ms<250?'#4ade80':ms<400?'#3b82f6':ms<600?'#d97706':'#dc2626'; }
-  var tileS='background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:6px 4px;text-align:center;flex:1;';
-  var labelS='font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-top:2px;';
-  var tilesHtml='<div style="position:fixed;top:52px;left:10px;right:10px;display:flex;gap:6px;z-index:10;">'
-    +'<div style="'+tileS+'" id="m-tile-last"><div style="font-size:16px;font-weight:800;color:'+(hasData?_tc(lastMs):'rgba(255,255,255,.25)')+';transition:transform .2s;" id="m-last-val">'+(hasData?lastMs+'<span style="font-size:10px;font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">OSTATNI</div></div>'
-    +'<div style="'+tileS+'"><div style="font-size:16px;font-weight:800;color:'+(hasData?_tc(avgMs):'rgba(255,255,255,.25)')+';">'+(hasData?avgMs+'<span style="font-size:10px;font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">ŚREDNIA</div></div>'
-    +'<div style="'+tileS+'"><div style="font-size:16px;font-weight:800;color:'+(hasData?'#4ade80':'rgba(255,255,255,.25)')+';">'+(hasData?bestMs+'<span style="font-size:10px;font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">NAJLEPSZY</div></div>'
+  var isWide=window.innerWidth>=768;
+  var tPad=isWide?'10px 8px':'6px 4px';
+  var tValFs=isWide?'20px':'16px';
+  var tUnitFs=isWide?'12px':'10px';
+  var tLblFs=isWide?'9px':'7px';
+  var tileBase='background:rgba(255,255,255,.05);border-radius:10px;padding:'+tPad+';text-align:center;flex:1;';
+  var lastTile=tileBase+'border:1px solid rgba(59,130,246,.3);';
+  var avgTile=tileBase+'border:1px solid rgba(168,85,247,.3);';
+  var bestTile=tileBase+'border:2px solid rgba(234,179,8,.5);box-shadow:0 0 12px rgba(234,179,8,.15);';
+  var bestValFs=isWide?'22px':'18px';
+  var labelS='font-size:'+tLblFs+';font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-top:2px;';
+  var tilesMax=isWide?'max-width:500px;margin-left:auto;margin-right:auto;':'';
+  var tilesHtml='<div style="position:fixed;top:48px;left:10px;right:10px;display:flex;gap:6px;z-index:15;'+tilesMax+'">'
+    +'<div style="'+lastTile+'" id="m-tile-last"><div style="font-size:'+tValFs+';font-weight:800;color:'+(hasData?_tc(lastMs):'rgba(255,255,255,.25)')+';transition:transform .2s;" id="m-last-val">'+(hasData?lastMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">OSTATNI</div></div>'
+    +'<div style="'+avgTile+'"><div style="font-size:'+tValFs+';font-weight:800;color:'+(hasData?_tc(avgMs):'rgba(255,255,255,.25)')+';">'+(hasData?avgMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">ŚREDNIA</div></div>'
+    +'<div style="'+bestTile+'"><div style="font-size:'+bestValFs+';font-weight:800;color:'+(hasData?'#4ade80':'rgba(255,255,255,.25)')+';">'+(hasData?bestMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">NAJLEPSZY</div></div>'
     +'</div>';
   return '<div style="position:absolute;top:0;left:0;right:0;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10;background:linear-gradient(to bottom,rgba(6,6,6,.9),transparent);height:42px;">'
     +'<span style="font-size:20px;font-weight:900;color:var(--accent);transition:transform .2s;" id="m-pts">⚡ '+_gamePoints+'</span>'
     +'<span style="font-size:12px;font-weight:700;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);padding:3px 10px;border-radius:12px;">'+ch.emoji+' Lv.'+_gameLevel+'</span>'
-    +'<div style="display:flex;align-items:center;gap:4px;">'+lives+'<button class="lock-btn" onclick="lockScreen()" style="margin-left:4px;font-size:12px;">🔒</button></div></div>'
+    +'<div style="display:flex;align-items:center;">'+lives+'</div></div>'
     +tilesHtml+comboHtml;
 }
 function _mTimeAnim(ms){
@@ -392,7 +453,7 @@ function _mCircle(state,content,subtext){
   var borderC=colors[state]||'rgba(255,255,255,.1)';
   var bg=state==='go'?'#4ade80':state==='nogo'?'#f87171':'transparent';
   var shadow=state==='go'?'0 0 40px rgba(74,222,128,.3)':state==='nogo'?'0 0 40px rgba(248,113,113,.3)':'none';
-  return '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">'
+  return '<div style="position:absolute;top:calc(50% + 30px);left:50%;transform:translate(-50%,-50%);text-align:center;">'
     +'<div style="width:160px;height:160px;border-radius:50%;border:3px solid '+borderC+';background:'+bg+';display:flex;align-items:center;justify-content:center;margin:0 auto;box-shadow:'+shadow+';'+(state==='go'||state==='nogo'?'animation:mPulse .15s ease-out;':'')+'"><div style="color:#fff;">'+content+'</div></div>'
     +(subtext?'<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.5);margin-top:10px;">'+subtext+'</div>':'')+'</div>';
 }
@@ -490,10 +551,14 @@ function _runTrial(idx,cfg,trialResults,cb){
       if(_motionAbort){ clearInterval(rc); return; }
       var moved=false;
       if(_motionMode==='directions'){
-        var dir=_desktopFallback?(_motionState._keyPressed?{ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[_motionState._keyPressed]:null):detectDirection();
-        if(dir){ moved=true; var correct=dir===dirTarget; _finishTrial(clearInterval,rc,rt,stimTime,correct,correct?null:'wrong_dir',trialResults,idx,cfg,cb); return; }
+        var dir;
+        if(_desktopFallback||_motionInputMode==='touch'){
+          var kp=_motionState._keyPressed;
+          dir=kp?({ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[kp]||null):null;
+        } else { dir=detectDirection(); }
+        if(dir){ moved=true; _motionState._keyPressed=null; var correct=dir===dirTarget; _finishTrial(clearInterval,rc,rt,stimTime,correct,correct?null:'wrong_dir',trialResults,idx,cfg,cb); return; }
       } else {
-        if(detectMovement()||(_desktopFallback&&_motionState._keyPressed)){ moved=true; _finishTrial(clearInterval,rc,rt,stimTime,true,null,trialResults,idx,cfg,cb); return; }
+        if(detectMovement()||(_desktopFallback&&_motionState._keyPressed)||(_motionInputMode==='touch'&&_motionState._keyPressed)){ moved=true; _motionState._keyPressed=null; _finishTrial(clearInterval,rc,rt,stimTime,true,null,trialResults,idx,cfg,cb); return; }
       }
     },16);
     var rt=setTimeout(function(){
@@ -694,7 +759,7 @@ function _patHtml(p,cols,fs){
 }
 function _patternsMatch(a,b){ if(!a||!b||a.length!==b.length) return false; for(var i=0;i<a.length;i++) if(a[i]!==b[i]) return false; return true; }
 // Pozycje bodźca
-var _PAT_POS={center:{t:'50%',l:'50%',tr:'translate(-50%,-50%)'},top:{t:'18%',l:'50%',tr:'translate(-50%,0)'},bottom:{t:'72%',l:'50%',tr:'translate(-50%,0)'},'top-left':{t:'18%',l:'12%',tr:'none'},'top-right':{t:'18%',l:'',r:'12%',tr:'none'},'bottom-left':{t:'68%',l:'12%',tr:'none'},'bottom-right':{t:'68%',l:'',r:'12%',tr:'none'}};
+var _PAT_POS={center:{t:'55%',l:'50%',tr:'translate(-50%,-50%)'},top:{t:'22%',l:'50%',tr:'translate(-50%,0)'},bottom:{t:'72%',l:'50%',tr:'translate(-50%,0)'},'top-left':{t:'22%',l:'12%',tr:'none'},'top-right':{t:'22%',l:'',r:'12%',tr:'none'},'bottom-left':{t:'68%',l:'12%',tr:'none'},'bottom-right':{t:'68%',l:'',r:'12%',tr:'none'}};
 function _pickPatPos(posMode){
   if(posMode==='center') return 'center';
   if(posMode==='vertical'){ var o=['center','top','bottom']; return o[Math.floor(Math.random()*o.length)]; }
@@ -738,8 +803,8 @@ function _runPatternLevel(idx,cfg,results,cb){
   var stimTime=Date.now();
   // Render
   ma.innerHTML=_mHUD()
-    // CEL — zawsze u góry centered
-    +'<div style="position:absolute;top:10%;left:50%;transform:translateX(-50%);text-align:center;width:min(65%,280px);z-index:5;">'
+    // CEL — zawsze u góry centered (poniżej kafelków HUD)
+    +'<div style="position:absolute;top:14%;left:50%;transform:translateX(-50%);text-align:center;width:min(65%,280px);z-index:5;">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">🎯 SZUKAJ</div>'
     +'<div id="pat-target-box" style="border:2px solid var(--accent);border-radius:16px;padding:16px;background:rgba(59,130,246,.06);box-shadow:0 0 24px rgba(59,130,246,.15);">'+_patHtml(_patternTarget,pc.cols,tFs)+'</div></div>'
     // BODZIEC — pozycja zależy od levelu

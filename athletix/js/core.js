@@ -149,5 +149,5 @@ lb.addEventListener('mousedown',_startFill); lb.addEventListener('mouseup',_canc
 // ══ SWIPE DOWN = STOP ══
 var _tsY=0,_tsX=0;
 document.addEventListener('touchstart',function(e){ _tsY=e.touches[0].clientY; _tsX=e.touches[0].clientX; },{passive:true});
-document.addEventListener('touchend',function(e){ var dy=e.changedTouches[0].clientY-_tsY; var dx=Math.abs(e.changedTouches[0].clientX-_tsX); if(dy>90&&dx<60){ if(el('workout').style.display==='block') stopW(); else if(el('rc-active').style.display==='block') stopRC(); else if(el('int-active').style.display==='block') stopInt(); else if(el('motion-active').style.display==='block'&&typeof stopMotion==='function') stopMotion(); } },{passive:true});
+document.addEventListener('touchend',function(e){ var dy=e.changedTouches[0].clientY-_tsY; var dx=Math.abs(e.changedTouches[0].clientX-_tsX); if(dy>90&&dx<60){ if(el('workout').style.display==='block') stopW(); else if(el('rc-active').style.display==='block') stopRC(); else if(el('int-active').style.display==='block') stopInt(); else if(el('motion-active').style.display==='block'&&typeof stopMotion==='function'&&!_motionBlockSwipeClose) stopMotion(); } },{passive:true});
 
