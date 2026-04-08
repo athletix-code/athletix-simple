@@ -10,6 +10,55 @@ var _motionState={listening:false,ax:0,ay:0,az:0,baseline:{x:0,y:0,z:0},sensitiv
 var _gamePoints=0, _gameLives=3, _gameLevel=1, _gameCombo=0, _gameMaxCombo=0, _gameTotalTrials=0, _gameCorrect=0, _gameTimes=[], _gameBestLevel=0;
 // Tryb Wzorce
 var PATTERN_SYMBOLS=['🔴','🟢','🔵','🟡','🟣','🟠','⬜','⬛'];
+
+// ── Osobowość trenera — cytaty i feedback ──
+var BRIEFING_QUOTES=['Spokojnie, to tylko gra... w której oceniam Twój mózg. 🧠','Oddychaj. Skup się. I nie myśl o tym, że Cię oceniam.','Sprinterzy reagują w 120ms. Bez presji. 😏','Twoje palce są gotowe. Pytanie czy mózg nadąży.','Poprzednim razem poszło Ci... no, sam zobaczysz.','Pamiętaj: to trening. Błędy są OK. Brak prób — nie.','Za chwilę zaczniesz. Za godzinę będziesz chciał jeszcze raz.','Jestem tylko aplikacją, ale wierzę w Ciebie. Serio.','No to co, gotowy na kolejną dawkę adrenaliny?','Dziś pobijemy rekord. Albo przynajmniej spróbujemy.'];
+var LEVEL_MOTIVATORS=['Wierzę w Ciebie. No... prawie na pewno.','Następny level to Twój. Weź go.','Gorzej już było. Teraz może być tylko lepiej. 😏','Skup się. Oddychaj. I nie myśl o poprzednich błędach.','Gdyby to było łatwe, każdy by to robił.','Twój mózg właśnie buduje nowe połączenia neuronalne. Dosłownie.','Za 10 sekund zapomnisz o tym tekście i będziesz w trybie walki.','Pamiętaj: postęp > perfekcja.','Ten level jest trudniejszy. Ale Ty też jesteś lepszy niż 5 minut temu.','Nic nie motywuje bardziej niż udowodnienie sobie że się da.','Ok, starczy tego coachingu. Dawaj. 🚀'];
+var _COACH_FAST=['No dobra, przyznam — to było szybkie. Naprawdę szybkie. 🔥','Twój czas reakcji jest bliżej pilota myśliwca niż zwykłego śmiertelnika.','Okej, oficjalnie nie mam się już do czego przyczepić. Prawie.','Szybszy niż mój procesor. I nie mówię tego każdemu.'];
+var _COACH_MID=['Solidnie! Nie jesteś sprinterem olimpijskim, ale kto jest? 😏','Dobre tempo. Mózg pracuje, mięśnie nadążają. Tak trzymaj.','Widzę postęp. Albo po prostu dobrze spałeś. Tak czy siak — brawo.','Niezły poziom. Jeszcze parę takich sesji i zacznę się bać.'];
+var _COACH_OK=['Hej, jest potencjał! Tylko go trochę... obudzić. ☕','Nie jest źle. Naprawdę. Ale może jutro po kawie będzie lepiej?','Przeciętnie? Tak. Ale przeciętność to punkt wyjścia, nie wyrok.','Dobra wiadomość: jest dokąd się rozwijać. Zła: jest dokąd się rozwijać. 😄'];
+var _COACH_SLOW=['Okej, chwila coachingu... Skup się bardziej. Koniec coachingu. 😎','Hmm, chyba ktoś myślami był gdzie indziej? Następny level — pełna koncentracja!','Sprinterzy reagują 5× szybciej? Dobra, liczyłeś na pochwałę. Ale muszę być szczery.','Nie martw się, Einstein też pewnie miałby kiepski czas reakcji. Prawdopodobnie.'];
+var _COACH_ACC=[' Za dużo pomyłek. Ale hej — pomyłki to dowód na to że próbujesz.',' Trochę za dużo fałszywych alarmów. Cierpliwość, młody padawanie.',' Przeczytaj zasady jeszcze raz. Żartuję. A może nie. 🤔'];
+var _COACH_COMBO=[' Combo x{N}! To nie przypadek — to flow state. 🧘',' Seria {N} z rzędu. Twój mózg wszedł w tryb turbo.',' {N} z rzędu — i to BEZ przerwy? Respect.'];
+var _COACH_NERD=[' 🤓 Fun fact: Twój sygnał nerwowy podróżuje ~120 m/s. To ~430 km/h!',' 🤓 Bodziec wzrokowy dociera do mózgu w ~20-40ms. Reszta to przetwarzanie.',' 🤓 Badanie MindCrowd: czas reakcji pogarsza się o ~3-7ms na rok życia. Trening pomaga!',' 🤓 W sprincie próg falstartu to 100ms. Badania Komi (2009) sugerują, że niektórzy reagują w 80ms.',' 🤓 Czas reakcji jest lepszy po rozgrzewce, kawie i dobrym śnie. Gorszy po jedzeniu i alkoholu.'];
+var _COACH_JOKE=[' 😄 Suchar: Dlaczego akcelerometr nie chodzi na randki? Bo za szybko się przechyla.',' 😄 Co mówi trener do wolnego zawodnika? "Masz czas... ale nie za dużo."',' 😄 Koniec żartów. Chociaż... jeszcze jeden. Nie? Ok, wracamy do roboty.'];
+function _pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function getCoachFeedback(avg,acc,combo,lv){
+  var t=avg<250?_pick(_COACH_FAST):avg<350?_pick(_COACH_MID):avg<500?_pick(_COACH_OK):_pick(_COACH_SLOW);
+  if(acc<70) t+=_pick(_COACH_ACC);
+  if(combo>=5) t+=_pick(_COACH_COMBO).replace(/\{N\}/g,String(combo));
+  if(Math.random()<0.2) t+=_pick(_COACH_NERD);
+  if(Math.random()<0.1) t+=_pick(_COACH_JOKE);
+  return t;
+}
+function getFinalFeedback(avg,maxLv){
+  var t=maxLv>=10?'Level '+maxLv+'. Nie mam słów. A to rzadkość, bo zwykle gadam za dużo. 🏆':maxLv>=7?'Level '+maxLv+' — to już poważny wynik. Widzę w Tobie potencjał. Serio.':maxLv>=4?'Level '+maxLv+'. Solidna robota. Jeszcze trochę i zaczniesz mnie zaskakiwać.':'Level '+maxLv+'. Hej, każdy kiedyś zaczynał. Jutro będzie lepiej. Obiecuję. No... prawie.';
+  t+='<br><br>';
+  t+=avg<300?'Średni czas '+avg+'ms — Twój mózg działa jak dobrze naoliwiona maszyna. ⚡':avg<450?'Średnia '+avg+'ms — przyzwoicie! Regularny trening i zejdziesz poniżej 300.':'Średnia '+avg+'ms — jest nad czym pracować. Ale samo to że tu jesteś to już więcej niż większość robi.';
+  t+='<br><br>Wróć jutro. Twój mózg potrzebuje snu żeby skonsolidować to czego się dziś nauczył. Tak działa neuroplastyczność. 🧠';
+  return t;
+}
+function _getBriefingRules(){
+  if(_motionMode==='simple') return '• Czekaj na zielony sygnał<br>• Reaguj ruchem telefonu (lub tapnięciem)<br>• Im szybciej — tym więcej punktów<br>• Masz 3 życia — fałszywy start = tracisz jedno';
+  if(_motionMode==='directions') return '• Pojawi się strzałka ← → ↑ ↓<br>• Przechyl telefon W KIERUNKU strzałki<br>• Liczy się szybkość I precyzja<br>• Zły kierunek = błąd';
+  if(_motionMode==='gonogo') return '• 🟢 Zielone = REAGUJ szybko!<br>• 🔴 Czerwone = STÓJ! Nie ruszaj się!<br>• Twój mózg będzie chciał zareagować na czerwone — nie daj się nabrać';
+  if(_motionMode==='pattern') return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → REAGUJ!<br>• Gdy nie pasuje → STÓJ nieruchomo';
+  return '';
+}
+function _getNextLevelHint(lv){
+  var cur=_getLevelCfg(lv),nxt=_getLevelCfg(lv+1);
+  var hints=[];
+  if(nxt.window<cur.window) hints.push('Bodźce będą szybsze! Mniej czasu na reakcję.');
+  if(nxt.fakeChance>cur.fakeChance&&nxt.fakeChance>0) hints.push('⚠️ Uwaga na zmyłki!');
+  if(_motionMode==='pattern'){
+    var pc=_patCfg(lv),pn=_patCfg(lv+1);
+    if(pn.tgtCh>pc.tgtCh) hints.push('🔄 Cel może się zmieniać w trakcie!');
+    if(pn.cols>pc.cols) hints.push('📐 Więcej pól! Wzorce bardziej złożone.');
+    if(pn.pos!==pc.pos) hints.push('🧭 Wzorzec w innym miejscu — reaguj kierunkowo!');
+  }
+  if(_movementThreshold(lv+1)>_movementThreshold(lv)+0.5) hints.push('💪 Potrzeba mocniejszego ruchu!');
+  return hints.length?hints.join(' '):'Więcej prób, mniej czasu. Klasyka. Dasz radę. 💪';
+}
 var _patternTarget=[], _patternInterval=null;
 
 // ── Postacie per level ──
@@ -222,16 +271,18 @@ function startMotionGame(){
       _motionHandler=onMotionData; window.addEventListener('devicemotion',_motionHandler);
     }
     _addInputListeners();
-    // Kalibracja lub od razu
-    if(_motionInputMode==='touch'||_desktopFallback){
-      _motionCountdown(function(){ _startLevel(_gameLevel); });
-    } else {
-      _motionCountdown(function(){
-        el('motion-active').innerHTML=_mScreen('Kalibracja...','Trzymaj telefon nieruchomo','');
-        var cb2=document.getElementById('motion-close-btn'); if(!cb2){ cb2=closeBtn.cloneNode(true); cb2.onclick=_confirmCloseMotion; el('motion-active').appendChild(cb2); }
-        calibrateMotion(function(){ _startLevel(_gameLevel); });
-      });
-    }
+    // Briefing → Countdown → Kalibracja/Start
+    _showBriefing(closeBtn, function(){
+      if(_motionInputMode==='touch'||_desktopFallback){
+        _motionCountdown(function(){ _startLevel(_gameLevel); });
+      } else {
+        _motionCountdown(function(){
+          el('motion-active').innerHTML=_mScreen('Kalibracja...','Trzymaj telefon nieruchomo','');
+          var cb2=document.getElementById('motion-close-btn'); if(!cb2){ cb2=closeBtn.cloneNode(true); cb2.onclick=_confirmCloseMotion; el('motion-active').appendChild(cb2); }
+          calibrateMotion(function(){ _startLevel(_gameLevel); });
+        });
+      }
+    });
   });
 }
 function stopMotion(){
@@ -263,6 +314,28 @@ function _showSwipeTip(){
   tip.textContent='💡 Tip: możesz też zamykać ściągając palcem w dół';
   document.body.appendChild(tip);
   setTimeout(function(){ tip.style.opacity='0'; setTimeout(function(){ tip.remove(); },300); },3000);
+}
+function _showBriefing(closeBtn, onReady){
+  var ma=el('motion-active');
+  var modeNames={simple:'⚡ Reakcja',directions:'🧭 Kierunki',gonogo:'👁 Go / No-Go',pattern:'🧩 Wzorce'};
+  var modeName=modeNames[_motionMode]||'Gra';
+  var rules=_getBriefingRules();
+  var quote=_pick(BRIEFING_QUOTES);
+  var ch=getLevelCharacter(_gameLevel);
+  ma.style.background='#060606';
+  ma.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 28px;box-sizing:border-box;max-width:360px;">'
+    +'<div style="font-size:40px;margin-bottom:4px;">'+ch.emoji+'</div>'
+    +'<div style="font-size:18px;font-weight:900;color:#f2f2f2;letter-spacing:.04em;">'+modeName+'</div>'
+    +'<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4);margin-top:2px;">Level '+_gameLevel+' • '+ch.name+'</div>'
+    +'<div style="margin-top:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;text-align:left;">'
+    +'<div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">ZASADY</div>'
+    +'<div style="font-size:12px;font-weight:500;line-height:1.7;color:rgba(255,255,255,.7);">'+rules+'</div></div>'
+    +'<div style="margin-top:14px;font-size:12px;font-weight:600;font-style:italic;color:rgba(255,255,255,.45);line-height:1.5;padding:0 8px;">\u201E'+quote+'\u201D</div>'
+    +'<button id="briefing-go-btn" style="margin-top:20px;width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.04em;">DAWAJ! \uD83D\uDE80</button>'
+    +'</div>';
+  var cb2=document.getElementById('motion-close-btn');
+  if(!cb2){ cb2=closeBtn.cloneNode(true); cb2.onclick=_confirmCloseMotion; ma.appendChild(cb2); }
+  document.getElementById('briefing-go-btn').onclick=function(){ onReady(); };
 }
 
 function _motionCountdown(cb){
@@ -486,9 +559,11 @@ function _showLevelComplete(lv,trialResults){
     +'<div style="'+tileS+'"><div style="font-size:20px;font-weight:900;color:'+accCol+';">'+lvAcc+'%</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;">Celność</div><div style="font-size:9px;font-weight:500;color:rgba(255,255,255,.4);margin-top:2px;">poprawne / wszystkie</div></div>'
     +'<div style="'+tileS+'"><div style="font-size:20px;font-weight:900;color:#f59e0b;">x'+lvCombo+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;">Max combo</div><div style="font-size:9px;font-weight:500;color:rgba(255,255,255,.4);margin-top:2px;">reakcji z rzędu &lt; 350ms</div></div>'
     +'</div>'
-    +'<div style="font-size:13px;font-weight:600;font-style:italic;color:rgba(255,255,255,.55);margin-bottom:2px;">'+msg+'</div>'
-    +'<div style="font-size:10px;color:rgba(255,255,255,.3);">'+moveHint+'</div>'
-    +'<div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
+    // Feedback trenera
+    +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin:10px auto;max-width:300px;"><span style="font-size:16px;">🎙️</span> <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:1.6;font-style:italic;">'+getCoachFeedback(lvAvg,lvAcc,lvCombo,lv)+'</span></div>'
+    // Info o następnym levelu
+    +'<div style="border:1px dashed rgba(255,255,255,.1);border-radius:10px;padding:10px;margin:6px auto;max-width:300px;"><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:4px;">📢 LEVEL '+(lv+1)+':</div><div style="font-size:11px;font-weight:500;color:rgba(255,255,255,.45);">'+_getNextLevelHint(lv)+'</div><div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);margin-top:4px;">'+_pick(LEVEL_MOTIVATORS)+'</div></div>'
+    +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
     +'<button onclick="_endGame()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏁 Zakończ grę</button></div></div>';
 }
@@ -532,6 +607,10 @@ function _showGameOver(){
     +compareHtml
     // Kafelki wyników
     +_mResultTiles(avg,best,acc)
+    // Feedback trenera
+    +'<div style="margin-top:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;max-width:320px;margin-left:auto;margin-right:auto;text-align:left;">'
+    +'<div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;">TRENER MÓWI</div>'
+    +'<div style="font-size:12px;font-weight:500;line-height:1.6;color:rgba(255,255,255,.6);">'+getFinalFeedback(avg,_gameLevel)+'</div></div>'
     +'<div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_motionRetry()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Zagraj ponownie</button>'
     +'<button onclick="stopMotion()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">🏠 Wróć</button>'
