@@ -44,15 +44,15 @@ function randomizeAvatar(name){
 
 // ── Przyznawanie punktów ──
 function addPoints(athleteName,source,points,desc){
-  if(!athleteName||points<=0) return;
+  if(!athleteName||points===0) return;
   loadGamification(); var gp=getGamProfile(athleteName);
   var oldLevel=gp.level;
-  gp.totalPoints+=points;
+  gp.totalPoints=Math.max(0,gp.totalPoints+points);
   var rank=getRank(gp.totalPoints); gp.level=rank.level;
   gp.history.unshift({date:new Date().toISOString(),source:source,points:points,desc:desc});
   if(gp.history.length>100) gp.history.length=100;
   saveGamification();
-  if(gp.level>oldLevel) showLevelUp(athleteName,rank);
+  if(points>0&&gp.level>oldLevel) showLevelUp(athleteName,rank);
 }
 
 // ── Streak tygodniowy ──

@@ -228,6 +228,9 @@ function deductEntry(athleteName){
   var ear=document.getElementById('wallet-earned-tile');
   if(dep){ dep.style.borderColor='var(--red)'; setTimeout(function(){ dep.style.borderColor='var(--green)'; },500); }
   if(ear){ ear.style.borderColor='var(--green)'; ear.style.transform='scale(1.03)'; setTimeout(function(){ ear.style.borderColor='var(--accent)'; ear.style.transform='scale(1)'; },500); }
+  // ATP za wejście
+  if(typeof addPoints==='function') addPoints(athleteName,'entry',15,'Wejście na trening');
+  if(typeof updateWeeklyStreak==='function') updateWeeklyStreak(athleteName);
 }
 
 function openAddPower(athleteName){
@@ -441,6 +444,8 @@ function deleteTransaction(txId, athleteName){
     // Log event
     _logEvent(w2,'⊘ Usunięto: '+(tx.note||tx.type)+' ('+tx.amount+' pkt) — '+reason);
     saveCRM(); ov.style.display='none';
+    // Cofnij ATP jeśli to było wejście
+    if(tx.type==='debit'&&typeof addPoints==='function') addPoints(athleteName,'entry_removed',-15,'Cofnięcie wejścia');
     if(_currentProfileId){ var allSess=[]; try{ allSess=JSON.parse(localStorage.getItem(SESSION_KEY)||'[]'); }catch(e){} renderAthleteProfile(a2,allSess); }
     renderAthleteList();
   };
