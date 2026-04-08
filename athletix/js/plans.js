@@ -670,6 +670,7 @@ function _restoreAthleteState(name){
         _execPlan=JSON.parse(JSON.stringify(state.execPlan));
         var c=el('plan-exec-list'); if(c) _renderExecCards(c);
         el('plan-exec-save-wrap').style.display='block';
+        _updateExecProgress();
       } else { renderPlanExecution(); }
     }
   } else {
@@ -712,6 +713,7 @@ function renderPlanExecution(){
   });
   _renderExecCards(c);
   el('plan-exec-save-wrap').style.display='block';
+  _updateExecProgress();
 }
 
 function _renderExecCards(container){
@@ -749,7 +751,12 @@ function _renderExecCards(container){
       +(ex.exZone?'<span style="font-size:9px;color:var(--dim);flex-shrink:0;">'+(ZONE_LABELS[ex.exZone]||'')+'</span>':'')
       +_cardControls(ei,total,'_moveExecEx','_rmExecEx')
       +'</div>';
-    if(sum) h+='<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Cel: '+sum+'</div>';
+    // Cel + licznik postępu per ćwiczenie
+    var exDone=0,exTotal=(ex.targetSets||[]).length;
+    (ex.targetSets||[]).forEach(function(s){ if(s._checked) exDone++; });
+    var progHtml=exTotal>0?(exDone>=exTotal?'<span style="font-size:10px;font-weight:800;color:var(--green-text);margin-left:8px;">✓ Ukończone</span>':'<span style="font-size:10px;font-weight:700;color:var(--green-text);opacity:.7;margin-left:8px;">'+exDone+'/'+exTotal+' serii</span>'):'';
+    if(sum) h+='<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Cel: '+sum+progHtml+'</div>';
+    else if(progHtml) h+='<div style="margin-bottom:6px;">'+progHtml+'</div>';
     // Nagłówki: ✓ + kolumny + 📝
     h+='<div style="display:flex;gap:4px;align-items:center;margin-bottom:3px;">'
       +'<div style="width:34px;flex-shrink:0;text-align:center;font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--muted);">OK</div>';
@@ -762,15 +769,17 @@ function _renderExecCards(container){
       if(!ex.isExtra){ var os=ex._origSets&&ex._origSets[si]?ex._origSets[si]:null;
         if(os){ fields.forEach(function(f){ if(String(s[f]||'').trim()!==String(os[f]||'').trim()) changed=true; }); if(changed) origDesc=_origSetText(os,fields); }
       }
-      var rowBg=ck?'background:rgba(22,163,74,.05);':'';
+      var rowBg=ck?'background:rgba(22,163,74,.06);':'';
       if(changed) rowBg='background:rgba(217,119,6,.05);';
+      var inpExtra=ck&&!changed?'border-color:rgba(22,163,74,.3);opacity:0.85;':'';
+      if(changed) inpExtra='border-color:var(--amber);';
       h+='<div style="margin-bottom:3px;">'
         +'<div class="pe-exec-row" style="display:flex;gap:4px;align-items:center;padding:3px 0;border-radius:var(--r-xs);'+rowBg+'transition:background .2s;">'
         +'<label style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;cursor:pointer;flex-shrink:0;">'
         +'<input type="checkbox" '+(ck?'checked ':'')+' onchange="_togExec('+ei+','+si+',this)" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer;"/></label>';
       fields.forEach(function(f){
         var v=s[f]||'';
-        h+='<input class="ex-set-input" style="flex:1;min-width:'+(_fieldWidth(f)-10)+'px;'+(ck&&!changed?'border-color:var(--green);':'')+(changed?'border-color:var(--amber);':'')+'" data-ei="'+ei+'" data-si="'+si+'" data-field="'+f+'" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" value="'+v+'" placeholder="—" oninput="_upExec('+ei+','+si+',\''+f+'\',this.value)"/>';
+        h+='<input class="ex-set-input" style="flex:1;min-width:'+(_fieldWidth(f)-10)+'px;'+inpExtra+'" data-ei="'+ei+'" data-si="'+si+'" data-field="'+f+'" type="'+FIELD_TYPES[f]+'" inputmode="'+FIELD_INPUTMODES[f]+'" value="'+v+'" placeholder="—" oninput="_upExec('+ei+','+si+',\''+f+'\',this.value)"/>';
       });
       // Notatka serii — przycisk
       var hasNote=s._note&&s._note.trim();
@@ -852,7 +861,15 @@ function _openSetNote(ei,si){
   _openSetNoteModal(_execPlan.exercises[ei].targetSets, si, function(){ var c=el('plan-exec-list'); if(c) _renderExecCards(c); });
 }
 
-function _togExec(ei,si,cb){ if(!_execPlan) return; _execPlan.exercises[ei].targetSets[si]._checked=cb.checked; var c=el('plan-exec-list'); if(c) _renderExecCards(c); }
+function _togExec(ei,si,cb){
+  if(!_execPlan) return; _execPlan.exercises[ei].targetSets[si]._checked=cb.checked;
+  // Wizualny feedback bez pełnego re-renderu
+  var row=cb.closest('.pe-exec-row'); if(row){
+    row.style.background=cb.checked?'rgba(22,163,74,.06)':'';
+    row.querySelectorAll('.ex-set-input').forEach(function(inp){ inp.style.opacity=cb.checked?'0.85':'1'; if(cb.checked&&!inp.style.borderColor.match(/amber/)) inp.style.borderColor='rgba(22,163,74,.3)'; else if(!cb.checked) inp.style.borderColor=''; });
+  }
+  _updateExecProgress();
+}
 function _upExec(ei,si,f,v){
   if(!_execPlan||!_execPlan.exercises[ei]||!_execPlan.exercises[ei].targetSets[si]) return;
   _execPlan.exercises[ei].targetSets[si][f]=v;
@@ -886,7 +903,51 @@ function _upExec(ei,si,f,v){
 }
 function _addExecSet(ei){ if(!_execPlan||!_execPlan.exercises[ei]) return; var cat=EXERCISE_LIBRARY[_execPlan.exercises[ei].exCat]||{fields:['reps','load']}; var s={_note:'',_checked:false}; cat.fields.forEach(function(f){ s[f]=''; }); _execPlan.exercises[ei].targetSets.push(s); var c=el('plan-exec-list'); if(c) _renderExecCards(c); }
 function _moveExecEx(ei,d){ if(!_execPlan) return; var a=_execPlan.exercises; var n=ei+d; if(n<0||n>=a.length) return; var t=a[ei]; a[ei]=a[n]; a[n]=t; var c=el('plan-exec-list'); if(c) _renderExecCards(c); }
-function _rmExecEx(ei){ if(!_execPlan) return; _execPlan.exercises.splice(ei,1); var c=el('plan-exec-list'); if(c) _renderExecCards(c); }
+function _rmExecEx(ei){ if(!_execPlan) return; _execPlan.exercises.splice(ei,1); var c=el('plan-exec-list'); if(c) _renderExecCards(c); _updateExecProgress(); }
+
+// ── Postęp sesji ──
+function _getExecStats(){
+  if(!_execPlan) return {total:0,done:0};
+  var total=0,done=0;
+  _execPlan.exercises.forEach(function(ex){ if(ex.type==='note') return; (ex.targetSets||[]).forEach(function(s){ total++; if(s._checked) done++; }); });
+  return {total:total,done:done};
+}
+function _updateExecProgress(){
+  var st=_getExecStats();
+  var progWrap=el('plan-exec-progress'); if(!progWrap) return;
+  if(st.total===0){ progWrap.style.display='none'; return; }
+  progWrap.style.display='block';
+  var pct=st.total?Math.round(st.done/st.total*100):0;
+  var txt=el('plan-progress-text'); var bar=el('plan-progress-bar'); var pctEl=el('plan-progress-pct');
+  if(pct>=100){ txt.textContent='✅ Sesja ukończona!'; txt.style.color='var(--green-text)'; bar.style.background='var(--accent)'; }
+  else { txt.textContent='Postęp: '+st.done+'/'+st.total+' serii'; txt.style.color='var(--text)'; bar.style.background='var(--green)'; }
+  bar.style.width=pct+'%';
+  if(pctEl) pctEl.textContent=pct+'%';
+}
+
+// ── Potwierdzenie zapisu ──
+function _confirmSaveExec(){
+  var st=_getExecStats();
+  if(st.total>0&&st.done<st.total){
+    // Nie wszystkie odhaczone — pokaż modal potwierdzenia
+    var existing=document.getElementById('exec-confirm-modal'); if(existing) existing.remove();
+    var modal=document.createElement('div'); modal.id='exec-confirm-modal';
+    modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;';
+    modal.onclick=function(e){ if(e.target===modal) modal.remove(); };
+    var box=document.createElement('div');
+    box.style.cssText='max-width:380px;width:calc(100% - 40px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;text-align:center;';
+    box.innerHTML='<div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:8px;">Nie wszystkie serie oznaczone</div>'
+      +'<div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Odhaczone: '+st.done+'/'+st.total+' serii</div>'
+      +'<div style="font-size:12px;color:var(--dim);margin-bottom:16px;">Wszystkie serie zostaną zapisane.</div>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button id="exec-confirm-save" style="flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Zapisz wszystko</button>'
+      +'<button onclick="document.getElementById(\'exec-confirm-modal\').remove()" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Wróć</button></div>';
+    modal.appendChild(box); document.body.appendChild(modal);
+    document.getElementById('exec-confirm-save').onclick=function(){ modal.remove(); saveExecutedPlan(); };
+    return;
+  }
+  saveExecutedPlan();
+}
 
 // ── Zapis wykonanej sesji ──
 function saveExecutedPlan(){
@@ -909,10 +970,13 @@ function saveExecutedPlan(){
     entry.text=buildEntryText(entry); notes.push(entry); count++;
   });
   saveNotes(); renderCal(); renderDayDetail(saveDay);
+  // Oblicz tonaż
+  var ton=0; _execPlan.exercises.forEach(function(ex){ if(ex.type==='note') return; (ex.targetSets||[]).forEach(function(s){ var r=parseFloat(s.reps)||0; var l=parseFloat(s.load)||0; ton+=r*l; }); }); ton=Math.round(ton);
+  var tonTxt=ton>0?' • Tonaż: '+(ton>=1000?(ton/1000).toFixed(1)+'t':ton+' kg'):'';
   var btn=el('plan-exec-save-btn');
-  if(btn){ var o=btn.textContent; btn.textContent='✅ Zapisano! '+count+' elem.'; btn.style.background='var(--green)'; setTimeout(function(){ btn.textContent=o; btn.style.background=''; },2000); }
+  if(btn){ var o=btn.textContent; btn.textContent='✅ Zapisano! '+count+' ćwicz.'+tonTxt; btn.style.background='var(--green)'; setTimeout(function(){ btn.textContent=o; btn.style.background=''; },2500); }
   launchConfetti();
-  setTimeout(function(){ var s=el('plan-select'); if(s) s.value=''; var c=el('plan-exec-list'); if(c) c.innerHTML=''; el('plan-exec-save-wrap').style.display='none'; _execPlan=null; },2500);
+  setTimeout(function(){ var s=el('plan-select'); if(s) s.value=''; var c=el('plan-exec-list'); if(c) c.innerHTML=''; el('plan-exec-save-wrap').style.display='none'; el('plan-exec-progress').style.display='none'; _execPlan=null; },3000);
 }
 
 // ── launchPlan z zakładki Plany ──
