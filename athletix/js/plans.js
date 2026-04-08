@@ -788,7 +788,7 @@ function _renderExecCards(container){
       // Notatka: zmiana + ręczna w jednej linii
       if(changed||hasNote){
         var noteHtml=''; var blColor=changed?'var(--amber)':'var(--accent)';
-        if(changed) noteHtml+='<span style="color:var(--amber-text);">⚠ Było: '+origDesc+'</span>';
+        if(changed) noteHtml+='<span style="color:var(--amber-text);">⚠ W planie było: '+origDesc+'</span>';
         if(changed&&hasNote) noteHtml+='<span style="color:var(--text);"> · </span>';
         if(hasNote) noteHtml+='<span style="color:var(--text);">'+s._note.replace(/</g,'&lt;')+'</span>';
         h+='<div class="exec-changed-indicator" onclick="_openSetNote('+ei+','+si+')" style="font-size:11px;font-weight:600;line-height:1.3;padding:2px 0 2px 8px;border-left:2px solid '+blColor+';margin:1px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;">'+noteHtml+'</div>';
@@ -900,7 +900,7 @@ function _upExec(ei,si,f,v){
     if(indic.previousElementSibling!==row){ row.after(indic); }
     indic.style.cssText='font-size:11px;font-weight:600;line-height:1.3;padding:2px 0 2px 8px;border-left:2px solid var(--amber);margin:1px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;';
     var noteVal=ex.targetSets[si]._note||'';
-    indic.innerHTML='<span style="color:var(--amber-text);">⚠ Było: '+desc+'</span>'+(noteVal?'<span style="color:var(--text);"> · '+noteVal.replace(/</g,'&lt;')+'</span>':'');
+    indic.innerHTML='<span style="color:var(--amber-text);">⚠ W planie było: '+desc+'</span>'+(noteVal?'<span style="color:var(--text);"> · '+noteVal.replace(/</g,'&lt;')+'</span>':'');
   } else {
     if(indic) indic.remove();
   }
@@ -1022,7 +1022,7 @@ function saveExecutedPlan(){
           if(cat.fields.indexOf('rir')>=0&&os.rir) pp.push('RIR '+os.rir);
           if(cat.fields.indexOf('time')>=0&&os.time) pp.push(os.time+'s');
           if(cat.fields.indexOf('dist')>=0&&os.dist) pp.push(os.dist+'m');
-          if(pp.length) changeNote='⚠ Było: '+pp.join(' × ');
+          if(pp.length) changeNote='⚠ W planie było: '+pp.join(' × ');
         }
       }
       var finalNote=changeNote&&manualNote?changeNote+'. '+manualNote:changeNote||manualNote;
