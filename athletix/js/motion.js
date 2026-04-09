@@ -563,6 +563,7 @@ function _mHUD(){
 }
 function _flashLives(){
   var lv=document.getElementById('m-lives'); if(!lv) return;
+  lv.textContent='❤️ '+_gameLives;
   lv.style.color='#ff0000'; lv.style.transform='scale(1.3)';
   setTimeout(function(){ lv.style.color='#f87171'; lv.style.transform='scale(1)'; },300);
 }
@@ -579,6 +580,8 @@ function _mPtsAnim(text,color){
   d.textContent=text; document.getElementById('motion-active').appendChild(d);
   requestAnimationFrame(function(){ d.style.transform='translate(-50%,-60px)'; d.style.opacity='0'; });
   setTimeout(function(){ d.remove(); },700);
+  // Sync HUD points display
+  var pe=document.getElementById('m-pts'); if(pe){ pe.textContent='⚡ '+_gamePoints; pe.style.color=_gamePoints<0?'#f87171':'var(--accent)'; }
 }
 
 // ── Kółko centralne ──
