@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════
-//  SEARCH GAMES — Pary, Kolejność, Słowa
+//  SEARCH GAMES  - Pary, Kolejność, Słowa
 //  Korzysta z globalnych: _motionMode, _gamePoints, _gameLives, _gameLevel, etc.
 // ═══════════════════════════════════════
 
@@ -38,10 +38,23 @@ function _seqCfg(lv){
   return lv<=cfgs.length?cfgs[lv-1]:cfgs[cfgs.length-1];
 }
 
-// ── Punktowanie ──
-function _searchPts(ms,mode){
-  if(mode==='pairs'){ if(ms<1000) return 5; if(ms<2000) return 4; if(ms<3000) return 3; if(ms<5000) return 2; return 1; }
-  if(mode==='sequence'){ if(ms<3000) return 5; if(ms<5000) return 4; if(ms<8000) return 3; if(ms<12000) return 2; return 1; }
+// ── Punktowanie z uwzględnieniem levelu ──
+function _searchPts(ms,mode,lv){
+  lv=lv||_gameLevel;
+  if(mode==='pairs'){
+    if(lv<=2){ if(ms<2000) return 5; if(ms<4000) return 4; if(ms<6000) return 3; if(ms<10000) return 2; return 1; }
+    if(lv<=4){ if(ms<3000) return 5; if(ms<5000) return 4; if(ms<8000) return 3; if(ms<12000) return 2; return 1; }
+    if(lv<=6){ if(ms<5000) return 5; if(ms<8000) return 4; if(ms<12000) return 3; if(ms<18000) return 2; return 1; }
+    if(ms<8000) return 5; if(ms<12000) return 4; if(ms<18000) return 3; if(ms<25000) return 2; return 1;
+  }
+  if(mode==='sequence'){
+    if(lv<=2){ if(ms<3000) return 5; if(ms<5000) return 4; if(ms<8000) return 3; if(ms<12000) return 2; return 1; }
+    if(lv<=4){ if(ms<5000) return 5; if(ms<8000) return 4; if(ms<12000) return 3; if(ms<18000) return 2; return 1; }
+    if(ms<8000) return 5; if(ms<12000) return 4; if(ms<18000) return 3; if(ms<25000) return 2; return 1;
+  }
+  if(mode==='words'){
+    if(ms<5000) return 5; if(ms<8000) return 4; if(ms<12000) return 3; if(ms<18000) return 2; return 1;
+  }
   return 1;
 }
 
@@ -409,9 +422,9 @@ function openSearchInfo(){
   modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;';
   modal.onclick=function(e){ if(e.target===modal) modal.remove(); };
   var h='<div style="max-width:420px;width:calc(100% - 32px);background-color:#1a1a1a !important;color:#f2f2f2 !important;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">🔍 Wyszukiwanie — Jak grać?</div><button onclick="document.getElementById(\'search-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;">✕</button></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">🔍 Wyszukiwanie  - Jak grać?</div><button onclick="document.getElementById(\'search-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;">✕</button></div>'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">📋 TRYBY</div>'
-    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;"><strong>🔢 Pary</strong> — znajdź dwie takie same cyfry na planszy<br><strong>📊 Kolejność</strong> — klikaj cyfry od 1 do N po kolei<br><strong>📝 Słowa</strong> — znajdź ukryte słowa przesuwając palcem</div>'
+    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;"><strong>🔢 Pary</strong>  - znajdź dwie takie same cyfry na planszy<br><strong>📊 Kolejność</strong>  - klikaj cyfry od 1 do N po kolei<br><strong>📝 Słowa</strong>  - znajdź ukryte słowa przesuwając palcem</div>'
     +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px;margin:12px 0;">'
     +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#3b82f6;margin-bottom:10px;">📈 PROGRESJA</div>'
     +'<div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:2;">'
@@ -422,9 +435,9 @@ function openSearchInfo(){
     +'</div></div>'
     +'<button onclick="var nd=document.getElementById(\'search-nerd\');nd.style.display=nd.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🤓 Chcesz wiedzieć więcej?</button>'
     +'<div id="search-nerd" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;margin-top:8px;font-size:12px;font-weight:500;line-height:1.7;color:#f2f2f2;">'
-    +'<p style="margin-bottom:10px;">Wyszukiwanie wzrokowe to fundamentalna funkcja poznawcza badana od lat 50. XX wieku. Testy takie jak Trail Making Test (TMT) opracowany przez Reitana (1958) są do dziś standardem w neuropsychologii — używa się ich do oceny uwagi, szybkości przetwarzania i funkcji wykonawczych.</p>'
+    +'<p style="margin-bottom:10px;">Wyszukiwanie wzrokowe to fundamentalna funkcja poznawcza badana od lat 50. XX wieku. Testy takie jak Trail Making Test (TMT) opracowany przez Reitana (1958) są do dziś standardem w neuropsychologii  - używa się ich do oceny uwagi, szybkości przetwarzania i funkcji wykonawczych.</p>'
     +'<p style="margin-bottom:10px;">Wersja B testu, wymagająca naprzemiennego łączenia cyfr i liter (1-A-2-B-3-C...), jest szczególnie czuła na uszkodzenia płata czołowego.</p>'
-    +'<p style="margin-bottom:10px;">Co ciekawe, badania sugerują że trening wyszukiwania wzrokowego przenosi się na codzienne funkcjonowanie — szybsze skanowanie otoczenia, lepsze dostrzeganie szczegółów, sprawniejsze czytanie.</p>'
+    +'<p style="margin-bottom:10px;">Co ciekawe, badania sugerują że trening wyszukiwania wzrokowego przenosi się na codzienne funkcjonowanie  - szybsze skanowanie otoczenia, lepsze dostrzeganie szczegółów, sprawniejsze czytanie.</p>'
     +'<div style="font-size:10px;color:rgba(255,255,255,.35);">📚 <a href="https://pubmed.ncbi.nlm.nih.gov/13601598/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Reitan RM (1958). Validity of the Trail Making Test. Perceptual and Motor Skills, 8, 271-276.</a></div>'
     +'</div>'
     +'<button onclick="document.getElementById(\'search-info-modal\').remove()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
