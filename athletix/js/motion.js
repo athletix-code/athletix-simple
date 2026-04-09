@@ -21,7 +21,7 @@ var _COACH_OK=['Hej, jest potencjał! Tylko go trochę... obudzić. ☕','Nie je
 var _COACH_SLOW=['Okej, chwila coachingu... Skup się bardziej. Koniec coachingu. 😎','Hmm, chyba ktoś myślami był gdzie indziej? Następny level — pełna koncentracja!','Sprinterzy reagują 5× szybciej? Dobra, liczyłeś na pochwałę. Ale muszę być szczery.','Nie martw się, Einstein też pewnie miałby kiepski czas reakcji. Prawdopodobnie.'];
 var _COACH_ACC=[' Za dużo pomyłek. Ale hej — pomyłki to dowód na to że próbujesz.',' Trochę za dużo fałszywych alarmów. Cierpliwość, młody padawanie.',' Przeczytaj zasady jeszcze raz. Żartuję. A może nie. 🤔'];
 var _COACH_COMBO=[' Combo x{N}! To nie przypadek — to flow state. 🧘',' Seria {N} z rzędu. Twój mózg wszedł w tryb turbo.',' {N} z rzędu — i to BEZ przerwy? Respect.'];
-var _COACH_NERD=[' 🤓 Fun fact: Twój sygnał nerwowy podróżuje ~120 m/s. To ~430 km/h!',' 🤓 Bodziec wzrokowy dociera do mózgu w ~20-40ms. Reszta to przetwarzanie.',' 🤓 Badanie MindCrowd: czas reakcji pogarsza się o ~3-7ms na rok życia. Trening pomaga!',' 🤓 W sprincie próg falstartu to 100ms. Badania Komi (2009) sugerują, że niektórzy reagują w 80ms.',' 🤓 Czas reakcji jest lepszy po rozgrzewce, kawie i dobrym śnie. Gorszy po jedzeniu i alkoholu.'];
+var _COACH_NERD=[' 🤓 Sygnał nerwowy podróżuje ~120 m/s. To ~430 km/h. <a href="https://backyardbrains.com/pages/the-science-of-your-reaction-time" target="_blank" style="color:#3b82f6;text-decoration:underline;">Więcej o neurofizjologii →</a>',' 🤓 Bodziec wzrokowy dociera do mózgu w ~20-40ms (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Jain et al., 2015</a>). Reszta to przetwarzanie.',' 🤓 Badanie <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;text-decoration:underline;">MindCrowd</a>: czas reakcji pogarsza się o ~3-7ms na rok życia. Trening pomaga!',' 🤓 W sprincie próg falstartu to 100ms. <a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;text-decoration:underline;">Badania Komi (2009)</a> sugerują, że niektórzy reagują w 80ms.',' 🤓 Czas reakcji jest lepszy po rozgrzewce, kawie i dobrym śnie. Gorszy po jedzeniu i alkoholu.'];
 var _COACH_JOKE=[' 😄 Suchar: Dlaczego akcelerometr nie chodzi na randki? Bo za szybko się przechyla.',' 😄 Co mówi trener do wolnego zawodnika? "Masz czas... ale nie za dużo."',' 😄 Koniec żartów. Chociaż... jeszcze jeden. Nie? Ok, wracamy do roboty.'];
 function _pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function getCoachFeedback(avg,acc,combo,lv){
@@ -69,16 +69,26 @@ function _getBriefingRules(){
 function _getNextLevelHint(lv){
   var cur=_getLevelCfg(lv),nxt=_getLevelCfg(lv+1);
   var hints=[];
-  if(nxt.window<cur.window) hints.push('Bodźce będą szybsze! Mniej czasu na reakcję.');
-  if(nxt.fakeChance>cur.fakeChance&&nxt.fakeChance>0) hints.push('⚠️ Uwaga na zmyłki!');
   if(_motionMode==='pattern'){
     var pc=_patCfg(lv),pn=_patCfg(lv+1);
-    if(pn.tgtCh>pc.tgtCh) hints.push('🔄 Cel może się zmieniać w trakcie!');
-    if(pn.cols>pc.cols) hints.push('📐 Więcej pól! Wzorce bardziej złożone.');
-    if(pn.pos!==pc.pos) hints.push('🧭 Wzorzec w innym miejscu — reaguj kierunkowo!');
+    if(lv>12) return 'Od tego poziomu? Niespodzianka. Musisz tam dotrzeć żeby zobaczyć. 😏';
+    if(pn.cols>pc.cols&&pn.cols===3) hints.push('📐 Siatka 3×3 — dziewięć pól! Nowy wymiar.');
+    else if(pn.cols>pc.cols) hints.push('📐 Większa siatka! Więcej pól do obserwowania.');
+    if(pn.tgtCh>0&&pc.tgtCh===0) hints.push('🔄 UWAGA! Cel będzie się zmieniał w trakcie levelu!');
+    else if(pn.tgtCh>pc.tgtCh) hints.push('🔄 Cel zmienia się częściej!');
+    if(pn.pos==='vertical'&&pc.pos==='center') hints.push('🧭 Wzorzec pojawi się na GÓRZE lub DOLE — reaguj kierunkowo!');
+    if(pn.pos==='quad'&&pc.pos!=='quad') hints.push('🧭 Wzorzec w DOWOLNYM ROGU ekranu! Reaguj w jego kierunku!');
+    if(pn.interval<pc.interval-200) hints.push('⏱️ Szybsze zmiany wzorców! Mniej czasu na decyzję.');
+    if(pn.fake>pc.fake&&pn.fake>0) hints.push('⚠️ Więcej zmyłek — wzorce będą się różnić jednym symbolem!');
+  } else {
+    if(lv>12) return 'Witamy w elicie. Od teraz każdy level to walka. 🏆';
+    if(nxt.fakeChance>0&&cur.fakeChance===0) hints.push('⚠️ Pojawią się fałszywe bodźce — nie daj się nabrać!');
+    else if(nxt.fakeChance>cur.fakeChance) hints.push('⚠️ Więcej zmyłek!');
+    if(nxt.window<cur.window) hints.push('Szybsze bodźce, krótszy czas na reakcję.');
+    if(_movementThreshold(lv+1)>_movementThreshold(lv)+0.5) hints.push('💪 Potrzeba mocniejszego ruchu!');
+    if(lv>=9) hints.push('Od teraz każdy level to walka.');
   }
-  if(_movementThreshold(lv+1)>_movementThreshold(lv)+0.5) hints.push('💪 Potrzeba mocniejszego ruchu!');
-  return hints.length?hints.join(' '):'Więcej prób, mniej czasu. Klasyka. Dasz radę. 💪';
+  return hints.length?hints.join(' '):'Więcej prób, mniej czasu. Klasyka. 💪';
 }
 var _patternTarget=[], _patternInterval=null;
 
@@ -207,12 +217,12 @@ function openMotionInfo(){
     // Źródła
     +'<div style="font-size:13px;font-weight:800;margin-top:16px;margin-bottom:6px;">📚 ŹRÓDŁA</div>'
     +'<div style="font-size:10px;font-weight:500;color:var(--muted);line-height:1.6;">'
-    +'1. Jain A, Bansal R, Kumar A, Singh KD (2015). "A comparative study of visual and auditory reaction times..." Int J Appl Basic Med Res, 5(2):124-127. PMC4456887<br>'
-    +'2. Pain MTG, Hibbs A (2007). "Sprint starts and the minimum auditory reaction time." J Sports Sciences, 25(1):79-86.<br>'
-    +'3. Komi PV, Ishikawa M, Salmi J (2009). "IAAF Sprint Start Research Project: Is the 100 ms limit still valid?" New Studies in Athletics, 24(1):37-47.<br>'
-    +'4. Brosnan KC, Hayes K, Harrison AJ (2017). "Effects of false-start disqualification rules on response-times of elite-standard sprinters." J Sports Sciences, 35(10):929-935.<br>'
+    +'1. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Jain A, Bansal R, Kumar A, Singh KD (2015)</a>. "A comparative study of visual and auditory reaction times..." Int J Appl Basic Med Res, 5(2):124-127.<br>'
+    +'2. <a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain MTG, Hibbs A (2007)</a>. "Sprint starts and the minimum auditory reaction time." J Sports Sciences, 25(1):79-86.<br>'
+    +'3. <a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;text-decoration:underline;">Komi PV, Ishikawa M, Salmi J (2009)</a>. "IAAF Sprint Start Research Project: Is the 100 ms limit still valid?" New Studies in Athletics, 24(1):37-47.<br>'
+    +'4. <a href="https://www.academia.edu/26592344/Effects_of_false_start_disqualification_rules_on_response_times_of_elite_standard_sprinters" target="_blank" style="color:#3b82f6;text-decoration:underline;">Brosnan KC, Hayes K, Harrison AJ (2017)</a>. "Effects of false-start disqualification rules on response-times of elite-standard sprinters." J Sports Sciences, 35(10):929-935.<br>'
     +'5. Welford AT (1980). "Reaction Times." Academic Press, New York.<br>'
-    +'6. MindCrowd Study — Arizona Alzheimer\'s Consortium. mindcrowd.org</div>'
+    +'6. <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;text-decoration:underline;">MindCrowd Study</a> — Arizona Alzheimer\'s Consortium.</div>'
     // Nota
     +'<div style="font-size:10px;font-style:italic;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:12px;">⚠️ Opisy opierają się na recenzowanych publikacjach naukowych. Nasz pomiar akcelerometryczny nie jest równoważny pomiarom laboratoryjnym — służy do śledzenia własnego postępu. Część treści opracowana z wykorzystaniem narzędzi AI i zweryfikowana przez autorów.</div>'
     +'<div style="font-weight:800;color:var(--accent);margin-top:14px;text-align:center;">⚡ Elevate Your Game — trenuj swój mózg tak jak trenujesz ciało!</div>'
@@ -702,7 +712,7 @@ function _showLevelComplete(lv,trialResults){
     // Feedback trenera
     +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin:10px auto;max-width:300px;"><span style="font-size:16px;">🎙️</span> <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:1.6;font-style:italic;">'+getCoachFeedback(lvAvg,lvAcc,lvCombo,lv)+'</span></div>'
     // Info o następnym levelu
-    +'<div style="border:1px dashed rgba(255,255,255,.1);border-radius:10px;padding:10px;margin:6px auto;max-width:300px;"><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:4px;">📢 LEVEL '+(lv+1)+':</div><div style="font-size:11px;font-weight:500;color:rgba(255,255,255,.45);">'+_getNextLevelHint(lv)+'</div><div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);margin-top:4px;">'+_pick(LEVEL_MOTIVATORS)+'</div></div>'
+    +'<div style="border:1px dashed rgba(255,255,255,.12);border-radius:10px;padding:10px;margin:8px auto;max-width:300px;"><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:4px;">📢 CO CIĘ CZEKA:</div><div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.55);line-height:1.5;">'+_getNextLevelHint(lv)+'</div><div style="font-size:10px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+_pick(['Dasz radę. Pewnie.','Twój mózg jest gotowy. Chyba.','Skupienie to klucz. 🔑','Oddychaj i działaj.','Level wyżej = Ty lepszy.','Gdyby było łatwe, każdy by to robił.'])+'</div></div>'
     +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
     +'<button onclick="_endGame()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏁 Zakończ grę</button></div></div>';
@@ -738,23 +748,21 @@ function _showGameOver(){
   var newCharUnlocked=isNewRecord&&(!prevCh||ch.emoji!==prevCh.emoji);
 
   var ma=el('motion-active'); ma.style.background='#060606';
-  ma.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 24px;box-sizing:border-box;">'
-    +'<div style="font-size:48px;margin-bottom:4px;">'+ch.emoji+'</div>'
-    +'<div style="font-size:22px;font-weight:900;color:'+(isOver?'var(--red-text)':'var(--green-text)')+';">'+(isOver?'GAME OVER':'KONIEC GRY')+'</div>'
-    +'<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.5);margin-top:2px;">'+ch.name+' • Level '+_gameLevel+'</div>'
-    +'<div style="font-size:36px;font-weight:900;color:var(--accent);margin-top:6px;">⚡ '+_gamePoints+'</div>'
-    +(newCharUnlocked?'<div style="font-size:13px;font-weight:800;color:var(--accent);margin-top:6px;">🆕 '+ch.emoji+' '+ch.name+' odblokowany!</div>':'')
+  ma.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 20px;box-sizing:border-box;">'
+    +'<div style="font-size:36px;margin-bottom:2px;">'+ch.emoji+'</div>'
+    +'<div style="font-size:20px;font-weight:900;color:'+(isOver?'var(--red-text)':'var(--green-text)')+';">'+(isOver?'GAME OVER':'KONIEC GRY')+'</div>'
+    +'<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-top:1px;">'+ch.name+' • Level '+_gameLevel+'</div>'
+    +'<div style="font-size:32px;font-weight:900;color:var(--accent);margin-top:4px;">⚡ '+_gamePoints+'</div>'
+    +(newCharUnlocked?'<div style="font-size:12px;font-weight:800;color:var(--accent);margin-top:4px;">🆕 '+ch.emoji+' '+ch.name+' odblokowany!</div>':'')
     +compareHtml
-    // Kafelki wyników
     +_mResultTiles(avg,best,acc)
-    // Feedback trenera
-    +'<div style="margin-top:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;max-width:320px;margin-left:auto;margin-right:auto;text-align:left;">'
-    +'<div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;">TRENER MÓWI</div>'
-    +'<div style="font-size:12px;font-weight:500;line-height:1.6;color:rgba(255,255,255,.6);">'+getFinalFeedback(avg,_gameLevel)+'</div></div>'
-    +'<div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
-    +'<button onclick="_motionRetry()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Zagraj ponownie</button>'
-    +'<button onclick="stopMotion()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">🏠 Wróć</button>'
-    +(!athlete?'<div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:8px;">Wybierz zawodnika żeby zapisywać wyniki i zdobywać ATP</div>':'')
+    +'<div style="margin-top:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;max-width:320px;margin-left:auto;margin-right:auto;text-align:left;">'
+    +'<div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:4px;">TRENER MÓWI</div>'
+    +'<div style="font-size:11px;font-weight:500;line-height:1.5;color:rgba(255,255,255,.6);">'+getFinalFeedback(avg,_gameLevel)+'</div></div>'
+    +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;max-width:280px;margin-left:auto;margin-right:auto;">'
+    +'<button onclick="_motionRetry()" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Zagraj ponownie</button>'
+    +'<button onclick="stopMotion()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏠 Wróć</button>'
+    +(!athlete?'<div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:4px;">Wybierz zawodnika żeby zapisywać wyniki i zdobywać ATP</div>':'')
     +'</div></div>';
 
   // Zapis + ATP (tylko z zawodnikiem)
@@ -772,18 +780,18 @@ function _mResultTiles(avg,best,acc){
   var stdDev=0; if(_gameTimes.length>1){ var mean=avg; stdDev=Math.round(Math.sqrt(_gameTimes.reduce(function(s,t){return s+(t-mean)*(t-mean);},0)/(_gameTimes.length-1))); }
   var avgCol=avg<250?'#4ade80':avg<400?'#3b82f6':avg<600?'#d97706':'#dc2626';
   var accCol=acc>90?'#4ade80':acc>70?'#3b82f6':'#d97706';
-  var ts='background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;text-align:center;cursor:pointer;';
-  var descs={avg:'Średni czas Twojej reakcji na bodźce w tej sesji. Niższy = szybszy mózg. Regularny trening poprawia tę wartość.',best:'Twoja najszybsza reakcja w tej sesji. Pokazuje Twój potencjał gdy jesteś w pełni skupiony.',worst:'Najwolniejsza reakcja. Może wskazywać na chwilową utratę skupienia lub zmęczenie.',acc:'Procent poprawnych reakcji. Uwzględnia fałszywe starty i brak reakcji. 100% = perfekcja.',combo:'Najdłuższa seria szybkich reakcji z rzędu (<350ms). Combo daje mnożnik punktów: ×2 przy 3+, ×3 przy 5+, ×4 przy 10+.',sd:'Odchylenie standardowe — mierzy POWTARZALNOŚĆ Twoich reakcji. Niskie = stabilny czas. Wysokie = duże wahania.'};
+  var ts='background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;text-align:center;cursor:pointer;';
+  var descs={avg:'Średni czas reakcji. Niższy = szybszy mózg.',best:'Najszybsza reakcja — Twój potencjał.',worst:'Najwolniejsza reakcja — moment utraty skupienia.',acc:'Poprawne reakcje / wszystkie. 100% = perfekcja.',combo:'Seria szybkich reakcji (<350ms). ×2 przy 3+, ×3 przy 5+.',sd:'Powtarzalność reakcji. Niskie = stabilny czas.'};
   function tile(icon,val,unit,label,color,key,sub){
     return '<div style="'+ts+'" onclick="var d=this.querySelector(\'.td\');if(d)d.style.display=d.style.display===\'none\'?\'block\':\'none\'">'
-      +'<div style="font-size:20px;">'+icon+'</div>'
-      +'<div style="font-size:28px;font-weight:900;color:'+color+';margin:4px 0;">'+val+'<span style="font-size:14px;font-weight:700;"> '+unit+'</span></div>'
-      +'<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);">'+label+'</div>'
-      +(sub?'<div style="font-size:8px;color:rgba(255,255,255,.3);margin-top:2px;">'+sub+'</div>':'')
-      +'<div class="td" style="display:none;font-size:11px;font-weight:500;line-height:1.5;color:rgba(255,255,255,.5);padding:8px 0 4px;border-top:1px solid rgba(255,255,255,.06);margin-top:6px;">'+descs[key]+'</div>'
+      +'<div style="font-size:16px;">'+icon+'</div>'
+      +'<div style="font-size:24px;font-weight:900;color:'+color+';margin:2px 0;">'+val+'<span style="font-size:12px;font-weight:700;"> '+unit+'</span></div>'
+      +'<div style="font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);">'+label+'</div>'
+      +(sub?'<div style="font-size:8px;color:rgba(255,255,255,.3);margin-top:1px;">'+sub+'</div>':'')
+      +'<div class="td" style="display:none;font-size:10px;font-weight:500;line-height:1.4;color:rgba(255,255,255,.5);padding:6px 0 2px;border-top:1px solid rgba(255,255,255,.06);margin-top:4px;">'+descs[key]+'</div>'
       +'</div>';
   }
-  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;max-width:320px;margin-left:auto;margin-right:auto;">'
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;max-width:320px;margin-left:auto;margin-right:auto;">'
     +tile('⚡',avg,'ms','Średni czas',avgCol,'avg','')
     +tile('🏆',best,'ms','Najlepszy','#4ade80','best','')
     +tile('📊',worst,'ms','Najgorszy','rgba(255,255,255,.5)','worst','')
