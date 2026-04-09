@@ -36,6 +36,7 @@ function getFinalFeedback(avg,maxLv){
   var t=maxLv>=10?'Level '+maxLv+'. Nie mam słów. A to rzadkość, bo zwykle gadam za dużo. 🏆':maxLv>=7?'Level '+maxLv+' — to już poważny wynik. Widzę w Tobie potencjał. Serio.':maxLv>=4?'Level '+maxLv+'. Solidna robota. Jeszcze trochę i zaczniesz mnie zaskakiwać.':'Level '+maxLv+'. Hej, każdy kiedyś zaczynał. Jutro będzie lepiej. Obiecuję. No... prawie.';
   t+='<br><br>';
   t+=avg<300?'Średni czas '+avg+'ms — Twój mózg działa jak dobrze naoliwiona maszyna. ⚡':avg<450?'Średnia '+avg+'ms — przyzwoicie! Regularny trening i zejdziesz poniżej 300.':'Średnia '+avg+'ms — jest nad czym pracować. Ale samo to że tu jesteś to już więcej niż większość robi.';
+  if(_gamePoints<0) t+='<br><br>Bilans ujemny. Następnym razem cierpliwość! Lepiej nie reagować niż reagować źle. 😏';
   t+='<br><br>Wróć jutro. Twój mózg potrzebuje snu żeby skonsolidować to czego się dziś nauczył. Tak działa neuroplastyczność. 🧠';
   return t;
 }
@@ -466,6 +467,7 @@ function _showBriefing(onReady){
     +'<div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">ZASADY</div>'
     +'<div style="font-size:12px;font-weight:500;line-height:1.7;color:rgba(255,255,255,.7);">'+rules+'</div>'
     +'<div style="font-size:11px;font-weight:600;color:var(--accent);margin-top:6px;">'+inputHint+'</div></div>'
+    +(_motionMode==='pattern'?_patScoringHtml(_gameLevel):'')
     +'<div style="margin-top:14px;font-size:12px;font-weight:600;font-style:italic;color:rgba(255,255,255,.45);line-height:1.5;padding:0 8px;">\u201E'+quote+'\u201D</div>'
     +'<button id="briefing-go-btn" style="margin-top:20px;width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.04em;">DAWAJ! \uD83D\uDE80</button>'
     +'</div>';
@@ -481,7 +483,7 @@ function _motionCountdown(cb){
 function _mScreen(title,sub,extra){ return '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;"><div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.4);">'+title+'</div>'+(sub?'<div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:4px;">'+sub+'</div>':'')+(extra||'')+'</div>'; }
 function _mHUD(){
   var ch=getLevelCharacter(_gameLevel);
-  var comboHtml=_gameCombo>=3?'<div style="position:fixed;top:108px;left:50%;transform:translateX(-50%);z-index:16;font-size:14px;font-weight:900;color:#f59e0b;background:rgba(245,158,11,.1);padding:4px 14px;border-radius:20px;animation:mBtnPulse .6s infinite;">🔥 x'+_gameCombo+' COMBO</div>':'';
+  var comboHtml=_gameCombo>=3?'<div style="position:fixed;top:100px;left:50%;transform:translateX(-50%);z-index:16;font-size:14px;font-weight:900;color:#f59e0b;background:rgba(245,158,11,.1);padding:4px 14px;border-radius:20px;animation:mBtnPulse .6s infinite;">🔥 x'+_gameCombo+' COMBO</div>':'';
   var hasData=_gameTimes.length>0;
   var lastMs=_gameLastTime;
   var validTimes=_gameTimes.filter(function(t){ return t<3000; });
@@ -489,25 +491,25 @@ function _mHUD(){
   var bestMs=_gameTimes.length?Math.min.apply(null,_gameTimes):0;
   function _tc(ms){ return ms<250?'#4ade80':ms<400?'#3b82f6':ms<600?'#d97706':'#dc2626'; }
   var isWide=window.innerWidth>=768;
-  var tPad=isWide?'10px 8px':'6px 4px';
-  var tValFs=isWide?'20px':'16px';
-  var tUnitFs=isWide?'12px':'10px';
-  var tLblFs=isWide?'9px':'7px';
+  var tPad=isWide?'8px 6px':'4px 4px';
+  var tValFs=isWide?'18px':'14px';
+  var tUnitFs=isWide?'10px':'9px';
+  var tLblFs=isWide?'8px':'6px';
   var tileBase='background:rgba(255,255,255,.05);border-radius:10px;padding:'+tPad+';text-align:center;flex:1;';
   var lastTile=tileBase+'border:1px solid rgba(59,130,246,.3);';
   var avgTile=tileBase+'border:1px solid rgba(168,85,247,.3);';
   var bestTile=tileBase+'border:2px solid rgba(234,179,8,.5);box-shadow:0 0 12px rgba(234,179,8,.15);';
-  var bestValFs=isWide?'22px':'18px';
+  var bestValFs=isWide?'20px':'16px';
   var labelS='font-size:'+tLblFs+';font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-top:2px;';
   var tilesMax=isWide?'max-width:500px;margin-left:auto;margin-right:auto;':'';
-  var tilesHtml='<div style="position:fixed;top:48px;left:10px;right:10px;display:flex;gap:6px;z-index:15;'+tilesMax+'">'
+  var tilesHtml='<div style="position:fixed;top:56px;left:10px;right:60px;display:flex;gap:6px;z-index:15;'+tilesMax+'">'
     +'<div style="'+lastTile+'" id="m-tile-last"><div style="font-size:'+tValFs+';font-weight:800;color:'+(hasData?_tc(lastMs):'rgba(255,255,255,.25)')+';transition:transform .2s;" id="m-last-val">'+(hasData?lastMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">OSTATNI</div></div>'
     +'<div style="'+avgTile+'"><div style="font-size:'+tValFs+';font-weight:800;color:'+(hasData?_tc(avgMs):'rgba(255,255,255,.25)')+';">'+(hasData?avgMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">ŚREDNIA</div></div>'
     +'<div style="'+bestTile+'"><div style="font-size:'+bestValFs+';font-weight:800;color:'+(hasData?'#4ade80':'rgba(255,255,255,.25)')+';">'+(hasData?bestMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">NAJLEPSZY</div></div>'
     +'</div>';
   var hudLbl='font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);';
-  return '<div style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:15;display:flex;align-items:center;gap:12px;background:rgba(6,6,6,.85);padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.08);max-width:360px;">'
-    +'<div style="text-align:center;"><div style="font-size:16px;font-weight:900;color:var(--accent);transition:transform .2s;" id="m-pts">⚡ '+_gamePoints+'</div><div style="'+hudLbl+'">PUNKTY</div></div>'
+  return '<div style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:16;display:flex;align-items:center;gap:12px;background:rgba(6,6,6,.85);padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.08);max-width:360px;">'
+    +'<div style="text-align:center;"><div style="font-size:16px;font-weight:900;color:'+(_gamePoints<0?'#f87171':'var(--accent)')+';transition:transform .2s,color .3s;" id="m-pts">⚡ '+_gamePoints+'</div><div style="'+hudLbl+'">PUNKTY</div></div>'
     +'<span style="font-size:13px;font-weight:800;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);padding:3px 10px;border-radius:10px;">'+ch.emoji+' Lv.'+_gameLevel+'</span>'
     +'<div style="text-align:center;"><div style="font-size:14px;font-weight:800;color:#f87171;transition:transform .2s;" id="m-lives">❤️ '+_gameLives+'</div><div style="'+hudLbl+'">ŻYCIA</div></div>'
     +'</div>'
@@ -580,7 +582,7 @@ function _runTrial(idx,cfg,trialResults,cb){
     clearInterval(wc); _motionState.listening=false;
     if(_motionAbort) return;
     if(falseStart){
-      _gameLives--; setTimeout(_flashLives,50); _gamePoints=Math.max(0,_gamePoints-2); _gameCombo=0;
+      _gameLives--; setTimeout(_flashLives,50); _gamePoints-=2; _gameCombo=0;
       _sndBad(); if(navigator.vibrate) navigator.vibrate(200);
       _mPtsAnim('-2 💥','var(--red-text)');
       ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:48px;">✕</div>','Za wcześnie!');
@@ -601,7 +603,7 @@ function _runTrial(idx,cfg,trialResults,cb){
       setTimeout(function(){
         clearInterval(fc); _motionState.listening=false;
         _gameTotalTrials++;
-        if(fakeReacted){ _gameLives--; setTimeout(_flashLives,50); _gamePoints=Math.max(0,_gamePoints-3); _gameCombo=0; _mPtsAnim('-3 💥','var(--red-text)'); _sndBad(); ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:32px;">Fałszywy alarm!</div>',''); }
+        if(fakeReacted){ _gameLives--; setTimeout(_flashLives,50); _gamePoints-=3; _gameCombo=0; _mPtsAnim('-3 💥','var(--red-text)'); _sndBad(); ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:32px;">Fałszywy alarm!</div>',''); }
         else { _gameCorrect++; _mPtsAnim('✓','var(--green-text)'); ma.innerHTML=_mHUD()+_mCircle('result','<div style="font-size:24px;font-weight:700;color:var(--green-text);">✓ Dobrze!</div>',''); _sndGood(); }
         trialResults.push({time:0,correct:!fakeReacted,type:'fake'});
         setTimeout(function(){ _runTrial(idx+1,cfg,trialResults,cb); },1200);
@@ -622,7 +624,7 @@ function _runTrial(idx,cfg,trialResults,cb){
       var nc=setInterval(function(){ if(detectMovement()||(_desktopFallback&&_motionState._keyPressed)){ nogoReacted=true; _motionState._keyPressed=null; } },16);
       setTimeout(function(){
         clearInterval(nc); _motionState.listening=false; _gameTotalTrials++;
-        if(nogoReacted){ _gameLives--; setTimeout(_flashLives,50); _gamePoints=Math.max(0,_gamePoints-3); _gameCombo=0; _mPtsAnim('-3 💥','var(--red-text)'); _sndBad(); ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:24px;">Fałszywy alarm!</div>',''); }
+        if(nogoReacted){ _gameLives--; setTimeout(_flashLives,50); _gamePoints-=3; _gameCombo=0; _mPtsAnim('-3 💥','var(--red-text)'); _sndBad(); ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:24px;">Fałszywy alarm!</div>',''); }
         else { _gameCorrect++; _mPtsAnim('✓','var(--green-text)'); _sndGood(); ma.innerHTML=_mHUD()+_mCircle('result','<div style="font-size:24px;font-weight:700;color:var(--green-text);">✓</div>',''); }
         trialResults.push({time:0,correct:!nogoReacted,type:'nogo'});
         setTimeout(function(){ _runTrial(idx+1,cfg,trialResults,cb); },1200);
@@ -649,7 +651,7 @@ function _runTrial(idx,cfg,trialResults,cb){
     },16);
     var rt=setTimeout(function(){
       clearInterval(rc); _motionState.listening=false; _motionState._keyPressed=null;
-      _gameLives--; setTimeout(_flashLives,50); _gamePoints=Math.max(0,_gamePoints-1); _gameCombo=0; _gameTotalTrials++;
+      _gameLives--; setTimeout(_flashLives,50); _gamePoints-=1; _gameCombo=0; _gameTotalTrials++;
       _mPtsAnim('-1','var(--red-text)');
       ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:20px;">Brak reakcji</div>','');
       trialResults.push({time:cfg.window,correct:false,type:'timeout'});
@@ -682,7 +684,7 @@ function _finishTrial(clearFn,rc,rt,stimTime,correct,errType,trialResults,idx,cf
     var lv=document.getElementById('m-last-val'); if(lv){ lv.style.transform='scale(1.15)'; setTimeout(function(){ lv.style.transform='scale(1)'; },200); }
   } else {
     _gameLives--; setTimeout(_flashLives,50); _gameCombo=0;
-    _gamePoints=Math.max(0,_gamePoints-(errType==='wrong_dir'?2:1));
+    _gamePoints-=(errType==='wrong_dir'?2:1);
     _sndBad(); if(navigator.vibrate) navigator.vibrate(200);
     _mPtsAnim(errType==='wrong_dir'?'-2 ✕':'- 💥','var(--red-text)');
     var ma=el('motion-active');
@@ -728,7 +730,7 @@ function _showLevelComplete(lv,trialResults){
     +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin:10px auto;max-width:300px;"><span style="font-size:16px;">🎙️</span> <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:1.6;font-style:italic;">'+getCoachFeedback(lvAvg,lvAcc,lvCombo,lv)+'</span></div>'
     // Info o następnym levelu
     +'<div style="border:1px dashed rgba(255,255,255,.12);border-radius:10px;padding:10px;margin:8px auto;max-width:300px;"><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:4px;">📢 CO CIĘ CZEKA:</div><div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.55);line-height:1.5;">'+_getNextLevelHint(lv)+'</div>'
-    +(_motionMode==='pattern'?_patScoringHtml(lv+1):'')
+    +(_motionMode==='pattern'?_patScoringCompare(lv,lv+1):'')
     +'<div style="font-size:10px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+_pick(['Dasz radę. Pewnie.','Twój mózg jest gotowy. Chyba.','Skupienie to klucz. 🔑','Oddychaj i działaj.','Level wyżej = Ty lepszy.','Gdyby było łatwe, każdy by to robił.'])+'</div></div>'
     +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
@@ -769,7 +771,7 @@ function _showGameOver(){
     +'<div style="font-size:36px;margin-bottom:2px;">'+ch.emoji+'</div>'
     +'<div style="font-size:20px;font-weight:900;color:'+(isOver?'var(--red-text)':'var(--green-text)')+';">'+(isOver?'GAME OVER':'KONIEC GRY')+'</div>'
     +'<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-top:1px;">'+ch.name+' • Level '+_gameLevel+'</div>'
-    +'<div style="font-size:32px;font-weight:900;color:var(--accent);margin-top:4px;">⚡ '+_gamePoints+'</div>'
+    +'<div style="font-size:32px;font-weight:900;color:'+(_gamePoints<0?'#f87171':'var(--accent)')+';margin-top:4px;">⚡ '+_gamePoints+'</div>'
     +(newCharUnlocked?'<div style="font-size:12px;font-weight:800;color:var(--accent);margin-top:4px;">🆕 '+ch.emoji+' '+ch.name+' odblokowany!</div>':'')
     +compareHtml
     +_mResultTiles(avg,best,acc)
@@ -849,6 +851,12 @@ function _patScoringHtml(lv){
     +'Poprawne zignorowanie: +1 pkt<br>'
     +'Fałszywy alarm: -2 pkt + ❤️ | Przeoczony: -1 pkt + ❤️</div>'
     +'<div style="font-size:9px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+ctxTxt+'</div></div>';
+}
+
+function _patScoringCompare(curLv,nxtLv){
+  var cur=_getPatThresholds(curLv),nxt=_getPatThresholds(nxtLv);
+  if(cur.t5===nxt.t5) return '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;">⚡ Progi punktów bez zmian. Ale wzorce trudniejsze! 😏</div>';
+  return '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;">⚡ Nowe progi: &lt;'+nxt.t5+'ms=5pkt | &lt;'+nxt.t3+'ms=3pkt | &lt;'+nxt.t2+'ms=2pkt | &lt;'+nxt.t1+'ms=1pkt</div>';
 }
 
 // ── Tryb Wzorce (przebudowa) ──
@@ -964,8 +972,15 @@ function _runPatternLevel(idx,cfg,results,cb){
         var tb=document.getElementById('pat-target-box'); if(tb){ tb.style.borderColor='#4ade80'; }
         ma.style.background='rgba(74,222,128,.06)'; setTimeout(function(){ ma.style.background='#060606'; },300);
       } else {
-        _gameLives--; setTimeout(_flashLives,50); _gameCombo=0; _gamePoints=Math.max(0,_gamePoints-2);
-        _sndBad(); _mPtsAnim('✕ -2','var(--red-text)'); if(navigator.vibrate) navigator.vibrate(200);
+        _gameLives--; setTimeout(_flashLives,50); _gameCombo=0; _gamePoints-=2;
+        _sndBad(); if(navigator.vibrate) navigator.vibrate(200);
+        // Jasny komunikat o błędzie
+        var errMsg=document.createElement('div'); errMsg.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;';
+        errMsg.innerHTML='<div style="font-size:18px;font-weight:900;color:#f87171;">✕ ZMYŁKA! -2 pkt</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px;">To nie ten wzorzec!</div><div style="font-size:11px;font-weight:700;color:#f87171;margin-top:4px;">❤️ -1 życie!</div>';
+        ma.appendChild(errMsg); requestAnimationFrame(function(){ errMsg.style.opacity='1'; });
+        setTimeout(function(){ errMsg.style.transition='opacity .3s'; errMsg.style.opacity='0'; setTimeout(function(){ errMsg.remove(); },300); },1000);
+        // Flash punktów na czerwono
+        var pe=document.getElementById('m-pts'); if(pe){ pe.style.color='#f87171'; setTimeout(function(){ pe.style.color=_gamePoints<0?'#f87171':'var(--accent)'; },300); }
         results.push({time:t,correct:false,type:'pattern_false'});
         var sb2=document.getElementById('pat-stim-box'); if(sb2){ sb2.style.borderColor='#f87171'; sb2.style.boxShadow='0 0 20px rgba(248,113,113,.3)'; }
         ma.style.background='rgba(248,113,113,.06)'; setTimeout(function(){ ma.style.background='#060606'; },300);
@@ -976,7 +991,7 @@ function _runPatternLevel(idx,cfg,results,cb){
   var rt=setTimeout(function(){
     clearInterval(rc); _motionState.listening=false; _gameTotalTrials++;
     if(!reacted){
-      if(isMatch){ _gameLives--; setTimeout(_flashLives,50); _gameCombo=0; _gamePoints=Math.max(0,_gamePoints-1); _mPtsAnim('MISS -1','var(--red-text)'); _sndBad(); results.push({time:pc.interval,correct:false,type:'pattern_miss'});
+      if(isMatch){ _gameLives--; setTimeout(_flashLives,50); _gameCombo=0; _gamePoints-=1; _mPtsAnim('MISS -1','var(--red-text)'); _sndBad(); results.push({time:pc.interval,correct:false,type:'pattern_miss'});
         var sb3=document.getElementById('pat-stim-box'); if(sb3) sb3.style.borderColor='#f87171';
       } else { _gameCorrect++; _gamePoints+=1; results.push({time:0,correct:true,type:'pattern_ignore'});
         // Subtelna animacja za poprawne zignorowanie
