@@ -232,9 +232,13 @@ function _openQuizShareModal(){
     // Kolor
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin:8px 0 4px;">KOLOR</div>'
     +'<div id="qs-colors" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>'
+    // Zdjęcie
+    +'<div onclick="document.getElementById(\'qs-file\').click()" style="width:100%;padding:10px;border:1px dashed rgba(255,255,255,.15);border-radius:8px;background:transparent;color:rgba(255,255,255,.5);font-size:11px;font-weight:600;cursor:pointer;text-align:center;margin:8px 0;">📷 Dodaj zdjęcie</div>'
+    +'<input type="file" id="qs-file" accept="image/*" style="display:none;" onchange="_onQsPhoto(this)">'
+    +'<div id="qs-photo-prev" style="display:none;margin:6px 0;align-items:center;gap:8px;"></div>'
     // Tekst
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:4px;">TEKST NA GRAFICE</div>'
-    +'<textarea id="qs-text" style="width:100%;height:60px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#f2f2f2;font-family:Montserrat,sans-serif;font-size:12px;padding:8px;resize:none;box-sizing:border-box;" placeholder="Wpisz swój tekst lub zostaw pusty">'+(_qLastFeedback||'').replace(/'/g,'&#39;')+'</textarea>'
+    +'<textarea id="qs-text" style="width:100%;height:60px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#f2f2f2;font-family:Montserrat,sans-serif;font-size:12px;padding:8px;resize:none;box-sizing:border-box;" placeholder="Wpisz swój tekst lub zostaw pusty">'+('AX do Ciebie: '+(_qLastFeedback||'')).replace(/'/g,'&#39;')+'</textarea>'
     // Generuj
     +'<div onclick="_genQuizShare()" style="width:100%;padding:12px;background:#a855f7;color:#fff;border-radius:10px;text-align:center;font-size:13px;font-weight:800;cursor:pointer;margin-top:8px;">Generuj podgląd</div>'
     +'<div id="qs-preview" style="display:none;margin-top:12px;text-align:center;"></div>'
@@ -246,6 +250,18 @@ function _openQuizShareModal(){
   if(cc) cc.innerHTML=cols.map(function(cl){ return '<div onclick="_shareColor=\''+cl.k+'\';document.querySelectorAll(\'#qs-colors>div\').forEach(function(d){d.style.borderColor=\'rgba(255,255,255,.1)\';});this.style.borderColor=\'#a855f7\';" style="width:32px;height:32px;border-radius:50%;background:'+cl.bg+';cursor:pointer;border:2px solid '+(cl.k==='purple'?'#a855f7':'rgba(255,255,255,.1)')+';"></div>'; }).join('');
 }
 
+var _qsPhoto=null;
+function _onQsPhoto(input){
+  if(!input.files||!input.files[0]) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image(); img.onload=function(){
+      _qsPhoto=img;
+      var p=document.getElementById('qs-photo-prev');
+      if(p){ p.style.display='flex'; p.innerHTML='<img src="'+e.target.result+'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div onclick="_qsPhoto=null;this.parentElement.style.display=\'none\'" style="font-size:11px;color:#f87171;cursor:pointer;margin-left:8px;">✕ Usuń</div>'; }
+    }; img.src=e.target.result;
+  }; reader.readAsDataURL(input.files[0]);
+}
 function _genQuizShare(){
   var maxLv=_qLevelScores.length;
   var badge=_getBadge(maxLv,_qTotal);
@@ -255,8 +271,17 @@ function _genQuizShare(){
   var ctx=cv.getContext('2d');
   var t=_THEMES[_shareColor]||_THEMES.purple;
   // Background
-  var g=ctx.createLinearGradient(0,0,w*0.4,h); g.addColorStop(0,t.bg1); g.addColorStop(0.5,t.bg2); g.addColorStop(1,t.bg1);
-  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+  if(_qsPhoto){
+    var r=Math.max(w/_qsPhoto.width,h/_qsPhoto.height);
+    ctx.drawImage(_qsPhoto,(w-_qsPhoto.width*r)/2,(h-_qsPhoto.height*r)/2,_qsPhoto.width*r,_qsPhoto.height*r);
+    var tg=ctx.createLinearGradient(0,0,0,h*0.15); tg.addColorStop(0,'rgba(0,0,0,0.7)'); tg.addColorStop(1,'transparent');
+    ctx.fillStyle=tg; ctx.fillRect(0,0,w,h*0.15);
+    var bg=ctx.createLinearGradient(0,h*0.5,0,h); bg.addColorStop(0,'transparent'); bg.addColorStop(0.4,'rgba(0,0,0,0.5)'); bg.addColorStop(1,'rgba(0,0,0,0.85)');
+    ctx.fillStyle=bg; ctx.fillRect(0,h*0.5,w,h*0.5);
+  } else {
+    var g=ctx.createLinearGradient(0,0,w*0.4,h); g.addColorStop(0,t.bg1); g.addColorStop(0.5,t.bg2); g.addColorStop(1,t.bg1);
+    ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+  }
   // Lines
   var lG=ctx.createLinearGradient(w*0.1,0,w*0.9,0);
   lG.addColorStop(0,'transparent'); lG.addColorStop(0.5,'rgba('+t.ar+',0.5)'); lG.addColorStop(1,'transparent');
@@ -266,24 +291,34 @@ function _genQuizShare(){
   ctx.fillText('Athleti',w*0.06,h*0.04); var aw=ctx.measureText('Athleti').width;
   ctx.fillStyle='#dc2626'; ctx.fillText('X',w*0.06+aw,h*0.04);
   // Badge emoji + name
-  var cy=h*0.25;
-  ctx.font='120px serif'; ctx.textAlign='center'; ctx.fillStyle=t.text; ctx.fillText(badge.emoji,w/2,cy);
+  var cy=_qsPhoto?h*0.55:h*0.25;
+  ctx.font='120px serif'; ctx.textAlign='center'; ctx.fillStyle=_qsPhoto?'#fff':t.text; ctx.fillText(badge.emoji,w/2,cy);
   ctx.font='800 36px Montserrat,sans-serif'; ctx.fillStyle=badge.color; ctx.fillText(badge.name,w/2,cy+50);
   // Score
-  ctx.font='900 140px Montserrat,sans-serif'; ctx.fillStyle=t.text; ctx.fillText(_qTotal+'/20',w/2,cy+190);
+  ctx.font='900 140px Montserrat,sans-serif'; ctx.fillStyle=_qsPhoto?'#fff':t.text; ctx.fillText(_qTotal+'/20',w/2,cy+190);
   ctx.font='700 28px Montserrat,sans-serif'; ctx.fillStyle=t.muted; ctx.fillText('Quiz: Reaktywny Nerd',w/2,cy+230);
-  // Custom text (max 3 lines)
+  // Custom text with "AX do Ciebie:" prefix
   if(customText){
-    ctx.font='italic 20px Montserrat,sans-serif'; ctx.fillStyle='rgba(255,255,255,0.5)';
-    var words=customText.split(' '), lines=[], line='';
-    for(var i=0;i<words.length;i++){
-      var test=line+(line?' ':'')+words[i];
-      if(ctx.measureText(test).width>w*0.8&&line){ lines.push(line); line=words[i]; } else line=test;
-    }
-    if(line) lines.push(line);
-    lines=lines.slice(0,3);
     var ty2=cy+260;
-    lines.forEach(function(l,i){ ctx.fillText(l,w/2,ty2+i*28); });
+    var prefix='AX do Ciebie:';
+    var bodyText=customText;
+    if(customText.indexOf(prefix)===0){
+      // Draw prefix in accent
+      ctx.font='italic 700 18px Montserrat,sans-serif'; ctx.fillStyle=t.accent;
+      ctx.fillText(prefix,w/2,ty2); ty2+=28;
+      bodyText=customText.substring(prefix.length).trim();
+    }
+    if(bodyText){
+      ctx.font='italic 18px Montserrat,sans-serif'; ctx.fillStyle='rgba(255,255,255,0.5)';
+      var words=bodyText.split(' '), lines=[], line='';
+      for(var i=0;i<words.length;i++){
+        var test=line+(line?' ':'')+words[i];
+        if(ctx.measureText(test).width>w*0.8&&line){ lines.push(line); line=words[i]; } else line=test;
+      }
+      if(line) lines.push(line);
+      lines=lines.slice(0,3);
+      lines.forEach(function(l,li){ ctx.fillText(l,w/2,ty2+li*26); });
+    }
   }
   // Tiles 2x2
   var tW=(w-w*0.16-16)/2, tH=100, tY=cy+(customText?260+90:280);
