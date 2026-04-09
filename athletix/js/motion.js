@@ -9,6 +9,7 @@ var _motionBlockSwipeClose=false;
 var _motionState={listening:false,ax:0,ay:0,az:0,baseline:{x:0,y:0,z:0},sensitivity:3,_keyPressed:null};
 // Stan gry
 var _gamePoints=0, _gameLives=3, _gameLevel=1, _gameCombo=0, _gameMaxCombo=0, _gameTotalTrials=0, _gameCorrect=0, _gameTimes=[], _gameBestLevel=0, _gameLastTime=0;
+var _trialIdx=0, _trialTotal=0;
 // Tryb Wzorce
 var PATTERN_SYMBOLS=['🔴','🟢','🔵','🟡','🟣','🟠','⬜','⬛'];
 
@@ -428,7 +429,7 @@ function startMotionGame(){
     if(!ok&&_motionInputMode==='motion'){ _motionInputMode='touch'; }
     _motionAbort=false; _motionRunning=true;
     _motionBlockSwipeClose=(_motionInputMode==='touch'&&_motionMode==='directions');
-    _gamePoints=0; _gameLives=3; _gameLevel=1; _gameCombo=0; _gameMaxCombo=0; _gameTotalTrials=0; _gameCorrect=0; _gameTimes=[]; _gameLastTime=0;
+    _gamePoints=0; _gameLives=3; _gameLevel=1; _gameCombo=0; _gameMaxCombo=0; _gameTotalTrials=0; _gameCorrect=0; _gameTimes=[]; _gameLastTime=0; _trialIdx=0; _trialTotal=0;
     el('settings').style.display='none'; el('motion-active').style.display='block';
     reqWL(); goFS();
     // Przycisk zamknij ✕ — na document.body, z-index 99999
@@ -501,7 +502,7 @@ function _showBriefing(onReady){
     +'<div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">ZASADY</div>'
     +'<div style="font-size:12px;font-weight:500;line-height:1.7;color:rgba(255,255,255,.7);">'+rules+'</div>'
     +'<div style="font-size:11px;font-weight:600;color:var(--accent);margin-top:6px;">'+inputHint+'</div></div>'
-    +(_motionMode==='pattern'?_patScoringHtml(_gameLevel):'')
+    +(_motionMode==='pattern'?_patScoringHtml(_gameLevel):_scoringHtml(_gameLevel))
     +'<div style="margin-top:14px;font-size:12px;font-weight:600;font-style:italic;color:rgba(255,255,255,.45);line-height:1.5;padding:0 8px;">\u201E'+quote+'\u201D</div>'
     +'<button id="briefing-go-btn" style="margin-top:20px;width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.04em;">DAWAJ! \uD83D\uDE80</button>'
     +'</div>';
@@ -535,19 +536,19 @@ function _mHUD(){
   var bestTile=tileBase+'border:2px solid rgba(234,179,8,.5);box-shadow:0 0 12px rgba(234,179,8,.15);';
   var bestValFs=isWide?'20px':'16px';
   var labelS='font-size:'+tLblFs+';font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-top:2px;';
-  var tilesMax=isWide?'max-width:500px;margin-left:auto;margin-right:auto;':'';
-  var tilesHtml='<div style="position:fixed;top:56px;left:10px;right:60px;display:flex;gap:6px;z-index:15;'+tilesMax+'">'
+  var tilesHtml='<div style="position:fixed;top:56px;left:50%;transform:translateX(-50%);width:calc(100% - 80px);max-width:340px;display:flex;gap:6px;z-index:15;">'
     +'<div style="'+lastTile+'" id="m-tile-last"><div style="font-size:'+tValFs+';font-weight:800;color:'+(hasData?_tc(lastMs):'rgba(255,255,255,.25)')+';transition:transform .2s;" id="m-last-val">'+(hasData?lastMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">OSTATNI</div></div>'
     +'<div style="'+avgTile+'"><div style="font-size:'+tValFs+';font-weight:800;color:'+(hasData?_tc(avgMs):'rgba(255,255,255,.25)')+';">'+(hasData?avgMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">ŚREDNIA</div></div>'
     +'<div style="'+bestTile+'"><div style="font-size:'+bestValFs+';font-weight:800;color:'+(hasData?'#4ade80':'rgba(255,255,255,.25)')+';">'+(hasData?bestMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">NAJLEPSZY</div></div>'
     +'</div>';
   var hudLbl='font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);';
-  return '<div style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:16;display:flex;align-items:center;gap:12px;background:rgba(6,6,6,.85);padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.08);max-width:360px;">'
+  return '<div style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:16;display:flex;align-items:center;gap:12px;background:rgba(6,6,6,.85);padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.08);max-width:340px;">'
     +'<div style="text-align:center;"><div style="font-size:16px;font-weight:900;color:'+(_gamePoints<0?'#f87171':'var(--accent)')+';transition:transform .2s,color .3s;" id="m-pts">⚡ '+_gamePoints+'</div><div style="'+hudLbl+'">PUNKTY</div></div>'
     +'<span style="font-size:13px;font-weight:800;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);padding:3px 10px;border-radius:10px;">'+ch.emoji+' Lv.'+_gameLevel+'</span>'
     +'<div style="text-align:center;"><div style="font-size:14px;font-weight:800;color:#f87171;transition:transform .2s;" id="m-lives">❤️ '+_gameLives+'</div><div style="'+hudLbl+'">ŻYCIA</div></div>'
     +'</div>'
-    +tilesHtml+comboHtml;
+    +tilesHtml+comboHtml
+    +(_trialTotal>0?_mProgressBar(_trialIdx,_trialTotal):'');
 }
 function _flashLives(){
   var lv=document.getElementById('m-lives'); if(!lv) return;
@@ -599,6 +600,7 @@ function _startLevel(lv){
 function _runTrial(idx,cfg,trialResults,cb){
   if(_motionAbort||_gameLives<=0){ cb(trialResults); return; }
   if(idx>=cfg.trials){ cb(trialResults); return; }
+  _trialIdx=idx; _trialTotal=cfg.trials;
   var ma=el('motion-active');
   var isFake=Math.random()<cfg.fakeChance;
   var isGoNoGo=_motionMode==='gonogo';
@@ -763,7 +765,7 @@ function _showLevelComplete(lv,trialResults){
     +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin:10px auto;max-width:300px;"><span style="font-size:16px;">🎙️</span> <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:1.6;font-style:italic;">'+getCoachFeedback(lvAvg,lvAcc,lvCombo,lv)+'</span></div>'
     // Info o następnym levelu
     +'<div style="border:1px dashed rgba(255,255,255,.12);border-radius:10px;padding:10px;margin:8px auto;max-width:300px;"><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:4px;">📢 CO CIĘ CZEKA:</div><div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.55);line-height:1.5;">'+_getNextLevelHint(lv)+'</div>'
-    +(_motionMode==='pattern'?_patScoringCompare(lv,lv+1):'')
+    +(_motionMode==='pattern'?_patScoringCompare(lv,lv+1):_stdScoringCompare(lv,lv+1))
     +'<div style="font-size:10px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+_pick(['Dasz radę. Pewnie.','Twój mózg jest gotowy. Chyba.','Skupienie to klucz. 🔑','Oddychaj i działaj.','Level wyżej = Ty lepszy.','Gdyby było łatwe, każdy by to robił.'])+'</div></div>'
     +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
@@ -854,6 +856,33 @@ function _mResultTiles(avg,best,acc){
 }
 function _motionRetry(){ startMotionGame(); }
 
+// ── Punktowanie — progi per tryb ──
+var _STD_THRESHOLDS=[
+  {maxLevel:2,t5:200,t4:300,t3:400,t2:600,t1:800},
+  {maxLevel:5,t5:250,t4:350,t3:450,t2:650,t1:900},
+  {maxLevel:99,t5:200,t4:300,t3:400,t2:550,t1:800}
+];
+function _getStdThresholds(lv){
+  for(var i=0;i<_STD_THRESHOLDS.length;i++){ if(lv<=_STD_THRESHOLDS[i].maxLevel) return _STD_THRESHOLDS[i]; }
+  return _STD_THRESHOLDS[_STD_THRESHOLDS.length-1];
+}
+function _scoringHtml(lv){
+  var t=_getStdThresholds(lv);
+  return '<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;margin:10px 0;">'
+    +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#3b82f6;margin-bottom:4px;">⚡ PUNKTY W TYM LEVELU</div>'
+    +'<div style="font-size:11px;font-weight:500;color:rgba(255,255,255,.5);line-height:1.6;">'
+    +'&lt;'+t.t5+'ms = 5 pkt ⚡ | &lt;'+t.t4+'ms = 4 | &lt;'+t.t3+'ms = 3 | &lt;'+t.t2+'ms = 2 | &lt;'+t.t1+'ms = 1<br>'
+    +'Fałszywy start: -2 pkt + ❤️ | Brak reakcji: -1 pkt + ❤️</div></div>';
+}
+function _mProgressBar(idx,total){
+  var pct=Math.round((idx+1)/total*100);
+  var isWide=window.innerWidth>=768;
+  var h=isWide?'8px':'6px';
+  return '<div style="position:fixed;bottom:16px;left:16px;right:16px;z-index:10;display:flex;align-items:center;gap:8px;'+(isWide?'max-width:600px;margin:0 auto;':'')+'">'
+    +'<div style="flex:1;height:'+h+';background:rgba(255,255,255,.08);border-radius:3px;"><div style="width:'+pct+'%;height:'+h+';background:var(--accent);border-radius:3px;transition:width .3s;"></div></div>'
+    +'<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);white-space:nowrap;">'+(idx+1)+'/'+total+'</div></div>';
+}
+
 // ── Punktowanie Wzorce — skalowanie z levelem ──
 var _PAT_THRESHOLDS=[
   {maxLevel:2,t5:300,t3:500,t2:800,t1:1200},
@@ -886,6 +915,11 @@ function _patScoringHtml(lv){
     +'<div style="font-size:9px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+ctxTxt+'</div></div>';
 }
 
+function _stdScoringCompare(curLv,nxtLv){
+  var cur=_getStdThresholds(curLv),nxt=_getStdThresholds(nxtLv);
+  if(cur.t5===nxt.t5) return '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;">⚡ Progi punktów bez zmian. Szybciej i trudniej! 😏</div>';
+  return '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;">⚡ Nowe progi: &lt;'+nxt.t5+'ms=5pkt | &lt;'+nxt.t4+'ms=4 | &lt;'+nxt.t3+'ms=3 | &lt;'+nxt.t2+'ms=2 | &lt;'+nxt.t1+'ms=1</div>';
+}
 function _patScoringCompare(curLv,nxtLv){
   var cur=_getPatThresholds(curLv),nxt=_getPatThresholds(nxtLv);
   if(cur.t5===nxt.t5) return '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;">⚡ Progi punktów bez zmian. Ale wzorce trudniejsze! 😏</div>';
@@ -935,6 +969,7 @@ function _runPatternLevel(idx,cfg,results,cb){
   if(_motionAbort||_gameLives<=0){ cb(results); return; }
   var pc=_patCfg(_gameLevel); var syms=_getPatSyms(pc.nCol);
   if(idx>=pc.total){ cb(results); return; }
+  _trialIdx=idx; _trialTotal=pc.total;
   var ma=el('motion-active');
   // Zmiana celu
   if(pc.tgtCh>0&&idx>0&&_patTgtChangeCount<pc.tgtCh&&idx%(Math.floor(pc.total/pc.tgtCh))===0){
@@ -981,11 +1016,7 @@ function _runPatternLevel(idx,cfg,results,cb){
       +'<div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;">👀 OBSERWUJ</div>'
       +'<div id="pat-stim-box" style="border:2px solid rgba(255,255,255,.12);border-radius:16px;padding:'+boxPad+';background:rgba(255,255,255,.03);box-shadow:0 0 15px rgba(255,255,255,.05);transition:border-color .2s,box-shadow .2s;'+boxMaxH+'">'+_patHtml(stim,pc.cols,sFs)+'</div>'
     )
-    +'</div>'
-    // Progress bar
-    +'<div style="position:absolute;bottom:16px;left:16px;right:16px;z-index:10;text-align:center;">'
-    +'<div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:4px;">'+(idx+1)+'/'+pc.total+'</div>'
-    +'<div style="height:4px;background:rgba(255,255,255,.08);border-radius:2px;"><div style="width:'+Math.round((idx+1)/pc.total*100)+'%;height:4px;background:var(--accent);border-radius:2px;transition:width .3s;"></div></div></div>';
+    +'</div>';
   _sndStim();
   _motionState.listening=true; _motionState._keyPressed=null; _lastMousePos=null;
   var reacted=false;
