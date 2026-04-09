@@ -58,7 +58,7 @@ function _openShareModal(){
     // Zdjecie
     +'<div onclick="document.getElementById(\'share-file\').click()" style="width:100%;padding:10px;border:1px dashed rgba(255,255,255,.15);border-radius:8px;background:transparent;color:rgba(255,255,255,.5);font-size:11px;font-weight:600;cursor:pointer;text-align:center;margin-bottom:4px;">📷 Dodaj zdjecie</div>'
     +'<input type="file" id="share-file" accept="image/*" capture="environment" style="display:none;" onchange="_onShareFile(this)">'
-    +'<div id="share-photo-prev" style="display:none;margin:6px 0;display:flex;align-items:center;gap:8px;"></div>'
+    +'<div id="share-photo-prev" style="display:none;margin:6px 0;align-items:center;gap:8px;"></div>'
     // Generuj
     +'<div id="share-gen-btn" onclick="_doGenerate()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border-radius:10px;text-align:center;font-size:13px;font-weight:800;cursor:pointer;margin-top:8px;">Generuj podglad</div>'
     // Preview
@@ -143,24 +143,30 @@ function _doGenerate(){
   ctx.font='900 28px Montserrat,sans-serif'; ctx.fillStyle='rgba('+t.ar+',0.2)'; ctx.textAlign='right'; ctx.fillText('AX',w*0.94,h*0.04);
 
   // 4. POSTAC
-  var cy=_sharePhoto?h*0.68:h*0.3;
-  if(!_sharePhoto){
+  var cy;
+  if(_sharePhoto){
+    cy=h*0.65;
+    // Ze zdjeciem: mniejszy tekst levelu
+    ctx.font='700 26px Montserrat,sans-serif'; ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.textAlign='center';
+    ctx.fillText(d.characterEmoji+' '+d.characterName+' - Level '+d.maxLevel,w/2,cy-20);
+  } else {
+    cy=h*0.3;
     ctx.font='120px serif'; ctx.textAlign='center'; ctx.fillStyle=t.text; ctx.fillText(d.characterEmoji,w/2,cy-60);
     ctx.font='800 32px Montserrat,sans-serif'; ctx.fillStyle=t.text; ctx.fillText(d.characterName+' - Level '+d.maxLevel,w/2,cy);
   }
 
   // 5. NAZWA GRY
-  ctx.font='700 24px Montserrat,sans-serif'; ctx.fillStyle=t.accent; ctx.textAlign='center';
+  ctx.font='700 24px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'rgba(255,255,255,0.9)':t.accent; ctx.textAlign='center';
   ctx.fillText(d.gameName.toUpperCase(),w/2,cy+40);
 
   // 6. GLOWNA METRYKA (punkty)
-  ctx.font='900 120px Montserrat,sans-serif'; ctx.fillStyle=t.text; ctx.textAlign='center';
+  ctx.font='900 120px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'#ffffff':t.text; ctx.textAlign='center';
   ctx.fillText(d.points+'',w/2,cy+160);
-  ctx.font='700 28px Montserrat,sans-serif'; ctx.fillStyle=t.good;
+  ctx.font='700 28px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'#4ade80':t.good;
   ctx.fillText('⚡ PUNKTOW',w/2,cy+198);
 
   // 7. SREDNI CZAS
-  ctx.font='500 22px Montserrat,sans-serif'; ctx.fillStyle=t.muted;
+  ctx.font='500 22px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'rgba(255,255,255,0.5)':t.muted;
   ctx.fillText('sredni czas: '+d.avgTxt,w/2,cy+235);
 
   // 8. KAFELKI 2x2
