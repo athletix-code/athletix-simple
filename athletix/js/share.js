@@ -18,7 +18,7 @@ function _getShareData(){
   var best=_gameTimes.length?Math.min.apply(null,_gameTimes):0;
   var acc=_gameTotalTrials?Math.round(_gameCorrect/_gameTotalTrials*100):0;
   var ch=getLevelCharacter(_gameLevel);
-  var modeNames={simple:'Reakcja',directions:'Kierunki',gonogo:'Go/No-Go',pattern:'Wzorce',pairs:'Pary',sequence:'Kolejnosc',words:'Slowa'};
+  var modeNames={simple:'Reakcja',directions:'Kierunki',gonogo:'Go/No-Go',pattern:'Wzorce',pairs:'Pary',sequence:'Kolejność',words:'Słowa'};
   return {
     gameName:modeNames[_motionMode]||'Motion',
     avgTime:avg, bestTime:best, accuracy:acc,
@@ -46,7 +46,7 @@ function _openShareModal(){
   ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px;';
   ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
   ov.innerHTML='<div style="max-width:400px;width:calc(100% - 32px);background:#1a1a1a;border-radius:16px;padding:20px;max-height:85vh;overflow-y:auto;color:#f2f2f2;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:800;">📸 Udostepnij wynik</div><div onclick="document.getElementById(\'share-modal\').remove()" style="cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</div></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:800;">📸 Udostępnij wynik</div><div onclick="document.getElementById(\'share-modal\').remove()" style="cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</div></div>'
     // Format
     +'<div style="display:flex;gap:8px;margin:12px 0;" id="share-fmt">'
     +'<div class="sfmt" data-f="story" onclick="_setShareFmt(\'story\')" style="flex:1;padding:8px;border-radius:8px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:#3b82f6;color:#fff;">Story 9:16</div>'
@@ -56,11 +56,11 @@ function _openShareModal(){
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;">KOLOR</div>'
     +'<div id="share-colors" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;"></div>'
     // Zdjecie
-    +'<div onclick="document.getElementById(\'share-file\').click()" style="width:100%;padding:10px;border:1px dashed rgba(255,255,255,.15);border-radius:8px;background:transparent;color:rgba(255,255,255,.5);font-size:11px;font-weight:600;cursor:pointer;text-align:center;margin-bottom:4px;">📷 Dodaj zdjecie</div>'
+    +'<div onclick="document.getElementById(\'share-file\').click()" style="width:100%;padding:10px;border:1px dashed rgba(255,255,255,.15);border-radius:8px;background:transparent;color:rgba(255,255,255,.5);font-size:11px;font-weight:600;cursor:pointer;text-align:center;margin-bottom:4px;">📷 Dodaj zdjęcie</div>'
     +'<input type="file" id="share-file" accept="image/*" capture="environment" style="display:none;" onchange="_onShareFile(this)">'
     +'<div id="share-photo-prev" style="display:none;margin:6px 0;align-items:center;gap:8px;"></div>'
     // Generuj
-    +'<div id="share-gen-btn" onclick="_doGenerate()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border-radius:10px;text-align:center;font-size:13px;font-weight:800;cursor:pointer;margin-top:8px;">Generuj podglad</div>'
+    +'<div id="share-gen-btn" onclick="_doGenerate()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border-radius:10px;text-align:center;font-size:13px;font-weight:800;cursor:pointer;margin-top:8px;">Generuj podgląd</div>'
     // Preview
     +'<div id="share-prev" style="display:none;margin-top:12px;text-align:center;"></div>'
     +'</div>';
@@ -97,7 +97,7 @@ function _onShareFile(input){
     var img=new Image(); img.onload=function(){
       _sharePhoto=img;
       var p=document.getElementById('share-photo-prev');
-      if(p){ p.style.display='flex'; p.innerHTML='<img src="'+e.target.result+'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div onclick="_sharePhoto=null;this.parentElement.style.display=\'none\'" style="font-size:11px;color:#f87171;cursor:pointer;">✕ Usun</div>'; }
+      if(p){ p.style.display='flex'; p.innerHTML='<img src="'+e.target.result+'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div onclick="_sharePhoto=null;this.parentElement.style.display=\'none\'" style="font-size:11px;color:#f87171;cursor:pointer;">✕ Usuń</div>'; }
     };
     img.src=e.target.result;
   };
@@ -163,17 +163,17 @@ function _doGenerate(){
   ctx.font='900 120px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'#ffffff':t.text; ctx.textAlign='center';
   ctx.fillText(d.points+'',w/2,cy+160);
   ctx.font='700 28px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'#4ade80':t.good;
-  ctx.fillText('⚡ PUNKTOW',w/2,cy+198);
+  ctx.fillText('⚡ PUNKTÓW',w/2,cy+198);
 
   // 7. SREDNI CZAS
   ctx.font='500 22px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'rgba(255,255,255,0.5)':t.muted;
-  ctx.fillText('sredni czas: '+d.avgTxt,w/2,cy+235);
+  ctx.fillText('średni czas: '+d.avgTxt,w/2,cy+235);
 
   // 8. KAFELKI 2x2
   var tW=(w-w*0.16-16)/2, tH=100, tY=cy+260;
   var tiles=[
     {v:d.bestTxt,l:'NAJLEPSZY',c:t.good},
-    {v:d.accuracy+'%',l:'CELNOSC',c:t.text},
+    {v:d.accuracy+'%',l:'CELNOŚĆ',c:t.text},
     {v:'x'+d.maxCombo,l:'COMBO',c:'#f59e0b'},
     {v:'Lv.'+d.maxLevel,l:'LEVEL',c:t.accent}
   ];
@@ -208,8 +208,8 @@ function _showShareResult(cv){
   if(canShare){
     var sb=document.createElement('div');
     sb.style.cssText='width:100%;padding:12px;background:#3b82f6;color:#fff;border-radius:10px;text-align:center;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:6px;';
-    sb.textContent='Udostepnij';
-    sb.onclick=function(){ cv.toBlob(function(blob){ var f=new File([blob],'athletix-wynik.png',{type:'image/png'}); navigator.share({files:[f],title:'Moj wynik - AthletiX',text:'Elevate Your Game!'}).catch(function(){}); },'image/png'); };
+    sb.textContent='Udostępnij';
+    sb.onclick=function(){ cv.toBlob(function(blob){ var f=new File([blob],'athletix-wynik.png',{type:'image/png'}); navigator.share({files:[f],title:'Mój wynik - AthletiX',text:'Elevate Your Game!'}).catch(function(){}); },'image/png'); };
     p.appendChild(sb);
   }
   var db=document.createElement('div');
