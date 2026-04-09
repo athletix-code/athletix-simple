@@ -210,6 +210,39 @@ function openEditPackages(){
 }
 
 function deductEntry(athleteName){
+  loadCRM();
+  var a=athletes.find(function(x){ return x.name===athleteName; }); if(!a) return;
+  var w=_getWallet(a);
+  var rate=w.entryRate||80;
+  var newBal=w.balance-rate;
+  var now=new Date();
+  var dateStr=String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear();
+  var timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  var old=document.getElementById('deduct-confirm-modal'); if(old) old.remove();
+  var ov=document.createElement('div'); ov.id='deduct-confirm-modal';
+  ov.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.innerHTML='<div style="max-width:360px;width:100%;background:var(--s1);border-radius:16px;padding:20px;">'
+    +'<div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:12px;">Odbić wejście?</div>'
+    +'<div style="font-size:13px;color:var(--muted);line-height:1.8;">'
+    +'<div><span style="font-weight:700;color:var(--text);">Zawodnik:</span> '+athleteName+'</div>'
+    +'<div><span style="font-weight:700;color:var(--text);">Stawka:</span> '+rate+' pkt</div>'
+    +'<div><span style="font-weight:700;color:var(--text);">Saldo po odbiciu:</span> '+newBal+' pkt</div>'
+    +(newBal<0?'<div style="font-size:12px;font-weight:600;color:var(--red-text);margin-top:4px;">⚠️ Saldo spadnie poniżej zera!</div>':'')
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin:8px 0;">📅 '+dateStr+' ⏰ '+timeStr+'</div>'
+    +'<input id="deduct-note" type="text" placeholder="Notatka (opcjonalnie)" style="width:100%;padding:9px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;box-sizing:border-box;margin:8px 0;">'
+    +'<button id="deduct-yes" style="width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:12px;">Tak, odbij wejście</button>'
+    +'<button id="deduct-no" style="width:100%;padding:12px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;">Anuluj</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+  document.getElementById('deduct-no').onclick=function(){ ov.remove(); };
+  document.getElementById('deduct-yes').onclick=function(){
+    var note=(document.getElementById('deduct-note')||{}).value||'';
+    ov.remove();
+    _doDeductEntry(athleteName,note);
+  };
+}
+function _doDeductEntry(athleteName,note){
   _pushUndo('Wejście: '+athleteName);
   loadCRM();
   var a=athletes.find(function(x){ return x.name===athleteName; }); if(!a) return;
@@ -218,19 +251,31 @@ function deductEntry(athleteName){
   w.balance-=rate;
   var today=getDayKey(new Date());
   var now=new Date(); var timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  w.transactions.push({id:Date.now(),date:today,type:'debit',amount:rate,note:'Wejście '+timeStr});
-  _logEvent(w,'🚪 Wejście: -'+rate+' pkt ('+timeStr+')');
+  w.transactions.push({
+    id:Date.now(),date:today,type:'debit',amount:rate,
+    note:note?'Wejście '+timeStr+' - '+note:'Wejście '+timeStr,
+    time:timeStr,
+    status:'confirmed',confirmedBy:'trainer',confirmedAt:now.toISOString(),
+    clientNotified:false,clientConfirmed:null
+  });
+  _logEvent(w,'🚪 Wejście: -'+rate+' pkt ('+timeStr+')'+(note?' ['+note+']':''));
   saveCRM();
   if(_currentProfileId){ var allSess=[]; try{ allSess=JSON.parse(localStorage.getItem(SESSION_KEY)||'[]'); }catch(e){} renderAthleteProfile(a,allSess); }
   renderAthleteList();
-  // Animacja kafelków Depozyt → Skarbiec
+  // Animacja kafelkow
   var dep=document.getElementById('wallet-deposit-tile');
   var ear=document.getElementById('wallet-earned-tile');
   if(dep){ dep.style.borderColor='var(--red)'; setTimeout(function(){ dep.style.borderColor='var(--green)'; },500); }
   if(ear){ ear.style.borderColor='var(--green)'; ear.style.transform='scale(1.03)'; setTimeout(function(){ ear.style.borderColor='var(--accent)'; ear.style.transform='scale(1)'; },500); }
-  // ATP za wejście
+  // ATP
   if(typeof addPoints==='function') addPoints(athleteName,'entry',15,'Wejście na trening');
   if(typeof updateWeeklyStreak==='function') updateWeeklyStreak(athleteName);
+  // Toast
+  var toast=document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(22,163,74,.15);color:var(--green-text);font-family:Montserrat,sans-serif;font-size:12px;font-weight:600;padding:8px 16px;border-radius:20px;z-index:30;transition:opacity .3s;';
+  toast.textContent='✅ Wejście odebrane - '+athleteName;
+  document.body.appendChild(toast);
+  setTimeout(function(){ toast.style.opacity='0'; setTimeout(function(){ toast.remove(); },300); },2000);
 }
 
 function openAddPower(athleteName){
