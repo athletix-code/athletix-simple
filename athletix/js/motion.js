@@ -155,6 +155,94 @@ function _setMotionMode(m){
 }
 
 // ── Modal "Jak grać?" ──
+function _nerdSectionContent(){
+  return '<div style="font-size:12px;line-height:1.8;color:rgba(255,255,255,0.65);">'
++'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:16px 0 8px;">📱 Akcelerometr MEMS - maleństwo, które Cię mierzy</div>'
++'<p>W Twoim telefonie siedzi mikroskopijny czujnik ruchu - akcelerometr MEMS (Micro-Electro-Mechanical System). To struktura krzemowa mniejsza niż ziarno ryżu. Wewnątrz znajduje się maleńka masa zawieszona na sprężynkach - gdy telefon się porusza, masa przesuwa się względem obudowy, zmieniając pojemność elektryczną kondensatorów. Ta zmiana jest przeliczana na wartość przyspieszenia w trzech osiach: X, Y i Z.</p>'
++'<p>Twój telefon próbkuje dane z akcelerometru około 60 razy na sekundę (60 Hz) - co ~16.7 ms. Dla porównania - profesjonalne systemy w laboratoriach biomechanicznych próbkują z częstotliwością 1000-2000 Hz. Nasze pomiary są przybliżone, ale wystarczające do śledzenia trendów.</p>'
++'<p>Pierwszy telefon z akcelerometrem? Nokia 5500 Sport (2006). Ale to iPhone w 2007 spopularyzował ten czujnik. Dziś kosztują mniej niż 1 dolar za sztukę.</p>'
++'<p style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:6px;">Uwaga: nasze pomiary dodają własne opóźnienia (transmisja danych, przetwarzanie w przeglądarce), więc bezwzględne wartości nie są porównywalne z pomiarami laboratoryjnymi. Traktuj je jako wskaźnik relatywny.</p>'
+
++'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">⏱️ Anatomia czasu reakcji - co się dzieje w Twoim ciele</div>'
++'<p>Czas reakcji to kaskada zdarzeń neurobiologicznych:</p>'
++'<p><span style="font-weight:700;color:rgba(255,255,255,0.8);">1. Detekcja bodźca (~20-40 ms wzrok, ~8-10 ms słuch)</span><br>Światło pada na siatkówkę, fotoreceptory przekształcają je w sygnał elektryczny, który podróżuje nerwem wzrokowym do kory wzrokowej. Dźwięk jest szybszy - krótsza droga nerwowa (<a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain & Hibbs, 2007</a>).</p>'
++'<p><span style="font-weight:700;color:rgba(255,255,255,0.8);">2. Przetwarzanie w korze mózgowej (~40-100 ms)</span><br>Mózg rozpoznaje bodziec, podejmuje decyzję i wybiera odpowiedź. W zadaniach go/no-go wymaga to zaangażowania kory przedczołowej i trwa dłużej.</p>'
++'<p><span style="font-weight:700;color:rgba(255,255,255,0.8);">3. Transmisja sygnału motorycznego (~10-25 ms)</span><br>Sygnał z kory motorycznej podróżuje rdzeniem kręgowym do mięśni. Prędkość w zmielinizowanych aksonach: 80-120 m/s (~430 km/h).</p>'
++'<p><span style="font-weight:700;color:rgba(255,255,255,0.8);">4. Aktywacja mięśnia i ruch (~30-50 ms)</span><br>Acetylocholina uruchamia skurcz włókien mięśniowych. Sam skurcz i ruch to tak zwane opóźnienie elektromechaniczne (EMD).</p>'
++'<p>Suma: ~190-250 ms dla prostego bodźca wzrokowego u młodych dorosłych (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Jain et al., 2015</a>).</p>'
+
++'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🧠 Mielinizacja - jak trening dosłownie zmienia Twój mózg</div>'
++'<p>Mielina to substancja tłuszczowa (70-80% lipidów) produkowana przez oligodendrocyty. Owijając aksony neuronów, tworzy izolację elektryczną. Bez niej sygnał płynie z prędkością 0.5-2 m/s. Z mieliną "skacze" między węzłami Ranviera (przewodzenie skokowe) - nawet 120 m/s.</p>'
++'<p><span style="font-weight:700;color:rgba(255,255,255,0.8);">Mielinizacja jest procesem dynamicznym.</span> Badanie McKenzie et al. w Science (<a href="https://pubmed.ncbi.nlm.nih.gov/25324381/" target="_blank" style="color:#3b82f6;text-decoration:underline;">2014</a>) wykazało, że uczenie się nowych umiejętności motorycznych wymaga aktywnej mielinizacji. Zablokowanie tego procesu u myszy uniemożliwiało im nauczenie się nowych zadań.</p>'
++'<p>Daniel Coyle w "The Talent Code" opisał "deep practice" - powtarzanie z naciskiem na precyzję, w strefie na granicy umiejętności. Neuronaukowcy potwierdzają: ten typ praktyki najsilniej stymuluje mielinizację. Każde powtórzenie to kolejna warstwa izolacji na Twoich "kablach nerwowych".</p>'
++'<p>Badania na szczurach (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6140121/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pajevic et al., 2018</a>) wykazały, że mielinizacja w korze przedczołowej odpowiada prawie dwukrotnemu zwiększeniu prędkości transmisji.</p>'
+
++'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🏅 Sprinterzy i kontrowersja 100 ms</div>'
++'<p>Od 1991 roku World Athletics uznaje reakcję szybszą niż 100 ms za falstart. Ale nauka mówi: to nie takie proste.</p>'
++'<p><a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain i Hibbs (2007)</a> zbadali 9 sprinterów. Pięciu miało średnie czasy &lt;100 ms. Jeden osiągał średnią 87 ms (SD = 4 ms). Latencje EMG schodziły poniżej 60 ms.</p>'
++'<p><a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;text-decoration:underline;">Komi et al. (2009)</a> - badanie zlecone przez IAAF. Wniosek: "Potwierdzamy reakcje tak szybkie jak 80 ms. Rekomendujemy obniżenie progu do 80-85 ms."</p>'
++'<p><a href="https://www.academia.edu/26592344/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Brosnan et al. (2017)</a> przeanalizowali >8500 startów z MŚ i ME (1999-2014). 95% czasów mieściło się powyżej 122 ms. Zaproponowali progi: 115 ms (mężczyźni), 119 ms (kobiety).</p>'
++'<p>Dennis Mitchell na MŚ w Tokio 1991 zareagował w 90 ms i NIE został zdyskwalifikowany - zdobył brąz na 100 m.</p>'
+
++'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🧪 Go/No-Go - dlaczego NIE reagowanie jest trudniejsze</div>'
++'<p>Zadanie wymyślone przez Francisca Dondersa w 1868 roku bada zdolność hamowania reakcji. Twój mózg domyślnie działa w trybie "reaguj" - ewolucja premiowała szybkie reakcje. Zdolność hamowania to ewolucyjnie nowsza umiejętność kontrolowana przez korę przedczołową.</p>'
++'<p><a href="https://pubmed.ncbi.nlm.nih.gov/18799345/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Verbruggen i Logan (2008)</a> opisali model "wyścigu koni": proces "go" i "stop" rywalizują. Który skończy pierwszy - ten wygrywa.</p>'
++'<p>Trening go/no-go ma zastosowanie kliniczne - od ADHD, przez concussion protocol, po rehabilitację po udarze. Sportowcy z lepszą kontrolą hamowania podejmują lepsze decyzje pod presją.</p>'
+
++'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🔍 Wyszukiwanie wzrokowe - Twoje oczy jako skaner</div>'
++'<p>Szukając pary na planszy, Twoje oczy wykonują 3-4 sakkady na sekundę (<a href="https://pubmed.ncbi.nlm.nih.gov/9811504/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Rayner, 1998</a>). Między nimi fiksacje (200-300 ms), podczas których mózg przetwarza informację z fovea - zaledwie 2 stopnie kąta widzenia.</p>'
++'<p>Trail Making Test (<a href="https://pubmed.ncbi.nlm.nih.gov/13601598/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Reitan, 1958</a>) to złoty standard neuropsychologii. Wersja A (1-2-3-4...) mierzy prędkość psychomotoryczną. Wersja B (1-A-2-B-3-C...) angażuje przełączanie uwagi. Nasza gra "Kolejność" jest inspirowana TMT-A.</p>'
+
++'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">📊 Co wpływa na czas reakcji</div>'
++'<p><span style="font-weight:700;color:#4ade80;">POPRAWIA:</span> aktywność fizyczna, rozgrzewka, kofeina (~3-6 mg/kg), dobry sen (7-9h), nawodnienie, trening specyficzny, gry akcji (Bediou et al., 2018).</p>'
++'<p><span style="font-weight:700;color:#f87171;">POGARSZA:</span> wiek (~3-7 ms/rok wg <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;text-decoration:underline;">MindCrowd</a>), zmęczenie, brak snu, alkohol, odwodnienie, obfity posiłek, multitasking, chroniczny stres.</p>'
++'<p>Ciekawostka z MindCrowd: mężczyźni reagowali średnio o 34 ms szybciej niż kobiety.</p>'
+
++'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🧬 Neuroplastyczność - Twój mózg się zmienia</div>'
++'<p>~86 miliardów neuronów (<a href="https://pubmed.ncbi.nlm.nih.gov/19226510/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Azevedo et al., 2009</a>), ~100 bilionów synaps, ~1.4 kg, 20% energii ciała (<a href="https://pubmed.ncbi.nlm.nih.gov/12149485/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Raichle & Gusnard, 2002</a>). I nie jest stały.</p>'
++'<p>Meta-analiza we <a href="https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2022.868450/full" target="_blank" style="color:#3b82f6;text-decoration:underline;">Frontiers in Human Neuroscience (2022)</a> wykazała, że trening neurofeedback istotnie poprawia czas reakcji u sportowców (SMD = -1.08, p = 0.0009). Neuroplastyczność nie ma daty ważności. Trening działa w każdym wieku.</p>'
+
++'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🎯 Orientacyjne normy</div>'
++'<p style="font-size:10px;color:rgba(255,255,255,0.35);">Prosty czas reakcji wzrokowej, warunki laboratoryjne. Pomiar akcelerometryczny daje wolniejsze wyniki.</p>'
++'<p style="color:#4ade80;font-weight:600;">&lt; 200 ms - Elita sportowa, piloci myśliwców</p>'
++'<p style="color:#3b82f6;font-weight:600;">200-280 ms - Bardzo dobry, osoby aktywne</p>'
++'<p style="color:rgba(255,255,255,0.7);font-weight:600;">280-350 ms - Przeciętny wynik młodych dorosłych</p>'
++'<p style="color:#d97706;font-weight:600;">350-500 ms - Zmęczenie lub brak wprawy. Trenowalny.</p>'
++'<p style="color:#f87171;font-weight:600;">&gt; 500 ms - Powód do trenowania, nie do niepokoju.</p>'
+
++'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">💡 Czy wiesz, że...</div>'
++'<p>- Twoje ciało produkuje ~11 mln bitów informacji sensorycznej/s. Świadomie przetwarzasz ~50.<br>'
++'- Mięśnie okoruchowe to najszybsze mięśnie w ciele - sakkady trwają 20-200 ms.<br>'
++'- Praworęczni mają ~5-10 ms szybszą reakcję prawą ręką.<br>'
++'- Czas reakcji jest gorszy w poniedziałek rano niż w środę po południu.<br>'
++'- Graczy gier akcji (FPS) cechuje szybsze przetwarzanie wzrokowe.</p>'
+
++'<div style="background:rgba(59,130,246,0.06);border-radius:10px;padding:14px;margin:20px 0;">'
++'<div style="font-size:13px;font-weight:800;color:#3b82f6;margin-bottom:8px;">📚 Spis literatury</div>'
++'<div style="font-size:10px;color:rgba(255,255,255,0.45);line-height:2;">'
++'1. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Jain A et al. (2015). Int J Appl Basic Med Res, 5(2), 124-127.</a><br>'
++'2. <a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain MTG, Hibbs A (2007). J Sports Sciences, 25(1), 79-86.</a><br>'
++'3. <a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;text-decoration:underline;">Komi PV et al. (2009). New Studies in Athletics, 24(1), 37-47.</a><br>'
++'4. <a href="https://www.academia.edu/26592344/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Brosnan KC et al. (2017). J Sports Sciences, 35(10), 929-935.</a><br>'
++'5. Welford AT (1980). Reaction Times. Academic Press.<br>'
++'6. <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;text-decoration:underline;">MindCrowd Study. Arizona Alzheimer\'s Consortium.</a><br>'
++'7. <a href="https://pubmed.ncbi.nlm.nih.gov/18799345/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Verbruggen F, Logan GD (2008). Trends Cogn Sci, 12(11), 418-424.</a><br>'
++'8. <a href="https://pubmed.ncbi.nlm.nih.gov/25324381/" target="_blank" style="color:#3b82f6;text-decoration:underline;">McKenzie IA et al. (2014). Science, 346(6207), 318-322.</a><br>'
++'9. <a href="https://pubmed.ncbi.nlm.nih.gov/12149485/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Raichle ME, Gusnard DA (2002). PNAS, 99(16), 10237-10239.</a><br>'
++'10. <a href="https://pubmed.ncbi.nlm.nih.gov/19226510/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Azevedo FA et al. (2009). J Comp Neurol, 513(5), 532-541.</a><br>'
++'11. <a href="https://pubmed.ncbi.nlm.nih.gov/9811504/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Rayner K (1998). Psychological Bulletin, 124(3), 372-422.</a><br>'
++'12. <a href="https://pubmed.ncbi.nlm.nih.gov/13601598/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Reitan RM (1958). Perceptual and Motor Skills, 8(3), 271-276.</a><br>'
++'13. <a href="https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2022.868450/full" target="_blank" style="color:#3b82f6;text-decoration:underline;">Frontiers Hum Neurosci (2022). Neurofeedback Meta-Analysis.</a><br>'
++'14. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6140121/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pajevic S et al. (2018). eNeuro, 5(4).</a><br>'
++'15. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3849146/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Seidl AH (2014). Neuroscience, 276, 126-134.</a><br>'
++'16. Coyle D (2009). The Talent Code. Bantam Books.<br>'
++'17. Donders FC (1868/1969). Acta Psychologica, 30, 412-431.</div></div>'
+
++_nerdChallengeNote()
+
++'<p style="font-size:9px;color:rgba(255,255,255,0.2);text-align:center;margin-top:12px;">Część treści opracowana z wykorzystaniem narzędzi AI i zweryfikowana na podstawie recenzowanych publikacji naukowych.</p>'
++'</div>';
+}
 function _nerdChallengeNote(){
   return '<div style="background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:12px;padding:14px;margin:16px 0;">'
     +'<div style="font-size:13px;font-weight:700;color:#a855f7;">🔍 Mądrzejszy od naszego nerda?</div>'
@@ -209,25 +297,7 @@ function openMotionInfo(){
     +'<div style="font-size:24px;flex-shrink:0;">🧠</div>'
     +'<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#3b82f6;">Sekcja dla nerdów</div><div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.45);">Jak to NAPRAWDĘ działa? Nauka, fakty, źródła.</div></div>'
     +'<div id="nerd-arrow" style="font-size:12px;color:rgba(255,255,255,.3);transition:transform .2s;">▼</div></div>'
-    +'<div id="motion-nerd-section" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;font-size:12px;font-weight:500;line-height:1.7;color:rgba(255,255,255,.6);">'
-    +'<div style="font-size:13px;font-weight:800;color:#3b82f6;margin-bottom:6px;">⏱️ CZAS REAKCJI</div>'
-    +'<p style="margin-bottom:10px;">Czas reakcji to przedział od pojawienia się bodźca do początku odpowiedzi ruchowej. Średni prosty czas reakcji na bodziec wzrokowy to ~190-250 ms (Welford 1980, Jain et al. 2015).</p>'
-    +'<div style="font-size:13px;font-weight:800;color:#3b82f6;margin-top:16px;margin-bottom:6px;">🏅 SPRINTERZY I 100 MS</div>'
-    +'<p style="margin-bottom:10px;">World Athletics uznaje reakcje &lt;100ms za falstart. Jednak <a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">Komi et al. (2009)</a> wykazali reakcje poniżej 80ms.</p>'
-    +'<div style="font-size:13px;font-weight:800;color:#3b82f6;margin-top:16px;margin-bottom:6px;">🧠 CO WPLYWA</div>'
-    +'<p style="margin-bottom:10px;">Wiek, sen, kawa, aktywność fizyczna, nawodnienie. <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">MindCrowd</a>: degradacja ~3-7ms/rok.</p>'
-    +'<div style="font-size:13px;font-weight:800;color:#3b82f6;margin-top:16px;margin-bottom:6px;">📊 NORMY</div>'
-    +'<div style="margin-bottom:10px;font-size:11px;">&lt;200ms elita | 200-280ms bardzo dobry | 280-350ms przeciętny | &gt;350ms do poprawy</div>'
-    +'<div style="background:rgba(59,130,246,.04);border-radius:8px;padding:10px;margin-top:10px;">'
-    +'<div style="font-size:11px;font-weight:700;color:#3b82f6;margin-bottom:6px;">📚 Źródła</div>'
-    +'<div style="font-size:10px;color:rgba(255,255,255,.5);line-height:1.8;">'
-    +'<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">Jain et al. (2015)</a> - czas reakcji wzrokowej vs sluchowej<br>'
-    +'<a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">Pain & Hibbs (2007)</a> - minimalny czas reakcji sprinterow<br>'
-    +'<a href="https://www.academia.edu/26592344/" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">Brosnan et al. (2017)</a> - progi falstartu w sprincie<br>'
-    +'<a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">MindCrowd Study</a> - czas reakcji a wiek</div></div>'
-    +'</div>'
-    +'<div style="font-size:9px;font-style:italic;color:rgba(255,255,255,.25);margin-top:8px;">Część treści opracowana z wykorzystaniem narzędzi AI i zweryfikowana na podstawie recenzowanych publikacji naukowych.</div>'
-    +_nerdChallengeNote();
+    +'<div id="motion-nerd-section" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;">'+_nerdSectionContent()+'</div>';
   _motionModalWrap('motion-info-modal','⚡ Czas Reakcji - O module',body);
 }
 function openGameInfo(game){
