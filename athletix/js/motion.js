@@ -453,6 +453,7 @@ function startMotionGame(){
   });
 }
 function stopMotion(){
+  el('motion-active').style.overflow='hidden';
   _motionAbort=true; _motionRunning=false; _motionBlockSwipeClose=false;
   if(_motionHandler) window.removeEventListener('devicemotion',_motionHandler);
   _removeInputListeners();
@@ -748,7 +749,8 @@ function _showLevelComplete(lv,trialResults){
   var accCol=lvAcc>90?'#4ade80':lvAcc>70?'#3b82f6':'#d97706';
   var tileS='background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;text-align:center;';
   var ma=el('motion-active');
-  ma.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 20px;box-sizing:border-box;">'
+  ma.style.overflow='auto';
+  ma.innerHTML='<div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;"><div style="text-align:center;width:100%;max-width:360px;">'
     +'<div style="font-size:48px;margin-bottom:4px;">'+ch.emoji+'</div>'
     +'<div style="font-size:20px;font-weight:900;color:#f2f2f2;margin-bottom:2px;">'+ch.name+'</div>'
     +'<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,.65);margin-bottom:8px;">'+ch.desc+'</div>'
@@ -769,9 +771,10 @@ function _showLevelComplete(lv,trialResults){
     +'<div style="font-size:10px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+_pick(['Dasz radę. Pewnie.','Twój mózg jest gotowy. Chyba.','Skupienie to klucz. 🔑','Oddychaj i działaj.','Level wyżej = Ty lepszy.','Gdyby było łatwe, każdy by to robił.'])+'</div></div>'
     +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
-    +'<button onclick="_endGame()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏁 Zakończ grę</button></div></div>';
+    +'<button onclick="_endGame()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏁 Zakończ grę</button></div></div></div>';
 }
 function _nextLevel(){
+  el('motion-active').style.overflow='hidden';
   _motionCountdown(function(){ _startLevel(_gameLevel+1); });
 }
 
@@ -801,8 +804,8 @@ function _showGameOver(){
   var prevCh=prevBestLv>0?getLevelCharacter(prevBestLv):null;
   var newCharUnlocked=isNewRecord&&(!prevCh||ch.emoji!==prevCh.emoji);
 
-  var ma=el('motion-active'); ma.style.background='#060606';
-  ma.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 20px;box-sizing:border-box;">'
+  var ma=el('motion-active'); ma.style.background='#060606'; ma.style.overflow='auto';
+  ma.innerHTML='<div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;"><div style="text-align:center;width:100%;max-width:360px;">'
     +'<div style="font-size:36px;margin-bottom:2px;">'+ch.emoji+'</div>'
     +'<div style="font-size:20px;font-weight:900;color:'+(isOver?'var(--red-text)':'var(--green-text)')+';">'+(isOver?'GAME OVER':'KONIEC GRY')+'</div>'
     +'<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-top:1px;">'+ch.name+' • Level '+_gameLevel+'</div>'
@@ -817,7 +820,7 @@ function _showGameOver(){
     +'<button onclick="_motionRetry()" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Zagraj ponownie</button>'
     +'<button onclick="stopMotion()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏠 Wróć</button>'
     +(!athlete?'<div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:4px;">Wybierz zawodnika żeby zapisywać wyniki i zdobywać ATP</div>':'')
-    +'</div></div>';
+    +'</div></div></div>';
 
   // Zapis + ATP (tylko z zawodnikiem)
   if(athlete) _saveMotionResult(athlete,avg,best,_gameLevel,acc,_gameMaxCombo);
