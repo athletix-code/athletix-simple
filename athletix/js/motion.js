@@ -481,9 +481,9 @@ function _mHUD(){
     +'<div style="'+bestTile+'"><div style="font-size:'+bestValFs+';font-weight:800;color:'+(hasData?'#4ade80':'rgba(255,255,255,.25)')+';">'+(hasData?bestMs+'<span style="font-size:'+tUnitFs+';font-weight:700;"> ms</span>':'\u2014')+'</div><div style="'+labelS+'">NAJLEPSZY</div></div>'
     +'</div>';
   var hudLbl='font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);';
-  return '<div style="position:absolute;top:0;left:0;right:0;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10;background:linear-gradient(to bottom,rgba(6,6,6,.9),transparent);height:42px;">'
-    +'<div style="text-align:center;"><div style="font-size:20px;font-weight:900;color:var(--accent);transition:transform .2s;" id="m-pts">⚡ '+_gamePoints+'</div><div style="'+hudLbl+'">PUNKTY</div></div>'
-    +'<span style="font-size:12px;font-weight:700;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);padding:3px 10px;border-radius:12px;">'+ch.emoji+' Lv.'+_gameLevel+'</span>'
+  return '<div style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:15;display:flex;align-items:center;gap:12px;background:rgba(6,6,6,.85);padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.08);max-width:360px;">'
+    +'<div style="text-align:center;"><div style="font-size:16px;font-weight:900;color:var(--accent);transition:transform .2s;" id="m-pts">⚡ '+_gamePoints+'</div><div style="'+hudLbl+'">PUNKTY</div></div>'
+    +'<span style="font-size:13px;font-weight:800;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);padding:3px 10px;border-radius:10px;">'+ch.emoji+' Lv.'+_gameLevel+'</span>'
     +'<div style="text-align:center;"><div style="font-size:14px;font-weight:800;color:#f87171;transition:transform .2s;" id="m-lives">❤️ '+_gameLives+'</div><div style="'+hudLbl+'">ŻYCIA</div></div>'
     +'</div>'
     +tilesHtml+comboHtml;
