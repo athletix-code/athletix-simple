@@ -167,19 +167,17 @@ function _motionModalWrap(id,title,body){
   document.body.appendChild(m);
 }
 function _charListHtml(){
-  var athlete2=(el('motion-athlete')||{}).value||'';
-  var maxLv=0;
+  var maxLv=1; // Lv.1 zawsze odblokowany
   try{
     var d=JSON.parse(localStorage.getItem('axs_motion_results')||'{}');
-    if(d[athlete2]&&d[athlete2].reaction) d[athlete2].reaction.forEach(function(r){ if(r.level>maxLv) maxLv=r.level; });
-    if(!maxLv){ for(var k in d){ if(d[k]&&d[k].reaction) d[k].reaction.forEach(function(r){ if(r.level>maxLv) maxLv=r.level; }); } }
+    for(var k in d){ if(!d[k]) continue; ['reaction','stability','agility'].forEach(function(cat){ if(d[k][cat]) d[k][cat].forEach(function(r){ if(r.level>maxLv) maxLv=r.level; }); }); }
   }catch(e){}
   return LEVEL_CHARACTERS.map(function(c){
-    var unlocked=maxLv>=c.level; var isCurrent=c===getLevelCharacter(maxLv||1);
-    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.06);'+(isCurrent?'border-left:2px solid #3b82f6;padding-left:6px;':'')+(unlocked?'':'opacity:.4;')+'">'
-      +'<span style="font-size:20px;">'+(unlocked?c.emoji:'❓')+'</span>'
-      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:#f2f2f2;">'+(unlocked?c.name:'???')+' <span style="font-size:9px;color:rgba(255,255,255,.18);">Lv.'+c.level+'</span>'+(isCurrent?' <span style="font-size:9px;color:#3b82f6;">← Tu jesteś</span>':'')+'</div>'
-      +(unlocked?'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);">'+c.desc+'</div>':'')
+    var unlocked=maxLv>=c.level; var isCurrent=c===getLevelCharacter(maxLv);
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.06);'+(isCurrent?'border-left:2px solid #3b82f6;padding-left:6px;':'')+(unlocked?'':'opacity:.35;')+'">'
+      +'<span style="font-size:20px;">'+c.emoji+'</span>'
+      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:#f2f2f2;">'+c.name+' <span style="font-size:9px;color:rgba(255,255,255,.18);">Lv.'+c.level+'</span>'+(isCurrent?' <span style="font-size:9px;color:#3b82f6;">← Tu jesteś</span>':'')+(unlocked?'':' <span style="font-size:10px;">🔒</span>')+'</div>'
+      +'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);">'+c.desc+'</div>'
       +'</div></div>';
   }).join('');
 }
