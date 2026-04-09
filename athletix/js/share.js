@@ -116,10 +116,10 @@ function _doGenerate(){
   if(_sharePhoto){
     var r=Math.max(w/_sharePhoto.width,h/_sharePhoto.height);
     ctx.drawImage(_sharePhoto,(w-_sharePhoto.width*r)/2,(h-_sharePhoto.height*r)/2,_sharePhoto.width*r,_sharePhoto.height*r);
-    var tg=ctx.createLinearGradient(0,0,0,h*0.15); tg.addColorStop(0,'rgba(0,0,0,0.7)'); tg.addColorStop(1,'transparent');
-    ctx.fillStyle=tg; ctx.fillRect(0,0,w,h*0.15);
-    var bg=ctx.createLinearGradient(0,h*0.55,0,h); bg.addColorStop(0,'transparent'); bg.addColorStop(0.4,'rgba(0,0,0,0.5)'); bg.addColorStop(1,'rgba(0,0,0,0.85)');
-    ctx.fillStyle=bg; ctx.fillRect(0,h*0.55,w,h*0.45);
+    var tg=ctx.createLinearGradient(0,0,0,h*0.12); tg.addColorStop(0,'rgba(0,0,0,0.6)'); tg.addColorStop(1,'transparent');
+    ctx.fillStyle=tg; ctx.fillRect(0,0,w,h*0.12);
+    var bg=ctx.createLinearGradient(0,h*0.5,0,h); bg.addColorStop(0,'transparent'); bg.addColorStop(0.25,'rgba(0,0,0,0.4)'); bg.addColorStop(0.5,'rgba(0,0,0,0.7)'); bg.addColorStop(1,'rgba(0,0,0,0.92)');
+    ctx.fillStyle=bg; ctx.fillRect(0,h*0.5,w,h*0.5);
   } else {
     var g=ctx.createLinearGradient(0,0,w*0.4,h); g.addColorStop(0,t.bg1); g.addColorStop(0.5,t.bg2); g.addColorStop(1,t.bg1);
     ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
@@ -160,20 +160,23 @@ function _doGenerate(){
   ctx.fillText(d.gameName.toUpperCase(),w/2,cy+40);
 
   // 6. GLOWNA METRYKA (punkty)
-  ctx.font='900 120px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'#ffffff':t.text; ctx.textAlign='center';
+  var ptsCol=d.points<0?'#f87171':(_sharePhoto?'#ffffff':t.text);
+  ctx.font='900 120px Montserrat,sans-serif'; ctx.fillStyle=ptsCol; ctx.textAlign='center';
   ctx.fillText(d.points+'',w/2,cy+160);
   ctx.font='700 28px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'#4ade80':t.good;
-  ctx.fillText('⚡ PUNKTÓW',w/2,cy+198);
+  ctx.fillText('⚡ PUNKTY',w/2,cy+198);
 
   // 7. SREDNI CZAS
+  var avgDisplay=(d.avgTime>0&&!isNaN(d.avgTime))?d.avgTxt:'---';
   ctx.font='500 22px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'rgba(255,255,255,0.5)':t.muted;
-  ctx.fillText('średni czas: '+d.avgTxt,w/2,cy+235);
+  ctx.fillText('średni czas: '+avgDisplay,w/2,cy+235);
 
   // 8. KAFELKI 2x2
+  var bestDisplay=(d.bestTime>0&&!isNaN(d.bestTime))?d.bestTxt:'---';
   var tW=(w-w*0.16-16)/2, tH=100, tY=cy+260;
   var tiles=[
-    {v:d.bestTxt,l:'NAJLEPSZY',c:t.good},
-    {v:d.accuracy+'%',l:'CELNOŚĆ',c:t.text},
+    {v:bestDisplay,l:'NAJLEPSZY',c:t.good},
+    {v:d.accuracy+'%',l:'CELNOŚĆ',c:_sharePhoto?'#fff':t.text},
     {v:'x'+d.maxCombo,l:'COMBO',c:'#f59e0b'},
     {v:'Lv.'+d.maxLevel,l:'LEVEL',c:t.accent}
   ];

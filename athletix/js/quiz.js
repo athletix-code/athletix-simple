@@ -274,9 +274,9 @@ function _genQuizShare(){
   if(_qsPhoto){
     var r=Math.max(w/_qsPhoto.width,h/_qsPhoto.height);
     ctx.drawImage(_qsPhoto,(w-_qsPhoto.width*r)/2,(h-_qsPhoto.height*r)/2,_qsPhoto.width*r,_qsPhoto.height*r);
-    var tg=ctx.createLinearGradient(0,0,0,h*0.15); tg.addColorStop(0,'rgba(0,0,0,0.7)'); tg.addColorStop(1,'transparent');
-    ctx.fillStyle=tg; ctx.fillRect(0,0,w,h*0.15);
-    var bg=ctx.createLinearGradient(0,h*0.5,0,h); bg.addColorStop(0,'transparent'); bg.addColorStop(0.4,'rgba(0,0,0,0.5)'); bg.addColorStop(1,'rgba(0,0,0,0.85)');
+    var tg=ctx.createLinearGradient(0,0,0,h*0.12); tg.addColorStop(0,'rgba(0,0,0,0.6)'); tg.addColorStop(1,'transparent');
+    ctx.fillStyle=tg; ctx.fillRect(0,0,w,h*0.12);
+    var bg=ctx.createLinearGradient(0,h*0.5,0,h); bg.addColorStop(0,'transparent'); bg.addColorStop(0.25,'rgba(0,0,0,0.4)'); bg.addColorStop(0.5,'rgba(0,0,0,0.7)'); bg.addColorStop(1,'rgba(0,0,0,0.92)');
     ctx.fillStyle=bg; ctx.fillRect(0,h*0.5,w,h*0.5);
   } else {
     var g=ctx.createLinearGradient(0,0,w*0.4,h); g.addColorStop(0,t.bg1); g.addColorStop(0.5,t.bg2); g.addColorStop(1,t.bg1);
@@ -287,9 +287,13 @@ function _genQuizShare(){
   lG.addColorStop(0,'transparent'); lG.addColorStop(0.5,'rgba('+t.ar+',0.5)'); lG.addColorStop(1,'transparent');
   ctx.fillStyle=lG; ctx.fillRect(w*0.08,h*0.06,w*0.84,2); ctx.fillRect(w*0.08,h-h*0.06,w*0.84,2);
   // Branding top
-  ctx.font='700 36px Montserrat,sans-serif'; ctx.fillStyle=t.sub; ctx.textAlign='left';
+  ctx.font='700 36px Montserrat,sans-serif'; ctx.fillStyle=_qsPhoto?'rgba(255,255,255,0.7)':t.sub; ctx.textAlign='left';
   ctx.fillText('Athleti',w*0.06,h*0.04); var aw=ctx.measureText('Athleti').width;
   ctx.fillStyle='#dc2626'; ctx.fillText('X',w*0.06+aw,h*0.04);
+  var xw2=ctx.measureText('X').width;
+  ctx.font='500 28px Montserrat,sans-serif'; ctx.fillStyle=_qsPhoto?'rgba(255,255,255,0.5)':t.muted;
+  ctx.fillText(' App',w*0.06+aw+xw2,h*0.04);
+  ctx.font='900 28px Montserrat,sans-serif'; ctx.fillStyle='rgba('+t.ar+',0.2)'; ctx.textAlign='right'; ctx.fillText('AX',w*0.94,h*0.04);
   // Badge emoji + name
   var cy=_qsPhoto?h*0.55:h*0.25;
   ctx.font='120px serif'; ctx.textAlign='center'; ctx.fillStyle=_qsPhoto?'#fff':t.text; ctx.fillText(badge.emoji,w/2,cy);
@@ -322,7 +326,8 @@ function _genQuizShare(){
   }
   // Tiles 2x2
   var tW=(w-w*0.16-16)/2, tH=100, tY=cy+(customText?260+90:280);
-  var tiles=[{v:'Level '+maxLv,l:'OSIĄGNIĘTY',c:t.accent},{v:Math.round(_qTotal/20*100)+'%',l:'CELNOŚĆ',c:t.text},{v:badge.emoji,l:'ODZNAKA',c:badge.color},{v:'AthletiX',l:'APP',c:t.accent}];
+  var lastLvScore=_qLevelScores.length>0?_qLevelScores[_qLevelScores.length-1]:0;
+  var tiles=[{v:badge.emoji+' '+badge.name.split(' ')[0],l:'ODZNAKA',c:badge.color},{v:'Level '+maxLv,l:'OSIĄGNIĘTY',c:t.accent},{v:lastLvScore+'/5',l:'WYNIK LEVELU',c:lastLvScore>=4?'#4ade80':lastLvScore>=3?'#d97706':'#f87171'},{v:_qTotal+'/20',l:'ŁĄCZNIE',c:_qsPhoto?'#fff':t.text}];
   for(var j=0;j<4;j++){
     var tx=w*0.08+(j%2)*(tW+16), ty=tY+Math.floor(j/2)*(tH+10);
     _rrect(ctx,tx,ty,tW,tH,16); ctx.fillStyle='rgba('+t.ar+',0.04)'; ctx.fill();
@@ -330,8 +335,10 @@ function _genQuizShare(){
     ctx.font='700 14px Montserrat,sans-serif'; ctx.fillStyle=t.muted; ctx.fillText(tiles[j].l,tx+tW/2,ty+78);
   }
   // Branding bottom
-  ctx.font='600 20px Montserrat,sans-serif'; ctx.fillStyle=t.muted; ctx.textAlign='center';
+  ctx.font='600 20px Montserrat,sans-serif'; ctx.fillStyle=_qsPhoto?'rgba(255,255,255,0.2)':t.muted; ctx.textAlign='center';
   ctx.fillText('Elevate Your Game ⚡',w/2,h-h*0.03-14);
+  ctx.font='400 14px Montserrat,sans-serif'; ctx.fillStyle='rgba('+t.ar+',0.15)';
+  ctx.fillText('athletix-code.github.io',w/2,h-h*0.03+6);
   // Show preview
   var p=document.getElementById('qs-preview'); if(!p) return;
   p.style.display='block';
