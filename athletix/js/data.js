@@ -1,7 +1,7 @@
 // ══════════════════════════════════════
 //  EXPORT / IMPORT / BACKUP
 // ══════════════════════════════════════
-var AXS_KEYS=['axs_athletes','axs_sessions','axs_groups','axs_tests','axs_notes','axs_custom_tests','axs_packages','axs_int_presets','axs_custom_exercises','axs_plans','axs_favorite_exercises','axs_gamification','axs_motion_results','cts_v5','ct_theme'];
+var AXS_KEYS=['axs_athletes','axs_sessions','axs_groups','axs_tests','axs_notes','axs_custom_tests','axs_packages','axs_int_presets','axs_custom_exercises','axs_plans','axs_favorite_exercises','axs_gamification','axs_motion_results','axs_quiz_results','cts_v5','ct_theme'];
 var BACKUP_CFG_KEY='axs_backup_cfg';
 
 function openAppSettings(){ setMode('data'); }

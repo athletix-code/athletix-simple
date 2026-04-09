@@ -155,6 +155,14 @@ function _setMotionMode(m){
 }
 
 // ── Modal "Jak grać?" ──
+function _nerdChallengeNote(){
+  return '<div style="background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:12px;padding:14px;margin:16px 0;">'
+    +'<div style="font-size:13px;font-weight:700;color:#a855f7;">🔍 Mądrzejszy od naszego nerda?</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.6;margin-top:6px;">Wszystkie informacje opierają się na recenzowanych publikacjach naukowych. Ale nauka się zmienia, a my nie jesteśmy nieomylni.</div>'
+    +'<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6);margin-top:6px;">Znajdź błąd merytoryczny, potwierdź go źródłem - dostaniesz miesiąc bezpłatnego korzystania z AthletiX App.</div>'
+    +'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);margin-top:4px;">Challenge\'uj siebie i nas. Rozwijajmy się wspólnie. 🧠</div>'
+    +'<div style="font-size:11px;color:#3b82f6;margin-top:6px;">📧 Zgłoś: kontakt@sigmaathletix.pl</div></div>';
+}
 function _motionModalWrap(id,title,body){
   var old=document.getElementById(id); if(old) old.remove();
   var m=document.createElement('div'); m.id=id;
@@ -191,6 +199,11 @@ function openMotionInfo(){
     // Postacie
     +'<button onclick="var cl=document.getElementById(\'mi-charlist\');cl.style.display=cl.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🏆 Pokaż wszystkie postacie</button>'
     +'<div id="mi-charlist" style="display:none;max-height:220px;overflow-y:auto;margin-bottom:10px;">'+_charListHtml()+'</div>'
+    // Quiz button
+    +'<div onclick="openNerdQuiz()" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);border-radius:12px;padding:12px 14px;margin:14px 0 0;cursor:pointer;transition:background .2s;" onmouseenter="this.style.background=\'rgba(168,85,247,.12)\'" onmouseleave="this.style.background=\'rgba(168,85,247,.08)\'">'
+    +'<div style="font-size:24px;flex-shrink:0;">🧠</div>'
+    +'<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#a855f7;">Czy jesteś Reaktywnym Nerdem?</div><div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.45);">20 pytań. Sprawdź swoją wiedzę o neurofizjologii.</div></div>'
+    +'<div style="font-size:14px;color:rgba(255,255,255,.3);">▶</div></div>'
     // Nerd - wyrazisty przycisk
     +'<div onclick="var nd=document.getElementById(\'motion-nerd-section\');var ar=document.getElementById(\'nerd-arrow\');if(nd.style.display===\'none\'){nd.style.display=\'block\';ar.style.transform=\'rotate(180deg)\';}else{nd.style.display=\'none\';ar.style.transform=\'\';}" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:12px;padding:12px 14px;margin:14px 0;cursor:pointer;transition:background .2s;" onmouseenter="this.style.background=\'rgba(59,130,246,.1)\'" onmouseleave="this.style.background=\'rgba(59,130,246,.06)\'">'
     +'<div style="font-size:24px;flex-shrink:0;">🧠</div>'
@@ -213,7 +226,8 @@ function openMotionInfo(){
     +'<a href="https://www.academia.edu/26592344/" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">Brosnan et al. (2017)</a> - progi falstartu w sprincie<br>'
     +'<a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">MindCrowd Study</a> - czas reakcji a wiek</div></div>'
     +'</div>'
-    +'<div style="font-size:9px;font-style:italic;color:rgba(255,255,255,.25);margin-top:8px;">Część treści opracowana z wykorzystaniem narzędzi AI i zweryfikowana na podstawie recenzowanych publikacji naukowych.</div>';
+    +'<div style="font-size:9px;font-style:italic;color:rgba(255,255,255,.25);margin-top:8px;">Część treści opracowana z wykorzystaniem narzędzi AI i zweryfikowana na podstawie recenzowanych publikacji naukowych.</div>'
+    +_nerdChallengeNote();
   _motionModalWrap('motion-info-modal','⚡ Czas Reakcji - O module',body);
 }
 function openGameInfo(game){
