@@ -727,7 +727,9 @@ function _showLevelComplete(lv,trialResults){
     // Feedback trenera
     +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin:10px auto;max-width:300px;"><span style="font-size:16px;">🎙️</span> <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:1.6;font-style:italic;">'+getCoachFeedback(lvAvg,lvAcc,lvCombo,lv)+'</span></div>'
     // Info o następnym levelu
-    +'<div style="border:1px dashed rgba(255,255,255,.12);border-radius:10px;padding:10px;margin:8px auto;max-width:300px;"><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:4px;">📢 CO CIĘ CZEKA:</div><div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.55);line-height:1.5;">'+_getNextLevelHint(lv)+'</div><div style="font-size:10px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+_pick(['Dasz radę. Pewnie.','Twój mózg jest gotowy. Chyba.','Skupienie to klucz. 🔑','Oddychaj i działaj.','Level wyżej = Ty lepszy.','Gdyby było łatwe, każdy by to robił.'])+'</div></div>'
+    +'<div style="border:1px dashed rgba(255,255,255,.12);border-radius:10px;padding:10px;margin:8px auto;max-width:300px;"><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:4px;">📢 CO CIĘ CZEKA:</div><div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.55);line-height:1.5;">'+_getNextLevelHint(lv)+'</div>'
+    +(_motionMode==='pattern'?_patScoringHtml(lv+1):'')
+    +'<div style="font-size:10px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+_pick(['Dasz radę. Pewnie.','Twój mózg jest gotowy. Chyba.','Skupienie to klucz. 🔑','Oddychaj i działaj.','Level wyżej = Ty lepszy.','Gdyby było łatwe, każdy by to robił.'])+'</div></div>'
     +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
     +'<button onclick="_endGame()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏁 Zakończ grę</button></div></div>';
@@ -816,6 +818,38 @@ function _mResultTiles(avg,best,acc){
     +'</div>';
 }
 function _motionRetry(){ startMotionGame(); }
+
+// ── Punktowanie Wzorce — skalowanie z levelem ──
+var _PAT_THRESHOLDS=[
+  {maxLevel:2,t5:300,t3:500,t2:800,t1:1200},
+  {maxLevel:4,t5:400,t3:600,t2:900,t1:1400},
+  {maxLevel:6,t5:500,t3:700,t2:1000,t1:1600},
+  {maxLevel:8,t5:600,t3:800,t2:1100,t1:1800},
+  {maxLevel:99,t5:700,t3:900,t2:1200,t1:2000}
+];
+function _getPatThresholds(lv){
+  for(var i=0;i<_PAT_THRESHOLDS.length;i++){ if(lv<=_PAT_THRESHOLDS[i].maxLevel) return _PAT_THRESHOLDS[i]; }
+  return _PAT_THRESHOLDS[_PAT_THRESHOLDS.length-1];
+}
+function getPatternPoints(ms,lv){
+  var t=_getPatThresholds(lv);
+  if(ms<t.t5) return 5;
+  if(ms<t.t3) return 3;
+  if(ms<t.t2) return 2;
+  return 1;
+}
+function _patScoringHtml(lv){
+  var t=_getPatThresholds(lv);
+  var ctx=['Proste wzorce — liczy się szybkość!','Proste wzorce — liczy się szybkość!','Więcej symboli — masz trochę więcej czasu.','Więcej symboli — masz trochę więcej czasu.','Zmieniający się cel wymaga skupienia — progi łagodniejsze.','Zmieniający się cel wymaga skupienia — progi łagodniejsze.','Kierunkowe reagowanie = dodatkowe wyzwanie — progi dostosowane.','Kierunkowe reagowanie = dodatkowe wyzwanie — progi dostosowane.'];
+  var ctxTxt=lv<=8?(ctx[lv-1]||''):'Złożone wzorce — więcej czasu na decyzję. Ale nie za dużo. 😏';
+  return '<div style="background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px;margin-top:6px;">'
+    +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#3b82f6;margin-bottom:4px;">⚡ PUNKTY</div>'
+    +'<div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.45);line-height:1.6;">'
+    +'&lt; '+t.t5+'ms = 5 pkt ⚡ | &lt; '+t.t3+'ms = 3 pkt | &lt; '+t.t2+'ms = 2 pkt | &lt; '+t.t1+'ms = 1 pkt<br>'
+    +'Poprawne zignorowanie: +1 pkt<br>'
+    +'Fałszywy alarm: -2 pkt + ❤️ | Przeoczony: -1 pkt + ❤️</div>'
+    +'<div style="font-size:9px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+ctxTxt+'</div></div>';
+}
 
 // ── Tryb Wzorce (przebudowa) ──
 var PAT_COLORS=['🔴','🟢','🔵','🟡','🟣','🟠','⚪','⚫'];
@@ -921,9 +955,9 @@ function _runPatternLevel(idx,cfg,results,cb){
       reacted=true; var t=Date.now()-stimTime; _gameTotalTrials++;
       if(isMatch){
         _gameCorrect++; _gameTimes.push(t); _gameLastTime=t;
-        var sc=_calcPoints(t); var mult=_gameCombo>=10?4:_gameCombo>=5?3:_gameCombo>=3?2:1;
+        var pts=getPatternPoints(t,_gameLevel); var mult=_gameCombo>=10?4:_gameCombo>=5?3:_gameCombo>=3?2:1;
         _gameCombo++; if(_gameCombo>_gameMaxCombo) _gameMaxCombo=_gameCombo;
-        var earned=sc.pts*mult; _gamePoints+=earned;
+        var earned=pts*mult; _gamePoints+=earned;
         _sndGood(); _mPtsAnim('✓ +'+earned+' ⚡','var(--green-text)');
         results.push({time:t,correct:true,type:'pattern_hit'});
         var sb=document.getElementById('pat-stim-box'); if(sb){ sb.style.borderColor='#4ade80'; sb.style.boxShadow='0 0 30px rgba(74,222,128,.3)'; }
@@ -944,7 +978,13 @@ function _runPatternLevel(idx,cfg,results,cb){
     if(!reacted){
       if(isMatch){ _gameLives--; setTimeout(_flashLives,50); _gameCombo=0; _gamePoints=Math.max(0,_gamePoints-1); _mPtsAnim('MISS -1','var(--red-text)'); _sndBad(); results.push({time:pc.interval,correct:false,type:'pattern_miss'});
         var sb3=document.getElementById('pat-stim-box'); if(sb3) sb3.style.borderColor='#f87171';
-      } else { _gameCorrect++; _gamePoints+=1; _mPtsAnim('+1 ✓','var(--green-text)'); results.push({time:0,correct:true,type:'pattern_ignore'}); _sndGood(); }
+      } else { _gameCorrect++; _gamePoints+=1; results.push({time:0,correct:true,type:'pattern_ignore'});
+        // Subtelna animacja za poprawne zignorowanie
+        var ck=document.createElement('div'); ck.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;font-weight:700;color:#4ade80;z-index:20;pointer-events:none;opacity:0;transition:opacity .2s;';
+        ck.textContent='✓'; el('motion-active').appendChild(ck);
+        requestAnimationFrame(function(){ ck.style.opacity='1'; });
+        setTimeout(function(){ ck.style.opacity='0'; setTimeout(function(){ ck.remove(); },200); },300);
+      }
     }
     setTimeout(function(){ _runPatternLevel(idx+1,cfg,results,cb); },800);
   },pc.interval);
