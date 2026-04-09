@@ -61,14 +61,14 @@ function _getThresholds(mode,lv){
   if(lv<=2) return [4,11,25]; if(lv<=4) return [6,16,35]; return [10,24,50];
 }
 
-// ── Bottom bar z progress + timer ──
+// ── Bottom bar: timer centered nad progress bar ──
 function _searchBottomBar(idx,total){
   var pct=Math.round((idx+1)/total*100);
   var isWide=window.innerWidth>=768; var h=isWide?'8px':'6px';
-  return '<div style="position:fixed;bottom:16px;left:16px;right:16px;z-index:10;display:flex;align-items:center;gap:10px;'+(isWide?'max-width:600px;margin:0 auto;':'')+'">'
+  return '<div id="search-timer" style="position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:10;font-size:24px;font-weight:900;color:rgba(255,255,255,.6);">0.0s</div>'
+    +'<div style="position:fixed;bottom:16px;left:16px;right:16px;z-index:10;display:flex;align-items:center;gap:8px;'+(isWide?'max-width:600px;margin:0 auto;':'')+'">'
     +'<div style="flex:1;height:'+h+';background:rgba(255,255,255,.08);border-radius:3px;"><div style="width:'+pct+'%;height:'+h+';background:var(--accent);border-radius:3px;transition:width .3s;"></div></div>'
     +'<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);white-space:nowrap;">'+(idx+1)+'/'+total+'</div>'
-    +'<div id="search-timer" style="font-size:16px;font-weight:800;color:rgba(255,255,255,.6);min-width:52px;text-align:right;">0.0s</div>'
     +'</div>';
 }
 

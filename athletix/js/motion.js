@@ -495,7 +495,7 @@ function _showSwipeTip(){
 }
 function _showBriefing(onReady){
   var ma=el('motion-active');
-  var modeNames={simple:'⚡ Reakcja',directions:'🧭 Kierunki',gonogo:'👁 Go / No-Go',pattern:'🧩 Wzorce'};
+  var modeNames={simple:'⚡ Reakcja',directions:'🧭 Kierunki',gonogo:'👁 Go / No-Go',pattern:'🧩 Wzorce',pairs:'🔢 Pary',sequence:'📊 Kolejność',words:'📝 Słowa'};
   var modeName=modeNames[_motionMode]||'Gra';
   var rules=_getBriefingRules();
   var quote=_pick(BRIEFING_QUOTES);
@@ -511,7 +511,7 @@ function _showBriefing(onReady){
     +'<div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">ZASADY</div>'
     +'<div style="font-size:12px;font-weight:500;line-height:1.7;color:rgba(255,255,255,.7);">'+rules+'</div>'
     +'<div style="font-size:11px;font-weight:600;color:var(--accent);margin-top:6px;">'+inputHint+'</div></div>'
-    +(_motionMode==='pattern'?_patScoringHtml(_gameLevel):_scoringHtml(_gameLevel))
+    +(_motionMode==='pattern'?_patScoringHtml(_gameLevel):(_motionMode==='pairs'||_motionMode==='sequence'||_motionMode==='words')?_searchScoringHtml(_gameLevel):_scoringHtml(_gameLevel))
     +'<div style="margin-top:14px;font-size:12px;font-weight:600;font-style:italic;color:rgba(255,255,255,.45);line-height:1.5;padding:0 8px;">\u201E'+quote+'\u201D</div>'
     +'<button id="briefing-go-btn" style="margin-top:20px;width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.04em;">DAWAJ! \uD83D\uDE80</button>'
     +'</div>';
@@ -890,6 +890,15 @@ function _scoringHtml(lv){
     +'<div style="font-size:11px;font-weight:500;color:rgba(255,255,255,.5);line-height:1.6;">'
     +'&lt;'+t.t5+'ms = 5 pkt ⚡ | &lt;'+t.t4+'ms = 4 | &lt;'+t.t3+'ms = 3 | &lt;'+t.t2+'ms = 2 | &lt;'+t.t1+'ms = 1<br>'
     +'Fałszywy start: -2 pkt + ❤️ | Brak reakcji: -1 pkt + ❤️</div></div>';
+}
+function _searchScoringHtml(lv){
+  // Pobierz progi z search.js
+  var t=_getThresholds(_motionMode,lv);
+  return '<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;margin:10px 0;">'
+    +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#3b82f6;margin-bottom:4px;">⚡ PUNKTY W TYM LEVELU</div>'
+    +'<div style="font-size:11px;font-weight:500;color:rgba(255,255,255,.5);line-height:1.6;">'
+    +'&lt; '+t[0]+'s = 5 pkt ⚡ | &lt; '+t[1]+'s = 3 pkt | &lt; '+t[2]+'s = 1 pkt<br>'
+    +'Błędne kliknięcie: -1 pkt | Timeout: 0 pkt</div></div>';
 }
 function _mProgressBar(idx,total){
   var pct=Math.round((idx+1)/total*100);
