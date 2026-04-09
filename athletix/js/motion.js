@@ -898,7 +898,7 @@ function _searchScoringHtml(lv){
     +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#3b82f6;margin-bottom:4px;">⚡ PUNKTY W TYM LEVELU</div>'
     +'<div style="font-size:11px;font-weight:500;color:rgba(255,255,255,.5);line-height:1.6;">'
     +'&lt; '+t[0]+'s = 5 pkt ⚡ | &lt; '+t[1]+'s = 3 pkt | &lt; '+t[2]+'s = 1 pkt<br>'
-    +'Błędne kliknięcie: -1 pkt | Timeout: 0 pkt</div></div>';
+    +'Błędne kliknięcie: -1 pkt + ❤️ | Timeout: 0 pkt</div></div>';
 }
 function _mProgressBar(idx,total){
   var pct=Math.round((idx+1)/total*100);

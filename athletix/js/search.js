@@ -218,15 +218,19 @@ function _runPairsLevel(lv,round,results){
         }
         selected=null;
       } else {
-        _gameCombo=0; _gamePoints-=1;
-        _sndMiss(); _mPtsAnim('-1 ✕','var(--red-text)');
+        _gameCombo=0; _gamePoints-=1; _gameLives--; setTimeout(_flashLives,50);
+        _sndMiss(); if(navigator.vibrate) navigator.vibrate(200);
+        var errD=document.createElement('div'); errD.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;';
+        errD.innerHTML='<div style="font-size:16px;font-weight:800;color:#f87171;">✕ Źle! -1 pkt</div><div style="font-size:11px;color:#f87171;margin-top:4px;">❤️ -1 życie!</div>';
+        ma.appendChild(errD); requestAnimationFrame(function(){ errD.style.opacity='1'; });
+        setTimeout(function(){ errD.style.transition='opacity .3s'; errD.style.opacity='0'; setTimeout(function(){ errD.remove(); },300); },1000);
         cell.style.background='rgba(248,113,113,.3)'; cell.style.borderColor='#f87171';
         if(selCell){ selCell.style.background='rgba(248,113,113,.3)'; selCell.style.borderColor='#f87171'; }
-        if(navigator.vibrate) navigator.vibrate(100);
         setTimeout(function(){
           cell.style.background='rgba(255,255,255,.06)'; cell.style.borderColor='rgba(255,255,255,.1)'; cell.style.transform='';
           if(selCell){ selCell.style.background='rgba(255,255,255,.06)'; selCell.style.borderColor='rgba(255,255,255,.1)'; selCell.style.transform=''; }
         },300);
+        if(_gameLives<=0){ clearTimeout(tout); _stopSearchTimer(); setTimeout(function(){ _showGameOver(); },500); return; }
         selected=null;
       }
     }
@@ -311,11 +315,15 @@ function _runSeqLevel(lv,round,results){
         setTimeout(function(){ _runSeqLevel(lv,round+1,results); },800);
       }
     } else {
-      _gameCombo=0; _gamePoints-=1;
-      _sndMiss(); _mPtsAnim('-1 ✕','var(--red-text)');
+      _gameCombo=0; _gamePoints-=1; _gameLives--; setTimeout(_flashLives,50);
+      _sndMiss(); if(navigator.vibrate) navigator.vibrate(200);
+      var errD2=document.createElement('div'); errD2.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;';
+      errD2.innerHTML='<div style="font-size:16px;font-weight:800;color:#f87171;">✕ Źle! -1 pkt</div><div style="font-size:11px;color:#f87171;margin-top:4px;">❤️ -1 życie!</div>';
+      ma.appendChild(errD2); requestAnimationFrame(function(){ errD2.style.opacity='1'; });
+      setTimeout(function(){ errD2.style.transition='opacity .3s'; errD2.style.opacity='0'; setTimeout(function(){ errD2.remove(); },300); },1000);
       cell.style.background='rgba(248,113,113,.3)'; cell.style.borderColor='#f87171';
-      if(navigator.vibrate) navigator.vibrate(100);
       setTimeout(function(){ cell.style.background='rgba(255,255,255,.06)'; cell.style.borderColor='rgba(255,255,255,.1)'; },300);
+      if(_gameLives<=0){ clearTimeout(tout); _stopSearchTimer(); setTimeout(function(){ _showGameOver(); },500); return; }
     }
   };
 }
@@ -421,10 +429,15 @@ function _runWordsLevel(lv,round,results){
           setTimeout(function(){ _runWordsLevel(lv,round+1,results); },800);
         }
       } else {
-        _sndMiss(); _gamePoints-=1; _gameCombo=0;
-        _mPtsAnim('-1 ✕','var(--red-text)');
+        _sndMiss(); _gamePoints-=1; _gameCombo=0; _gameLives--; setTimeout(_flashLives,50);
+        if(navigator.vibrate) navigator.vibrate(200);
+        var errD3=document.createElement('div'); errD3.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;';
+        errD3.innerHTML='<div style="font-size:16px;font-weight:800;color:#f87171;">✕ Źle! -1 pkt</div><div style="font-size:11px;color:#f87171;margin-top:4px;">❤️ -1 życie!</div>';
+        ma.appendChild(errD3); requestAnimationFrame(function(){ errD3.style.opacity='1'; });
+        setTimeout(function(){ errD3.style.transition='opacity .3s'; errD3.style.opacity='0'; setTimeout(function(){ errD3.remove(); },300); },1000);
         cells2.forEach(function(c2){ if(c2){ c2.style.background='rgba(248,113,113,.2)'; c2.style.borderColor='#f87171'; } });
         setTimeout(function(){ cells2.forEach(function(c2){ if(c2){ c2.style.background='rgba(255,255,255,.06)'; c2.style.borderColor='rgba(255,255,255,.08)'; } }); },300);
+        if(_gameLives<=0){ clearTimeout(tout); _stopSearchTimer(); setTimeout(function(){ _showGameOver(); },500); return; }
       }
       selStart=null; resetSel();
     }
