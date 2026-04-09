@@ -780,7 +780,7 @@ function _showLevelComplete(lv,trialResults){
     +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin:10px auto;max-width:300px;"><span style="font-size:16px;">🎙️</span> <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:1.6;font-style:italic;">'+getCoachFeedback(lvAvg,lvAcc,lvCombo,lv)+'</span></div>'
     // Info o następnym levelu
     +'<div style="border:1px dashed rgba(255,255,255,.12);border-radius:10px;padding:10px;margin:8px auto;max-width:300px;"><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:4px;">📢 CO CIĘ CZEKA:</div><div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.55);line-height:1.5;">'+_getNextLevelHint(lv)+'</div>'
-    +(_motionMode==='pattern'?_patScoringCompare(lv,lv+1):_stdScoringCompare(lv,lv+1))
+    +(_motionMode==='pattern'?_patScoringCompare(lv,lv+1):(_motionMode==='pairs'||_motionMode==='sequence'||_motionMode==='words')?_searchScoringCompare(lv,lv+1):_stdScoringCompare(lv,lv+1))
     +'<div style="font-size:10px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+_pick(['Dasz radę. Pewnie.','Twój mózg jest gotowy. Chyba.','Skupienie to klucz. 🔑','Oddychaj i działaj.','Level wyżej = Ty lepszy.','Gdyby było łatwe, każdy by to robił.'])+'</div></div>'
     +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
@@ -944,6 +944,11 @@ function _patScoringHtml(lv){
     +'<div style="font-size:9px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+ctxTxt+'</div></div>';
 }
 
+function _searchScoringCompare(curLv,nxtLv){
+  var cur=_getThresholds(_motionMode,curLv),nxt=_getThresholds(_motionMode,nxtLv);
+  if(cur[0]===nxt[0]&&cur[1]===nxt[1]) return '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;">⚡ Progi bez zmian. Ale plansza trudniejsza! 😏</div>';
+  return '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;">⚡ Nowe progi: &lt;'+nxt[0]+'s=5pkt | &lt;'+nxt[1]+'s=3pkt | &lt;'+nxt[2]+'s=1pkt</div>';
+}
 function _stdScoringCompare(curLv,nxtLv){
   var cur=_getStdThresholds(curLv),nxt=_getStdThresholds(nxtLv);
   if(cur.t5===nxt.t5) return '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;">⚡ Progi punktów bez zmian. Szybciej i trudniej! 😏</div>';
