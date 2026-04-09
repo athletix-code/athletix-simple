@@ -59,6 +59,7 @@ function _getBriefingRules(){
     if(isTouch) return '• 🟢 Zielone = tapnij w ekran!<br>• 🔴 Czerwone = NIE dotykaj ekranu!<br>• Twój mózg będzie chciał zareagować na czerwone  - nie daj się nabrać';
     return '• 🟢 Zielone = przechyl telefon szybko!<br>• 🔴 Czerwone = STÓJ! Nie ruszaj się!<br>• Twój mózg będzie chciał zareagować na czerwone  - nie daj się nabrać';
   }
+  if(_motionMode==='sniper') return '• Celuj przesuwając widok - cel musi być pod celownikiem<br>• Tapnij/kliknij żeby strzelić<br>• 🟢 Zielone = strzelaj! 🔴 Czerwone = NIE strzelaj!<br>• Im szybciej trafisz, tym więcej punktów<br>• 3 życia - strzał w czerwony = -1 życie';
   if(_motionMode==='pairs') return '• Siatka z cyframi i literami<br>• Znajdź DWIE TAKIE SAME  - tapnij pierwszą, potem drugą<br>• Trafienie = punkty, pomyłka = -1 pkt<br>• Masz 3 życia i limit czasu na każdą rundę';
   if(_motionMode==='sequence') return '• Siatka z cyframi w losowej kolejności<br>• Klikaj po kolei: 1, 2, 3, 4...<br>• Zła cyfra = -1 pkt<br>• Na wyższych levelach cyfry ZNIKAJĄ i ZMIENIAJĄ POZYCJE!';
   if(_motionMode==='words') return '• Siatka z literami  - szukaj ukrytych słów<br>• Przesuń palcem po literach (lub kliknij pierwszą i ostatnią)<br>• Słowa mogą być poziome, pionowe lub po przekątnej<br>• Lista słów do znalezienia jest na górze ekranu';
@@ -145,8 +146,8 @@ function _getLevelCfg(lv){
 // ── UI ustawień ──
 function _setMotionMode(m){
   _motionMode=m;
-  var map={simple:'simple',directions:'dirs',gonogo:'gonogo',pattern:'pattern',pairs:'search',sequence:'search',words:'search'};
-  ['simple','dirs','gonogo','pattern','search'].forEach(function(k){
+  var map={simple:'simple',directions:'dirs',gonogo:'gonogo',pattern:'pattern',pairs:'search',sequence:'search',words:'search',sniper:'sniper'};
+  ['simple','dirs','gonogo','pattern','search','sniper'].forEach(function(k){
     var b=el('mt-'+k); if(!b) return;
     var active=(map[m]===k);
     b.style.borderColor=active?'var(--accent)':'var(--border)';
@@ -549,6 +550,11 @@ function startMotionGame(){
       _motionHandler=onMotionData; window.addEventListener('devicemotion',_motionHandler);
     }
     _addInputListeners();
+    // Sniper mode → osobna logika
+    if(_motionMode==='sniper'){
+      _showBriefing(function(){ _startSniperLevel(1); });
+      return;
+    }
     // Search modes → osobna logika
     if(_motionMode==='pairs'||_motionMode==='sequence'||_motionMode==='words'){
       _showBriefing(function(){ _startSearchLevel(1); });
@@ -602,7 +608,7 @@ function _showSwipeTip(){
 }
 function _showBriefing(onReady){
   var ma=el('motion-active');
-  var modeNames={simple:'⚡ Reakcja',directions:'🧭 Kierunki',gonogo:'👁 Go / No-Go',pattern:'🧩 Wzorce',pairs:'🔢 Pary',sequence:'📊 Kolejność',words:'📝 Słowa'};
+  var modeNames={simple:'⚡ Reakcja',directions:'🧭 Kierunki',gonogo:'👁 Go / No-Go',pattern:'🧩 Wzorce',pairs:'🔢 Pary',sequence:'📊 Kolejność',words:'📝 Słowa',sniper:'🎯 Snajper'};
   var modeName=modeNames[_motionMode]||'Gra';
   var rules=_getBriefingRules();
   var quote=_pick(BRIEFING_QUOTES);
@@ -895,7 +901,9 @@ function _showLevelComplete(lv,trialResults){
 }
 function _nextLevel(){
   el('motion-active').style.overflow='hidden';
-  if(_motionMode==='pairs'||_motionMode==='sequence'||_motionMode==='words'){
+  if(_motionMode==='sniper'){
+    _startSniperLevel(_gameLevel+1);
+  } else if(_motionMode==='pairs'||_motionMode==='sequence'||_motionMode==='words'){
     _startSearchLevel(_gameLevel+1);
   } else {
     _motionCountdown(function(){ _startLevel(_gameLevel+1); });

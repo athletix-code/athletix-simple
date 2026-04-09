@@ -647,7 +647,7 @@
           <button class="chip" id="ms-words" onclick="_setMotionMode('words');document.getElementById('ms-pairs').className='chip';document.getElementById('ms-seq').className='chip';document.getElementById('ms-words').className='chip on-blue';">📝 Słowa</button>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px dashed var(--border2);border-radius:14px;opacity:.4;"><span style="font-size:28px;">🎯</span><div style="flex:1;"><div style="font-size:13px;font-weight:800;color:var(--text);">Snajper</div><div style="font-size:10px;color:var(--muted);">Celuj i trafiaj. Wkrótce.</div></div></div>
+      <div id="mt-sniper" onclick="_setMotionMode('sniper')" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px solid var(--border);border-radius:14px;cursor:pointer;font-family:Montserrat,sans-serif;"><span style="font-size:28px;">🎯</span><div style="flex:1;"><div style="font-size:13px;font-weight:800;color:var(--text);">Snajper</div><div style="font-size:10px;color:var(--muted);">Cel. Mierz. Strzelaj. Precyzja i refleks.</div></div><button onclick="event.stopPropagation();openSniperInfo()" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:14px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">ℹ️</button><button onclick="event.stopPropagation();_setMotionMode('sniper');startMotionGame()" style="width:44px;height:44px;border-radius:12px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(59,130,246,.3);">▶</button></div>
       <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px dashed var(--border2);border-radius:14px;opacity:.4;"><span style="font-size:28px;">🧱</span><div style="flex:1;"><div style="font-size:13px;font-weight:800;color:var(--text);">Breaker</div><div style="font-size:10px;color:var(--muted);">Zbijaj spadające bloki. Wkrótce.</div></div></div>
       <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px dashed var(--border2);border-radius:14px;opacity:.4;"><span style="font-size:28px;">🏃</span><div style="flex:1;"><div style="font-size:13px;font-weight:800;color:var(--text);">Dash</div><div style="font-size:10px;color:var(--muted);">Biegnij, skacz, ślizgaj się. Wkrótce.</div></div></div>
     </div>
@@ -853,10 +853,11 @@
 <script src="js/supabase-config.js?v=54"></script>
 <script src="js/sync.js?v=54"></script>
 <script src="js/autogrow.js?v=54"></script>
-<script src="js/motion.js?v=81"></script>
+<script src="js/motion.js?v=82"></script>
 <script src="js/search.js?v=6"></script>
 <script src="js/share.js?v=5"></script>
 <script src="js/quiz.js?v=7"></script>
+<script src="js/sniper.js?v=1"></script>
 
 </body>
 </html>
