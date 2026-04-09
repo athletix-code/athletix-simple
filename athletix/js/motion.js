@@ -836,6 +836,7 @@ function _showGameOver(){
     +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;max-width:280px;margin-left:auto;margin-right:auto;">'
     +'<button onclick="_motionRetry()" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Zagraj ponownie</button>'
     +'<button onclick="stopMotion()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏠 Wróć</button>'
+    +'<button onclick="_openShareModal()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:2px;">📸 Udostępnij wynik</button>'
     +(!athlete?'<div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:4px;">Wybierz zawodnika żeby zapisywać wyniki i zdobywać ATP</div>':'')
     +'</div></div></div>';
 
