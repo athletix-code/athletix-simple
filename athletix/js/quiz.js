@@ -55,7 +55,7 @@ var NERD_BADGES={
   bog:{emoji:'👑',name:'Bóg Mieliny',desc:'Każdy akson Ci zazdrości. 100% izolacji.',color:'#dc2626'}
 };
 
-var _qLevel=0, _qLevelScore=0, _qIdx=0, _qTotal=0, _qLevelScores=[], _qOrder=[];
+var _qLevel=0, _qLevelScore=0, _qIdx=0, _qTotal=0, _qLevelScores=[], _qOrder=[], _qLastFeedback='';
 
 function _shuffleArr(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 function _pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
@@ -142,6 +142,7 @@ function _showLevelResult(){
   var passed=_qLevelScore>=3;
   var lvCfg=QUIZ_LEVELS[_qLevel];
   var fb; if(_qLevelScore>=5) fb=_pick(QUIZ_FEEDBACK.perfect); else if(_qLevelScore>=4) fb=_pick(QUIZ_FEEDBACK.great); else if(_qLevelScore>=3) fb=_pick(QUIZ_FEEDBACK.pass); else if(_qLevelScore>=2) fb=_pick(QUIZ_FEEDBACK.fail_2); else fb=_pick(QUIZ_FEEDBACK.fail_low);
+  _qLastFeedback=fb;
   var scCol=_qLevelScore>=5?'#4ade80':_qLevelScore>=4?'#3b82f6':_qLevelScore>=3?'#d97706':'#f87171';
   var m=document.getElementById('nerd-quiz-modal'); if(!m) return;
   var nextLv=_qLevel+1;
@@ -195,7 +196,6 @@ function _showQuizFinal(){
     var ok=_qLevelScores[i]>=3;
     breakdown+='Level '+(i+1)+': '+_qLevelScores[i]+'/5 '+(ok?'✅':'❌')+(_qLevelScores.length>i+1?' | ':'');
   }
-  var canShare=maxLv>=3;
   m.innerHTML='<div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">'
     +'<div style="text-align:center;max-width:360px;width:100%;">'
     +'<div style="font-size:56px;margin-bottom:4px;">'+badge.emoji+'</div>'
@@ -204,7 +204,7 @@ function _showQuizFinal(){
     +'<div style="font-size:18px;font-weight:700;margin-bottom:4px;">Łącznie: '+_qTotal+'/20 ('+pct+'%)</div>'
     +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:16px;">'+breakdown+'</div>'
     +'<div style="display:flex;flex-direction:column;gap:6px;max-width:280px;margin:0 auto;">'
-    +(canShare?'<button onclick="_shareQuizResult()" style="width:100%;padding:12px;background:#a855f7;color:#fff;border:none;border-radius:10px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;">📸 Pochwal się wynikiem!</button>':'')
+    +'<button onclick="_openQuizShareModal()" style="width:100%;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:10px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">📸 Udostępnij wynik</button>'
     +'<button onclick="document.getElementById(\'nerd-quiz-modal\').remove();openMotionInfo();setTimeout(function(){var nd=document.getElementById(\'motion-nerd-section\');if(nd)nd.style.display=\'block\';},100);" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:10px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📖 Przeczytaj sekcję nerdową</button>'
     +'<button onclick="openNerdQuiz();" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:10px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🔄 Spróbuj ponownie</button>'
     +'<div onclick="document.getElementById(\'nerd-quiz-modal\').remove();" style="color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;padding:8px;">✕ Zamknij</div>'
@@ -214,40 +214,106 @@ function _showQuizFinal(){
   _addQuizClose(m);
 }
 
-function _shareQuizResult(){
+function _openQuizShareModal(){
   var maxLv=_qLevelScores.length;
   var badge=_getBadge(maxLv,_qTotal);
-  // Reuse share system
-  _shareFormat='story'; _shareColor='purple'; _sharePhoto=null;
-  var cv=document.createElement('canvas');
-  var w=1080,h=1920; cv.width=w; cv.height=h;
+  _sharePhoto=null; _shareFormat='story'; _shareColor='purple';
+  var old=document.getElementById('quiz-share-modal'); if(old) old.remove();
+  var ov=document.createElement('div'); ov.id='quiz-share-modal';
+  ov.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
+  ov.innerHTML='<div style="max-width:400px;width:calc(100% - 32px);background:#1a1a1a;border-radius:16px;padding:20px;max-height:85vh;overflow-y:auto;color:#f2f2f2;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:800;">📸 Udostępnij wynik</div><div onclick="document.getElementById(\'quiz-share-modal\').remove()" style="cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</div></div>'
+    // Format
+    +'<div style="display:flex;gap:8px;margin:8px 0;">'
+    +'<div class="qsfmt" data-f="story" onclick="_shareFormat=\'story\';document.querySelectorAll(\'.qsfmt\').forEach(function(b){b.style.background=b.dataset.f===_shareFormat?\'#a855f7\':\'rgba(255,255,255,.06)\';b.style.color=b.dataset.f===_shareFormat?\'#fff\':\'rgba(255,255,255,.6)\';})" style="flex:1;padding:8px;border-radius:8px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:#a855f7;color:#fff;">Story 9:16</div>'
+    +'<div class="qsfmt" data-f="post" onclick="_shareFormat=\'post\';document.querySelectorAll(\'.qsfmt\').forEach(function(b){b.style.background=b.dataset.f===_shareFormat?\'#a855f7\':\'rgba(255,255,255,.06)\';b.style.color=b.dataset.f===_shareFormat?\'#fff\':\'rgba(255,255,255,.6)\';})" style="flex:1;padding:8px;border-radius:8px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);">Post 1:1</div></div>'
+    // Kolor
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin:8px 0 4px;">KOLOR</div>'
+    +'<div id="qs-colors" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>'
+    // Tekst
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:4px;">TEKST NA GRAFICE</div>'
+    +'<textarea id="qs-text" style="width:100%;height:60px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#f2f2f2;font-family:Montserrat,sans-serif;font-size:12px;padding:8px;resize:none;box-sizing:border-box;" placeholder="Wpisz swój tekst lub zostaw pusty">'+(_qLastFeedback||'').replace(/'/g,'&#39;')+'</textarea>'
+    // Generuj
+    +'<div onclick="_genQuizShare()" style="width:100%;padding:12px;background:#a855f7;color:#fff;border-radius:10px;text-align:center;font-size:13px;font-weight:800;cursor:pointer;margin-top:8px;">Generuj podgląd</div>'
+    +'<div id="qs-preview" style="display:none;margin-top:12px;text-align:center;"></div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  // Render color picker
+  var cols=[{k:'purple',bg:'#140a1e'},{k:'blue',bg:'#0a1428'},{k:'gold',bg:'#1a1808'},{k:'green',bg:'#0a1a0e'},{k:'fire',bg:'#1a0808'},{k:'light',bg:'#f5f5f5'}];
+  var cc=document.getElementById('qs-colors');
+  if(cc) cc.innerHTML=cols.map(function(cl){ return '<div onclick="_shareColor=\''+cl.k+'\';document.querySelectorAll(\'#qs-colors>div\').forEach(function(d){d.style.borderColor=\'rgba(255,255,255,.1)\';});this.style.borderColor=\'#a855f7\';" style="width:32px;height:32px;border-radius:50%;background:'+cl.bg+';cursor:pointer;border:2px solid '+(cl.k==='purple'?'#a855f7':'rgba(255,255,255,.1)')+';"></div>'; }).join('');
+}
+
+function _genQuizShare(){
+  var maxLv=_qLevelScores.length;
+  var badge=_getBadge(maxLv,_qTotal);
+  var customText=(document.getElementById('qs-text')||{}).value||'';
+  var w=1080, h=_shareFormat==='story'?1920:1080;
+  var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
   var ctx=cv.getContext('2d');
-  var t=_THEMES.purple;
+  var t=_THEMES[_shareColor]||_THEMES.purple;
+  // Background
   var g=ctx.createLinearGradient(0,0,w*0.4,h); g.addColorStop(0,t.bg1); g.addColorStop(0.5,t.bg2); g.addColorStop(1,t.bg1);
   ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
   // Lines
   var lG=ctx.createLinearGradient(w*0.1,0,w*0.9,0);
-  lG.addColorStop(0,'transparent'); lG.addColorStop(0.5,'rgba(168,85,247,0.5)'); lG.addColorStop(1,'transparent');
+  lG.addColorStop(0,'transparent'); lG.addColorStop(0.5,'rgba('+t.ar+',0.5)'); lG.addColorStop(1,'transparent');
   ctx.fillStyle=lG; ctx.fillRect(w*0.08,h*0.06,w*0.84,2); ctx.fillRect(w*0.08,h-h*0.06,w*0.84,2);
-  // Branding
+  // Branding top
   ctx.font='700 36px Montserrat,sans-serif'; ctx.fillStyle=t.sub; ctx.textAlign='left';
   ctx.fillText('Athleti',w*0.06,h*0.04); var aw=ctx.measureText('Athleti').width;
   ctx.fillStyle='#dc2626'; ctx.fillText('X',w*0.06+aw,h*0.04);
-  // Badge
-  ctx.font='120px serif'; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.fillText(badge.emoji,w/2,h*0.28);
-  ctx.font='800 36px Montserrat,sans-serif'; ctx.fillStyle=badge.color; ctx.fillText(badge.name,w/2,h*0.34);
-  ctx.font='900 140px Montserrat,sans-serif'; ctx.fillStyle='#fff'; ctx.fillText(_qTotal+'/20',w/2,h*0.48);
-  ctx.font='700 28px Montserrat,sans-serif'; ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fillText('Quiz: Reaktywny Nerd',w/2,h*0.52);
-  // Tiles
-  var tW=(w-w*0.16-16)/2,tH=100,tY=h*0.58;
-  var tiles=[{v:'Level '+maxLv,l:'OSIĄGNIĘTY',c:t.accent},{v:Math.round(_qTotal/20*100)+'%',l:'CELNOŚĆ',c:'#fff'},{v:badge.emoji,l:'ODZNAKA',c:badge.color},{v:'AthletiX',l:'APP',c:t.accent}];
-  for(var i=0;i<4;i++){
-    var tx=w*0.08+(i%2)*(tW+16),ty=tY+Math.floor(i/2)*(tH+10);
-    _rrect(ctx,tx,ty,tW,tH,16); ctx.fillStyle='rgba(168,85,247,0.04)'; ctx.fill();
-    ctx.font='800 36px Montserrat,sans-serif'; ctx.fillStyle=tiles[i].c; ctx.textAlign='center'; ctx.fillText(tiles[i].v,tx+tW/2,ty+50);
-    ctx.font='700 14px Montserrat,sans-serif'; ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fillText(tiles[i].l,tx+tW/2,ty+78);
+  // Badge emoji + name
+  var cy=h*0.25;
+  ctx.font='120px serif'; ctx.textAlign='center'; ctx.fillStyle=t.text; ctx.fillText(badge.emoji,w/2,cy);
+  ctx.font='800 36px Montserrat,sans-serif'; ctx.fillStyle=badge.color; ctx.fillText(badge.name,w/2,cy+50);
+  // Score
+  ctx.font='900 140px Montserrat,sans-serif'; ctx.fillStyle=t.text; ctx.fillText(_qTotal+'/20',w/2,cy+190);
+  ctx.font='700 28px Montserrat,sans-serif'; ctx.fillStyle=t.muted; ctx.fillText('Quiz: Reaktywny Nerd',w/2,cy+230);
+  // Custom text (max 3 lines)
+  if(customText){
+    ctx.font='italic 20px Montserrat,sans-serif'; ctx.fillStyle='rgba(255,255,255,0.5)';
+    var words=customText.split(' '), lines=[], line='';
+    for(var i=0;i<words.length;i++){
+      var test=line+(line?' ':'')+words[i];
+      if(ctx.measureText(test).width>w*0.8&&line){ lines.push(line); line=words[i]; } else line=test;
+    }
+    if(line) lines.push(line);
+    lines=lines.slice(0,3);
+    var ty2=cy+260;
+    lines.forEach(function(l,i){ ctx.fillText(l,w/2,ty2+i*28); });
   }
-  ctx.font='600 20px Montserrat,sans-serif'; ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.textAlign='center';
+  // Tiles 2x2
+  var tW=(w-w*0.16-16)/2, tH=100, tY=cy+(customText?260+90:280);
+  var tiles=[{v:'Level '+maxLv,l:'OSIĄGNIĘTY',c:t.accent},{v:Math.round(_qTotal/20*100)+'%',l:'CELNOŚĆ',c:t.text},{v:badge.emoji,l:'ODZNAKA',c:badge.color},{v:'AthletiX',l:'APP',c:t.accent}];
+  for(var j=0;j<4;j++){
+    var tx=w*0.08+(j%2)*(tW+16), ty=tY+Math.floor(j/2)*(tH+10);
+    _rrect(ctx,tx,ty,tW,tH,16); ctx.fillStyle='rgba('+t.ar+',0.04)'; ctx.fill();
+    ctx.font='800 36px Montserrat,sans-serif'; ctx.fillStyle=tiles[j].c; ctx.textAlign='center'; ctx.fillText(tiles[j].v,tx+tW/2,ty+50);
+    ctx.font='700 14px Montserrat,sans-serif'; ctx.fillStyle=t.muted; ctx.fillText(tiles[j].l,tx+tW/2,ty+78);
+  }
+  // Branding bottom
+  ctx.font='600 20px Montserrat,sans-serif'; ctx.fillStyle=t.muted; ctx.textAlign='center';
   ctx.fillText('Elevate Your Game ⚡',w/2,h-h*0.03-14);
-  _showShareResult(cv);
+  // Show preview
+  var p=document.getElementById('qs-preview'); if(!p) return;
+  p.style.display='block';
+  var img=document.createElement('img'); img.src=cv.toDataURL('image/png');
+  img.style.cssText='max-width:280px;width:100%;border-radius:8px;margin:0 auto 12px;display:block;';
+  p.innerHTML=''; p.appendChild(img);
+  // Share/download buttons
+  var canSh=false; try{ canSh=navigator.canShare&&navigator.canShare({files:[new File([''],'t.png',{type:'image/png'})]}); }catch(e){}
+  if(canSh){
+    var sb=document.createElement('div');
+    sb.style.cssText='width:100%;padding:12px;background:#a855f7;color:#fff;border-radius:10px;text-align:center;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:6px;';
+    sb.textContent='Udostępnij';
+    sb.onclick=function(){ cv.toBlob(function(blob){ var f=new File([blob],'athletix-quiz.png',{type:'image/png'}); navigator.share({files:[f],title:'Mój wynik - AthletiX Quiz',text:'Elevate Your Game!'}).catch(function(){}); },'image/png'); };
+    p.appendChild(sb);
+  }
+  var db=document.createElement('div');
+  db.style.cssText='width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:10px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;';
+  db.textContent='Pobierz PNG';
+  db.onclick=function(){ cv.toBlob(function(blob){ var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='athletix-quiz.png'; a.click(); URL.revokeObjectURL(url); },'image/png'); };
+  p.appendChild(db);
 }
