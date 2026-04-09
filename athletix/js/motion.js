@@ -161,6 +161,19 @@ function openMotionInfo(){
     +'<div style="max-height:180px;overflow-y:auto;margin-bottom:12px;">'
     +(function(){ var athlete2=(el('motion-athlete')||{}).value||''; var prev2=_getMotionResults(athlete2); var maxLv2=0; prev2.forEach(function(r){ if(r.level>maxLv2) maxLv2=r.level; }); return LEVEL_CHARACTERS.map(function(c){ var unlocked=maxLv2>=c.level; var isCurrent=c===getLevelCharacter(maxLv2||1); return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border);'+(isCurrent?'border-left:2px solid var(--accent);padding-left:6px;':'')+(unlocked?'':'opacity:.4;')+'">'+'<span style="font-size:18px;">'+(unlocked?c.emoji:'❓')+'</span>'+'<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:var(--text);">'+(unlocked?c.name:'???')+' <span style="font-size:9px;color:var(--dim);">Lv.'+c.level+'</span></div>'+(unlocked?'<div style="font-size:10px;color:var(--muted);">'+c.desc+'</div>':'')+'</div></div>'; }).join(''); })()
     +'</div>'
+    // Progresja wzorców
+    +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px;margin:12px 0;">'
+    +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">📈 PROGRESJA POZIOMÓW — WZORCE</div>'
+    +'<div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:2;">'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 1-2: Dwa symbole, proste wzorce. Nauka mechaniki.</div>'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 3-4: Cztery symbole (siatka 2×2). Więcej kolorów.</div>'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 5-6: Cel może się ZMIENIAĆ w trakcie! Wzorzec pojawia się na górze lub dole — reaguj kierunkowo.</div>'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 7-8: Wzorzec w DOWOLNYM rogu ekranu. Reaguj w kierunku wzorca!</div>'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 9-10: Siatka 3×3 — dziewięć pól! Więcej zmyłek.</div>'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);">Level 11+: Chaos. Szybkie zmiany, zmyłki, ruchome pozycje. Tylko dla najlepszych.</div>'
+    +'</div>'
+    +'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);margin-top:10px;">Każdy level jest trudniejszy — ale Ty też jesteś lepszy z każdą próbą. 💪</div>'
+    +'</div>'
     +'<button onclick="var nd=document.getElementById(\'motion-nerd-section\');nd.style.display=nd.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🤓 Sekcja dla nerdów — jak to NAPRAWDĘ działa?</button>'
     +'<div id="motion-nerd-section" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;margin-top:8px;font-size:12px;font-weight:500;line-height:1.7;color:var(--text);">'
     // Akcelerometr
@@ -845,20 +858,32 @@ function _runPatternLevel(idx,cfg,results,cb){
     if(_patternsMatch(stim,_patternTarget)) stim=_genPattern(pc.count,syms);
   }
   var stimPos=_pickPatPos(pc.pos);
-  var tFs=pc.cols<=2?(pc.count<=2?'48':'36'):'24';
-  var sFs=pc.cols<=2?(pc.count<=2?'48':'36'):'24';
+  var isSmall=window.innerHeight<600;
+  var boxPad=isSmall?'10px':'16px';
+  var tFs=pc.cols<=2?(pc.count<=2?(isSmall?'36':'48'):(isSmall?'28':'36')):(isSmall?'18':'24');
+  var sFs=tFs;
   _motionState.listening=false; _motionState._keyPressed=null;
   var stimTime=Date.now();
-  // Render
+  // Render — kontener z padding-top dla HUD safe zone
+  var boxMaxH='max-height:calc((100vh - 230px) / 2 - 20px);overflow:hidden;';
   ma.innerHTML=_mHUD()
-    // CEL — zawsze u góry centered (poniżej kafelków HUD)
-    +'<div style="position:absolute;top:14%;left:50%;transform:translateX(-50%);text-align:center;width:min(65%,280px);z-index:5;">'
+    +'<div style="position:absolute;inset:0;padding-top:115px;padding-bottom:40px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:'+(stimPos==='center'?'center':'flex-start')+';gap:16px;">'
+    // CEL — zawsze u góry
+    +'<div style="text-align:center;width:min(65%,280px);z-index:5;flex-shrink:0;">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">🎯 SZUKAJ</div>'
-    +'<div id="pat-target-box" style="border:2px solid var(--accent);border-radius:16px;padding:16px;background:rgba(59,130,246,.06);box-shadow:0 0 24px rgba(59,130,246,.15);">'+_patHtml(_patternTarget,pc.cols,tFs)+'</div></div>'
-    // BODZIEC — pozycja zależy od levelu
-    +'<div style="'+_patPosStyle(stimPos)+'">'
-    +'<div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;">👀 OBSERWUJ</div>'
-    +'<div id="pat-stim-box" style="border:2px solid rgba(255,255,255,.12);border-radius:16px;padding:16px;background:rgba(255,255,255,.03);box-shadow:0 0 15px rgba(255,255,255,.05);transition:border-color .2s,box-shadow .2s;">'+_patHtml(stim,pc.cols,sFs)+'</div></div>'
+    +'<div id="pat-target-box" style="border:2px solid var(--accent);border-radius:16px;padding:'+boxPad+';background:rgba(59,130,246,.06);box-shadow:0 0 24px rgba(59,130,246,.15);'+boxMaxH+'">'+_patHtml(_patternTarget,pc.cols,tFs)+'</div></div>'
+    // BODZIEC
+    +(stimPos==='center'
+      // Center: pod celem w kolumnie
+      ?'<div style="text-align:center;width:min(65%,280px);z-index:5;flex-shrink:0;">'
+      +'<div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;">👀 OBSERWUJ</div>'
+      +'<div id="pat-stim-box" style="border:2px solid rgba(255,255,255,.12);border-radius:16px;padding:'+boxPad+';background:rgba(255,255,255,.03);box-shadow:0 0 15px rgba(255,255,255,.05);transition:border-color .2s,box-shadow .2s;'+boxMaxH+'">'+_patHtml(stim,pc.cols,sFs)+'</div></div>'
+      // Quad/vertical: absolutnie pozycjonowany
+      :'</div><div style="'+_patPosStyle(stimPos)+'">'
+      +'<div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;">👀 OBSERWUJ</div>'
+      +'<div id="pat-stim-box" style="border:2px solid rgba(255,255,255,.12);border-radius:16px;padding:'+boxPad+';background:rgba(255,255,255,.03);box-shadow:0 0 15px rgba(255,255,255,.05);transition:border-color .2s,box-shadow .2s;'+boxMaxH+'">'+_patHtml(stim,pc.cols,sFs)+'</div>'
+    )
+    +'</div>'
     // Progress bar
     +'<div style="position:absolute;bottom:16px;left:16px;right:16px;z-index:10;text-align:center;">'
     +'<div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:4px;">'+(idx+1)+'/'+pc.total+'</div>'
