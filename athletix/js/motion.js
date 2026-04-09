@@ -58,11 +58,10 @@ function _getBriefingRules(){
     return '• 🟢 Zielone = przechyl telefon szybko!<br>• 🔴 Czerwone = STÓJ! Nie ruszaj się!<br>• Twój mózg będzie chciał zareagować na czerwone — nie daj się nabrać';
   }
   if(_motionMode==='pattern'){
-    var pc=_patCfg(_gameLevel);
-    if(isDsk) return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → kliknij lub naciśnij klawisz!<br>• Gdy nie pasuje → czekaj';
-    if(isTouch&&pc.pos==='quad') return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → przesuń palcem w kierunku wzorca (swipe)<br>• Gdy nie pasuje → nie dotykaj ekranu';
-    if(isTouch) return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → tapnij w ekran!<br>• Gdy nie pasuje → nie dotykaj ekranu';
-    return '• Na górze widzisz WZORZEC do zapamiętania<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny = górny → REAGUJ ruchem!<br>• Gdy nie pasuje → STÓJ nieruchomo';
+    var adv='<br><br><span style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);">📐 NA WYŻSZYCH LEVELACH:</span><br>';
+    if(isDsk) return '• Na górze ekranu widzisz WZORZEC — zapamiętaj go<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny pasuje do górnego → KLIKNIJ lub naciśnij SPACJĘ<br>• Gdy nie pasuje → NIE klikaj'+adv+'• Wzorzec na górze/dole → naciśnij STRZAŁKĘ ↑ lub ↓<br>• Wzorzec w rogu → odpowiednia STRZAŁKA<br>• Cel może się zmieniać — obserwuj górną kartę!';
+    if(isTouch) return '• Na górze ekranu widzisz WZORZEC — zapamiętaj go<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny pasuje do górnego → TAPNIJ w ekran<br>• Gdy nie pasuje → NIE dotykaj ekranu'+adv+'• Wzorzec na górze/dole → PRZESUŃ PALCEM w górę lub w dół (swipe)<br>• Wzorzec w rogu → PRZESUŃ PALCEM w kierunku tego rogu<br>• Cel może się zmieniać — obserwuj górną kartę!';
+    return '• Na górze ekranu widzisz WZORZEC — zapamiętaj go<br>• Na dole zmieniają się różne wzorce<br>• Gdy dolny pasuje do górnego → PRZECHYL TELEFON<br>• Gdy nie pasuje → STÓJ nieruchomo'+adv+'• Wzorzec na górze/dole → przechyl telefon W GÓRĘ lub W DÓŁ<br>• Wzorzec w rogu → przechyl W KIERUNKU tego rogu<br>• Cel może się zmieniać — obserwuj!';
   }
   return '';
 }
@@ -154,38 +153,24 @@ function _setMotionMode(m){
 function openMotionInfo(){
   var existing=document.getElementById('motion-info-modal'); if(existing) existing.remove();
   var modal=document.createElement('div'); modal.id='motion-info-modal';
-  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;';
   modal.onclick=function(e){ if(e.target===modal) modal.remove(); };
-  var h='<div style="max-width:420px;width:calc(100% - 32px);background:var(--s1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:var(--text);">⚡ Reakcja — Jak grać?</div><button onclick="document.getElementById(\'motion-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--muted);width:32px;height:32px;">✕</button></div>'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">📱 Jak trzymać telefon</div>'
-    +'<div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:12px;">Trzymaj telefon w wyprostowanej ręce przed sobą. Ekran do siebie. Stój stabilnie — telefon musi być nieruchomy przed bodźcem. 🧍📱</div>'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">🎯 Zasady gry</div>'
-    +'<div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:12px;">Czekaj na sygnał. Gdy kółko zmieni kolor na <strong style="color:#4ade80;">ZIELONE</strong> — przechyl telefon szybko! Im szybciej zareagujesz, tym więcej punktów.<br><br><strong>Kierunki:</strong> przechyl w stronę strzałki (← → ↑ ↓)<br><strong>Go/No-Go:</strong> reaguj TYLKO na zielone, IGNORUJ czerwone!</div>'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">⚡ Punkty</div>'
-    +'<div style="font-size:12px;color:var(--text);line-height:1.8;margin-bottom:12px;">&lt;200ms = 5 pkt ⚡<br>&lt;300ms = 3 pkt<br>&lt;400ms = 2 pkt<br>&lt;500ms = 1 pkt<br>🔥 Combo 3+ szybkich = podwójne!<br>🔥 Combo 5+ = potrójne!<br>❌ Fałszywy start = -2 pkt<br>❌ Błąd Go/No-Go = -3 pkt</div>'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">🏆 Poziomy</div>'
-    +'<div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:14px;">Gra ma nieskończoną ilość poziomów. Każdy kolejny jest trudniejszy: szybsze bodźce, krótsze okno reakcji, fałszywe sygnały. Masz 3 życia — fałszywy start lub brak reakcji = stracone życie.</div>'
-    // Postacie do odblokowania
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;margin-top:6px;">🏆 Postacie do odblokowania</div>'
+  var h='<div style="max-width:420px;width:calc(100% - 32px);background-color:#1a1a1a !important;color:#f2f2f2 !important;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">⚡ Reakcja — Jak grać?</div><button onclick="document.getElementById(\'motion-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;">✕</button></div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">📱 Jak trzymać telefon</div>'
+    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Trzymaj telefon w wyprostowanej ręce przed sobą. Ekran do siebie. Stój stabilnie — telefon musi być nieruchomy przed bodźcem. 🧍📱</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">🎯 Zasady gry</div>'
+    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Czekaj na sygnał. Gdy kółko zmieni kolor na <strong style="color:#4ade80;">ZIELONE</strong> — przechyl telefon szybko! Im szybciej zareagujesz, tym więcej punktów.<br><br><strong>Kierunki:</strong> przechyl w stronę strzałki (← → ↑ ↓)<br><strong>Go/No-Go:</strong> reaguj TYLKO na zielone, IGNORUJ czerwone!</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">⚡ Punkty</div>'
+    +'<div style="font-size:12px;color:#f2f2f2;line-height:1.8;margin-bottom:12px;">&lt;200ms = 5 pkt ⚡<br>&lt;300ms = 3 pkt<br>&lt;400ms = 2 pkt<br>&lt;500ms = 1 pkt<br>🔥 Combo 3+ szybkich = podwójne!<br>🔥 Combo 5+ = potrójne!<br>❌ Fałszywy start = -2 pkt<br>❌ Błąd Go/No-Go = -3 pkt</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">🏆 Poziomy</div>'
+    +'<div style="font-size:12px;color:#f2f2f2;line-height:1.6;margin-bottom:14px;">Gra ma nieskończoną ilość poziomów. Każdy kolejny jest trudniejszy: szybsze bodźce, krótsze okno reakcji, fałszywe sygnały. Masz 3 życia — fałszywy start lub brak reakcji = stracone życie.</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:6px;margin-top:6px;">🏆 Postacie do odblokowania</div>'
     +'<div style="max-height:180px;overflow-y:auto;margin-bottom:12px;">'
-    +(function(){ var athlete2=(el('motion-athlete')||{}).value||''; var prev2=_getMotionResults(athlete2); var maxLv2=0; prev2.forEach(function(r){ if(r.level>maxLv2) maxLv2=r.level; }); return LEVEL_CHARACTERS.map(function(c){ var unlocked=maxLv2>=c.level; var isCurrent=c===getLevelCharacter(maxLv2||1); return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border);'+(isCurrent?'border-left:2px solid var(--accent);padding-left:6px;':'')+(unlocked?'':'opacity:.4;')+'">'+'<span style="font-size:18px;">'+(unlocked?c.emoji:'❓')+'</span>'+'<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:var(--text);">'+(unlocked?c.name:'???')+' <span style="font-size:9px;color:var(--dim);">Lv.'+c.level+'</span></div>'+(unlocked?'<div style="font-size:10px;color:var(--muted);">'+c.desc+'</div>':'')+'</div></div>'; }).join(''); })()
+    +(function(){ var athlete2=(el('motion-athlete')||{}).value||''; var prev2=_getMotionResults(athlete2); var maxLv2=0; prev2.forEach(function(r){ if(r.level>maxLv2) maxLv2=r.level; }); return LEVEL_CHARACTERS.map(function(c){ var unlocked=maxLv2>=c.level; var isCurrent=c===getLevelCharacter(maxLv2||1); return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.07);'+(isCurrent?'border-left:2px solid #3b82f6;padding-left:6px;':'')+(unlocked?'':'opacity:.4;')+'">'+'<span style="font-size:18px;">'+(unlocked?c.emoji:'❓')+'</span>'+'<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:#f2f2f2;">'+(unlocked?c.name:'???')+' <span style="font-size:9px;color:rgba(255,255,255,.18);">Lv.'+c.level+'</span></div>'+(unlocked?'<div style="font-size:10px;color:rgba(255,255,255,.35);">'+c.desc+'</div>':'')+'</div></div>'; }).join(''); })()
     +'</div>'
-    // Progresja wzorców
-    +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px;margin:12px 0;">'
-    +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">📈 PROGRESJA POZIOMÓW — WZORCE</div>'
-    +'<div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:2;">'
-    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 1-2: Dwa symbole, proste wzorce. Nauka mechaniki.</div>'
-    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 3-4: Cztery symbole (siatka 2×2). Więcej kolorów.</div>'
-    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 5-6: Cel może się ZMIENIAĆ w trakcie! Wzorzec pojawia się na górze lub dole — reaguj kierunkowo.</div>'
-    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 7-8: Wzorzec w DOWOLNYM rogu ekranu. Reaguj w kierunku wzorca!</div>'
-    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 9-10: Siatka 3×3 — dziewięć pól! Więcej zmyłek.</div>'
-    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);">Level 11+: Chaos. Szybkie zmiany, zmyłki, ruchome pozycje. Tylko dla najlepszych.</div>'
-    +'</div>'
-    +'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);margin-top:10px;">Każdy level jest trudniejszy — ale Ty też jesteś lepszy z każdą próbą. 💪</div>'
-    +'</div>'
-    +'<button onclick="var nd=document.getElementById(\'motion-nerd-section\');nd.style.display=nd.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🤓 Sekcja dla nerdów — jak to NAPRAWDĘ działa?</button>'
-    +'<div id="motion-nerd-section" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;margin-top:8px;font-size:12px;font-weight:500;line-height:1.7;color:var(--text);">'
+    +'<button onclick="var nd=document.getElementById(\'motion-nerd-section\');nd.style.display=nd.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🤓 Sekcja dla nerdów — jak to NAPRAWDĘ działa?</button>'
+    +'<div id="motion-nerd-section" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;margin-top:8px;font-size:12px;font-weight:500;line-height:1.7;color:#f2f2f2;">'
     // Akcelerometr
     +'<div style="font-size:13px;font-weight:800;margin-bottom:6px;">📱 AKCELEROMETR W TWOIM TELEFONIE</div>'
     +'<p style="margin-bottom:10px;">Twój telefon ma wbudowany czujnik MEMS (Micro-Electro-Mechanical System) — mikroskopijną strukturę krzemową, mniejszą niż ziarno ryżu. Mierzy przyspieszenie w trzech osiach (przód-tył, lewo-prawo, góra-dół) z częstotliwością około 60 pomiarów na sekundę.</p>'
@@ -207,16 +192,16 @@ function openMotionInfo(){
     +'<p style="margin-bottom:10px;">Regularnie ćwiczący badani wykazywali krótsze czasy reakcji niż osoby prowadzące siedzący tryb życia (Jain et al., 2015). To sugeruje, że trening — w tym ćwiczenia takie jak ta gra — może mieć realny wpływ na szybkość przetwarzania. Pamiętaj jednak: na Twój wynik w danym momencie wpływa mnóstwo czynników — od jakości snu, przez nawodnienie, po to czy właśnie zjadłeś obiad. Pojedynczy pomiar to migawka, nie wyrok. Wartość jest w TRENOWANIU i śledzeniu trendu.</p>'
     // Normy
     +'<div style="font-size:13px;font-weight:800;margin-top:16px;margin-bottom:6px;">📊 ORIENTACYJNE NORMY</div>'
-    +'<p style="margin-bottom:6px;font-size:11px;color:var(--muted);">Prosty czas reakcji na bodziec wzrokowy, warunki laboratoryjne. Nasz pomiar akcelerometryczny będzie z natury wolniejszy.</p>'
+    +'<p style="margin-bottom:6px;font-size:11px;color:rgba(255,255,255,.35);">Prosty czas reakcji na bodziec wzrokowy, warunki laboratoryjne. Nasz pomiar akcelerometryczny będzie z natury wolniejszy.</p>'
     +'<div style="margin-bottom:10px;">• &lt; 200 ms — Wartości spotykane u elitarnych sportowców<br>'
     +'• 200-280 ms — Bardzo dobry, osoby aktywne fizycznie<br>'
     +'• 280-350 ms — Przeciętny wynik młodych dorosłych<br>'
     +'• 350-500 ms — Częsty przy zmęczeniu lub braku wprawy<br>'
     +'• &gt; 500 ms — Do poprawy, nie powód do niepokoju — powód do trenowania</div>'
-    +'<div style="font-size:10px;color:var(--muted);margin-bottom:10px;">(Na podstawie: Welford, 1980; Jain et al., 2015; dane MindCrowd)</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.35);margin-bottom:10px;">(Na podstawie: Welford, 1980; Jain et al., 2015; dane MindCrowd)</div>'
     // Źródła
     +'<div style="font-size:13px;font-weight:800;margin-top:16px;margin-bottom:6px;">📚 ŹRÓDŁA</div>'
-    +'<div style="font-size:10px;font-weight:500;color:var(--muted);line-height:1.6;">'
+    +'<div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.35);line-height:1.6;">'
     +'1. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Jain A, Bansal R, Kumar A, Singh KD (2015)</a>. "A comparative study of visual and auditory reaction times..." Int J Appl Basic Med Res, 5(2):124-127.<br>'
     +'2. <a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain MTG, Hibbs A (2007)</a>. "Sprint starts and the minimum auditory reaction time." J Sports Sciences, 25(1):79-86.<br>'
     +'3. <a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;text-decoration:underline;">Komi PV, Ishikawa M, Salmi J (2009)</a>. "IAAF Sprint Start Research Project: Is the 100 ms limit still valid?" New Studies in Athletics, 24(1):37-47.<br>'
@@ -224,10 +209,40 @@ function openMotionInfo(){
     +'5. Welford AT (1980). "Reaction Times." Academic Press, New York.<br>'
     +'6. <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;text-decoration:underline;">MindCrowd Study</a> — Arizona Alzheimer\'s Consortium.</div>'
     // Nota
-    +'<div style="font-size:10px;font-style:italic;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:12px;">⚠️ Opisy opierają się na recenzowanych publikacjach naukowych. Nasz pomiar akcelerometryczny nie jest równoważny pomiarom laboratoryjnym — służy do śledzenia własnego postępu. Część treści opracowana z wykorzystaniem narzędzi AI i zweryfikowana przez autorów.</div>'
-    +'<div style="font-weight:800;color:var(--accent);margin-top:14px;text-align:center;">⚡ Elevate Your Game — trenuj swój mózg tak jak trenujesz ciało!</div>'
+    +'<div style="font-size:10px;font-style:italic;color:rgba(255,255,255,.35);border-top:1px solid rgba(255,255,255,.07);padding-top:10px;margin-top:12px;">⚠️ Opisy opierają się na recenzowanych publikacjach naukowych. Nasz pomiar akcelerometryczny nie jest równoważny pomiarom laboratoryjnym — służy do śledzenia własnego postępu. Część treści opracowana z wykorzystaniem narzędzi AI i zweryfikowana przez autorów.</div>'
+    +'<div style="font-weight:800;color:#3b82f6;margin-top:14px;text-align:center;">⚡ Elevate Your Game — trenuj swój mózg tak jak trenujesz ciało!</div>'
     +'</div>'
-    +'<button onclick="document.getElementById(\'motion-info-modal\').remove()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
+    +'<button onclick="document.getElementById(\'motion-info-modal\').remove()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
+  var box=document.createElement('div'); box.innerHTML=h; modal.appendChild(box.firstChild);
+  document.body.appendChild(modal);
+}
+
+// ── Modal "Wzorce — Jak grać?" ──
+function openPatternInfo(){
+  var existing=document.getElementById('pattern-info-modal'); if(existing) existing.remove();
+  var modal=document.createElement('div'); modal.id='pattern-info-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.onclick=function(e){ if(e.target===modal) modal.remove(); };
+  var h='<div style="max-width:420px;width:calc(100% - 32px);background-color:#1a1a1a !important;color:#f2f2f2 !important;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">🧩 Wzorce — Jak grać?</div><button onclick="document.getElementById(\'pattern-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;">✕</button></div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">🎯 Zasady</div>'
+    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Na górze ekranu widzisz <strong style="color:#3b82f6;">WZORZEC</strong> (cel) — zapamiętaj go.<br>Na dole zmieniają się różne wzorce.<br><br>Gdy dolny wzorzec <strong style="color:#4ade80;">PASUJE</strong> do górnego → reaguj!<br>Gdy <strong style="color:#f87171;">NIE PASUJE</strong> → nie ruszaj się.</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">⚡ Punkty i życia</div>'
+    +'<div style="font-size:12px;color:#f2f2f2;line-height:1.8;margin-bottom:12px;">Szybka reakcja na pasujący wzorzec = punkty<br>Reakcja na niepasujący = utrata życia<br>Brak reakcji na pasujący = utrata życia<br>🔥 Combo za serie szybkich trafień!</div>'
+    // Progresja
+    +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px;margin:12px 0;">'
+    +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#3b82f6;margin-bottom:10px;">📈 PROGRESJA POZIOMÓW</div>'
+    +'<div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:2;">'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 1-2: Dwa symbole, proste wzorce. Nauka mechaniki.</div>'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 3-4: Cztery symbole (siatka 2×2). Więcej kolorów.</div>'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 5-6: Cel może się ZMIENIAĆ w trakcie! Wzorzec na górze lub dole.</div>'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 7-8: Wzorzec w DOWOLNYM rogu ekranu. Reaguj kierunkowo!</div>'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 9-10: Siatka 3×3 — dziewięć pól! Więcej zmyłek.</div>'
+    +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);">Level 11+: Chaos. Szybkie zmiany, zmyłki, ruchome pozycje.</div>'
+    +'</div>'
+    +'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);margin-top:10px;">Każdy level jest trudniejszy — ale Ty też jesteś lepszy z każdą próbą. 💪</div>'
+    +'</div>'
+    +'<button onclick="document.getElementById(\'pattern-info-modal\').remove()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
   var box=document.createElement('div'); box.innerHTML=h; modal.appendChild(box.firstChild);
   document.body.appendChild(modal);
 }
