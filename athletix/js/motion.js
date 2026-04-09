@@ -155,71 +155,86 @@ function _setMotionMode(m){
 }
 
 // ── Modal "Jak grać?" ──
+function _motionModalWrap(id,title,body){
+  var old=document.getElementById(id); if(old) old.remove();
+  var m=document.createElement('div'); m.id=id;
+  m.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;';
+  m.onclick=function(e){ if(e.target===m) m.remove(); };
+  m.innerHTML='<div style="max-width:420px;width:calc(100% - 32px);background-color:#1a1a1a !important;color:#f2f2f2 !important;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">'+title+'</div><div onclick="document.getElementById(\''+id+'\').remove()" style="cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</div></div>'
+    +body
+    +'<button onclick="document.getElementById(\''+id+'\').remove()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
+  document.body.appendChild(m);
+}
+function _charListHtml(){
+  var athlete2=(el('motion-athlete')||{}).value||'';
+  var maxLv=0;
+  try{
+    var d=JSON.parse(localStorage.getItem('axs_motion_results')||'{}');
+    if(d[athlete2]&&d[athlete2].reaction) d[athlete2].reaction.forEach(function(r){ if(r.level>maxLv) maxLv=r.level; });
+    if(!maxLv){ for(var k in d){ if(d[k]&&d[k].reaction) d[k].reaction.forEach(function(r){ if(r.level>maxLv) maxLv=r.level; }); } }
+  }catch(e){}
+  return LEVEL_CHARACTERS.map(function(c){
+    var unlocked=maxLv>=c.level; var isCurrent=c===getLevelCharacter(maxLv||1);
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.06);'+(isCurrent?'border-left:2px solid #3b82f6;padding-left:6px;':'')+(unlocked?'':'opacity:.4;')+'">'
+      +'<span style="font-size:20px;">'+(unlocked?c.emoji:'❓')+'</span>'
+      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:#f2f2f2;">'+(unlocked?c.name:'???')+' <span style="font-size:9px;color:rgba(255,255,255,.18);">Lv.'+c.level+'</span>'+(isCurrent?' <span style="font-size:9px;color:#3b82f6;">← Tu jesteś</span>':'')+'</div>'
+      +(unlocked?'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);">'+c.desc+'</div>':'')
+      +'</div></div>';
+  }).join('');
+}
 function openMotionInfo(){
-  var existing=document.getElementById('motion-info-modal'); if(existing) existing.remove();
-  var modal=document.createElement('div'); modal.id='motion-info-modal';
-  modal.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;';
-  modal.onclick=function(e){ if(e.target===modal) modal.remove(); };
-  var h='<div style="max-width:420px;width:calc(100% - 32px);background-color:#1a1a1a !important;color:#f2f2f2 !important;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">⚡ Reakcja  - Jak grać?</div><button onclick="document.getElementById(\'motion-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;">✕</button></div>'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">📱 Jak trzymać telefon</div>'
-    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Trzymaj telefon w wyprostowanej ręce przed sobą. Ekran do siebie. Stój stabilnie  - telefon musi być nieruchomy przed bodźcem. 🧍📱</div>'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">🎯 Zasady gry</div>'
-    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Czekaj na sygnał. Gdy kółko zmieni kolor na <strong style="color:#4ade80;">ZIELONE</strong>  - przechyl telefon szybko! Im szybciej zareagujesz, tym więcej punktów.<br><br><strong>Kierunki:</strong> przechyl w stronę strzałki (← → ↑ ↓)<br><strong>Go/No-Go:</strong> reaguj TYLKO na zielone, IGNORUJ czerwone!</div>'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">⚡ Punkty</div>'
-    +'<div style="font-size:12px;color:#f2f2f2;line-height:1.8;margin-bottom:12px;">&lt;200ms = 5 pkt ⚡<br>&lt;300ms = 3 pkt<br>&lt;400ms = 2 pkt<br>&lt;500ms = 1 pkt<br>🔥 Combo 3+ szybkich = podwójne!<br>🔥 Combo 5+ = potrójne!<br>❌ Fałszywy start = -2 pkt<br>❌ Błąd Go/No-Go = -3 pkt</div>'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">🏆 Poziomy</div>'
-    +'<div style="font-size:12px;color:#f2f2f2;line-height:1.6;margin-bottom:14px;">Gra ma nieskończoną ilość poziomów. Każdy kolejny jest trudniejszy: szybsze bodźce, krótsze okno reakcji, fałszywe sygnały. Masz 3 życia  - fałszywy start lub brak reakcji = stracone życie.</div>'
-    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:6px;margin-top:6px;">🏆 Postacie do odblokowania</div>'
-    +'<div style="max-height:180px;overflow-y:auto;margin-bottom:12px;">'
-    +(function(){ var athlete2=(el('motion-athlete')||{}).value||''; var prev2=_getMotionResults(athlete2); var maxLv2=0; prev2.forEach(function(r){ if(r.level>maxLv2) maxLv2=r.level; }); return LEVEL_CHARACTERS.map(function(c){ var unlocked=maxLv2>=c.level; var isCurrent=c===getLevelCharacter(maxLv2||1); return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.07);'+(isCurrent?'border-left:2px solid #3b82f6;padding-left:6px;':'')+(unlocked?'':'opacity:.4;')+'">'+'<span style="font-size:18px;">'+(unlocked?c.emoji:'❓')+'</span>'+'<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:#f2f2f2;">'+(unlocked?c.name:'???')+' <span style="font-size:9px;color:rgba(255,255,255,.18);">Lv.'+c.level+'</span></div>'+(unlocked?'<div style="font-size:10px;color:rgba(255,255,255,.35);">'+c.desc+'</div>':'')+'</div></div>'; }).join(''); })()
-    +'</div>'
-    +'<button onclick="var nd=document.getElementById(\'motion-nerd-section\');nd.style.display=nd.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🤓 Sekcja dla nerdów  - jak to NAPRAWDĘ działa?</button>'
+  var body=''
+    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:14px;">Moduł Czas Reakcji to zestaw gier treningowych rozwijających szybkość reakcji, zdolność podejmowania decyzji i rozpoznawanie wzorców. Każda gra ma nieskończoną ilość poziomów.</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">📱 TRYBY REAKCJI</div>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:14px;">📱 Ruch - reaguj przechyłem telefonu<br>👆 Dotyk - reaguj tapnięciem lub swipe\'em<br>💻 Komputer - reaguj kliknięciem lub klawiaturą<br><span style="font-size:11px;color:rgba(255,255,255,.35);">Wybierz tryb przed każdą grą. W trybie ruchowym trzymaj telefon stabilnie - kalibracja wymaga nieruchomości.</span></div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">🎮 GRY W MODULE</div>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:14px;">🎯 Reakcja - reaguj na bodziec jak najszybciej<br>🧭 Kierunki - przechyl/swipe w stronę strzałki<br>👁 Go/No-Go - reaguj na zielone, ignoruj czerwone<br>🧩 Wzorce - rozpoznaj właściwy wzorzec w chaosie<br>🔍 Wyszukiwanie - pary, kolejność, słowa<br><span style="font-size:11px;color:rgba(255,255,255,.35);">Kliknij ℹ️ przy danej grze żeby poznać szczegóły.</span></div>'
+    // Postacie
+    +'<button onclick="var cl=document.getElementById(\'mi-charlist\');cl.style.display=cl.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🏆 Pokaż wszystkie postacie</button>'
+    +'<div id="mi-charlist" style="display:none;max-height:220px;overflow-y:auto;margin-bottom:10px;">'+_charListHtml()+'</div>'
+    // Nerd
+    +'<button onclick="var nd=document.getElementById(\'motion-nerd-section\');nd.style.display=nd.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🤓 Jak to NAPRAWDĘ działa?</button>'
     +'<div id="motion-nerd-section" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;margin-top:8px;font-size:12px;font-weight:500;line-height:1.7;color:#f2f2f2;">'
-    // Akcelerometr
-    +'<div style="font-size:13px;font-weight:800;margin-bottom:6px;">📱 AKCELEROMETR W TWOIM TELEFONIE</div>'
-    +'<p style="margin-bottom:10px;">Twój telefon ma wbudowany czujnik MEMS (Micro-Electro-Mechanical System)  - mikroskopijną strukturę krzemową, mniejszą niż ziarno ryżu. Mierzy przyspieszenie w trzech osiach (przód-tył, lewo-prawo, góra-dół) z częstotliwością około 60 pomiarów na sekundę.</p>'
-    +'<p style="margin-bottom:10px;">Gdy przechylasz telefon, zmienia się rozkład siły grawitacji na osiach czujnika. Nasza aplikacja porównuje bieżące odczyty z Twoją pozycją wyjściową (kalibracja przed grą) i wykrywa ruch przekraczający ustalony próg. Im wyższy level, tym większy ruch jest wymagany  - dlatego na wyższych poziomach nie wystarczy delikatne drgnięcie ręki.</p>'
-    // Czas reakcji
-    +'<div style="font-size:13px;font-weight:800;margin-top:16px;margin-bottom:6px;">⏱️ CZAS REAKCJI  - CO MÓWI NAUKA?</div>'
-    +'<p style="margin-bottom:10px;">Czas reakcji to przedział od pojawienia się bodźca do początku odpowiedzi ruchowej. Składa się z kilku etapów: odbiór bodźca przez narząd zmysłu, transmisja nerwowa do mózgu, przetwarzanie w korze mózgowej, wysłanie sygnału motorycznego i aktywacja mięśnia. Każdy z tych etapów zajmuje określony czas  - i każdy podlega treningowi, zmęczeniu i wielu innym czynnikom.</p>'
-    +'<p style="margin-bottom:10px;">Przyjmowane wartości średniego prostego czasu reakcji na bodziec wzrokowy to około 190-250 ms u młodych dorosłych (Welford, 1980; Jain et al., 2015). Na bodziec dźwiękowy reagujemy szybciej  - około 140-160 ms  - ponieważ sygnał słuchowy dociera do kory mózgowej w około 8-10 ms, podczas gdy sygnał wzrokowy potrzebuje 20-40 ms (Kemp et al., cytowani w Pain & Hibbs, 2007).</p>'
-    +'<p style="margin-bottom:10px;">Warto jednak podkreślić: wartości te są przybliżone i różnią się znacząco między badaniami, populacjami i metodami pomiaru. Nasz pomiar akcelerometryczny dodaje własne opóźnienia (transmisja danych z czujnika, przetwarzanie w przeglądarce), więc czasy które widzisz w grze nie są bezpośrednio porównywalne z precyzyjnymi pomiarami laboratoryjnymi. Traktuj je jako wskaźnik RELATYWNY  - śledzenie własnego postępu w czasie jest wartościowe, nawet jeśli bezwzględne wartości obarczone są pewnym marginesem błędu.</p>'
-    // Sprinterzy
-    +'<div style="font-size:13px;font-weight:800;margin-top:16px;margin-bottom:6px;">🏅 SPRINTERZY I REGUŁA 100 MS</div>'
-    +'<p style="margin-bottom:10px;">World Athletics (dawniej IAAF) stosuje regułę, według której reakcja szybsza niż 100 ms po strzale startera jest uznawana za falstart. Założenie opiera się na przekonaniu, że ludzki mózg nie jest w stanie przetworzyć bodźca słuchowego i zainicjować odpowiedzi ruchowej w czasie krótszym niż 100 ms.</p>'
-    +'<p style="margin-bottom:10px;">Jednak badanie zlecone przez IAAF (Komi, Ishikawa & Salmi, 2009) wykazało, że niektórzy sprinterzy potrafią generować siłę na blokach startowych w czasie poniżej 80 ms. Autorzy rekomendowali obniżenie progu do 80-85 ms. Osobno, Pain & Hibbs (2007) zmierzyli u jednego z dziewięciu badanych sprinterów średni czas reakcji 87 ms (SD = 4 ms), a latencje EMG poniżej 60 ms.</p>'
-    +'<p style="margin-bottom:10px;">Z kolei analiza Brosnan, Hayes & Harrison (2017) danych z Mistrzostw Świata i Europy 1999-2014 (ponad 8500 startów) wykazała, że 95% zaobserwowanych czasów reakcji mieściło się powyżej 122 ms. Zaproponowali skorygowane progi: 115 ms dla mężczyzn i 119 ms dla kobiet.</p>'
-    +'<p style="margin-bottom:10px;">Temat pozostaje otwarty  - co doskonale pokazuje, że nawet pozornie prosta kwestia "ile wynosi minimalny czas reakcji" jest w nauce przedmiotem dyskusji.</p>'
-    // Co wpływa
-    +'<div style="font-size:13px;font-weight:800;margin-top:16px;margin-bottom:6px;">🧠 CO WPŁYWA NA CZAS REAKCJI?</div>'
-    +'<p style="margin-bottom:10px;">Badania wskazują na wiele czynników modulujących czas reakcji. Jain i współpracownicy (2015) wymieniają między innymi: wiek, płeć, zmęczenie, poziom aktywności fizycznej, cykl oddechowy, typ osobowości i inteligencję. Badanie MindCrowd na dużej próbie populacyjnej wykazało degradację czasu reakcji o około 3-7 ms na rok życia.</p>'
-    +'<p style="margin-bottom:10px;">Regularnie ćwiczący badani wykazywali krótsze czasy reakcji niż osoby prowadzące siedzący tryb życia (Jain et al., 2015). To sugeruje, że trening  - w tym ćwiczenia takie jak ta gra  - może mieć realny wpływ na szybkość przetwarzania. Pamiętaj jednak: na Twój wynik w danym momencie wpływa mnóstwo czynników  - od jakości snu, przez nawodnienie, po to czy właśnie zjadłeś obiad. Pojedynczy pomiar to migawka, nie wyrok. Wartość jest w TRENOWANIU i śledzeniu trendu.</p>'
-    // Normy
-    +'<div style="font-size:13px;font-weight:800;margin-top:16px;margin-bottom:6px;">📊 ORIENTACYJNE NORMY</div>'
-    +'<p style="margin-bottom:6px;font-size:11px;color:rgba(255,255,255,.35);">Prosty czas reakcji na bodziec wzrokowy, warunki laboratoryjne. Nasz pomiar akcelerometryczny będzie z natury wolniejszy.</p>'
-    +'<div style="margin-bottom:10px;">• &lt; 200 ms  - Wartości spotykane u elitarnych sportowców<br>'
-    +'• 200-280 ms  - Bardzo dobry, osoby aktywne fizycznie<br>'
-    +'• 280-350 ms  - Przeciętny wynik młodych dorosłych<br>'
-    +'• 350-500 ms  - Częsty przy zmęczeniu lub braku wprawy<br>'
-    +'• &gt; 500 ms  - Do poprawy, nie powód do niepokoju  - powód do trenowania</div>'
-    +'<div style="font-size:10px;color:rgba(255,255,255,.35);margin-bottom:10px;">(Na podstawie: Welford, 1980; Jain et al., 2015; dane MindCrowd)</div>'
-    // Źródła
-    +'<div style="font-size:13px;font-weight:800;margin-top:16px;margin-bottom:6px;">📚 ŹRÓDŁA</div>'
-    +'<div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.35);line-height:1.6;">'
-    +'1. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Jain A, Bansal R, Kumar A, Singh KD (2015)</a>. "A comparative study of visual and auditory reaction times..." Int J Appl Basic Med Res, 5(2):124-127.<br>'
-    +'2. <a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain MTG, Hibbs A (2007)</a>. "Sprint starts and the minimum auditory reaction time." J Sports Sciences, 25(1):79-86.<br>'
-    +'3. <a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;text-decoration:underline;">Komi PV, Ishikawa M, Salmi J (2009)</a>. "IAAF Sprint Start Research Project: Is the 100 ms limit still valid?" New Studies in Athletics, 24(1):37-47.<br>'
-    +'4. <a href="https://www.academia.edu/26592344/Effects_of_false_start_disqualification_rules_on_response_times_of_elite_standard_sprinters" target="_blank" style="color:#3b82f6;text-decoration:underline;">Brosnan KC, Hayes K, Harrison AJ (2017)</a>. "Effects of false-start disqualification rules on response-times of elite-standard sprinters." J Sports Sciences, 35(10):929-935.<br>'
-    +'5. Welford AT (1980). "Reaction Times." Academic Press, New York.<br>'
-    +'6. <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;text-decoration:underline;">MindCrowd Study</a>  - Arizona Alzheimer\'s Consortium.</div>'
-    // Nota
-    +'<div style="font-size:10px;font-style:italic;color:rgba(255,255,255,.35);border-top:1px solid rgba(255,255,255,.07);padding-top:10px;margin-top:12px;">⚠️ Opisy opierają się na recenzowanych publikacjach naukowych. Nasz pomiar akcelerometryczny nie jest równoważny pomiarom laboratoryjnym  - służy do śledzenia własnego postępu. Część treści opracowana z wykorzystaniem narzędzi AI i zweryfikowana przez autorów.</div>'
-    +'<div style="font-weight:800;color:#3b82f6;margin-top:14px;text-align:center;">⚡ Elevate Your Game  - trenuj swój mózg tak jak trenujesz ciało!</div>'
+    +'<div style="font-size:13px;font-weight:800;margin-bottom:6px;">⏱️ CZAS REAKCJI</div>'
+    +'<p style="margin-bottom:10px;">Czas reakcji to przedział od pojawienia się bodźca do początku odpowiedzi ruchowej. Średni prosty czas reakcji na bodziec wzrokowy to ~190-250 ms (Welford 1980, Jain et al. 2015).</p>'
+    +'<div style="font-size:13px;font-weight:800;margin-top:12px;margin-bottom:6px;">🏅 SPRINTERZY I 100 MS</div>'
+    +'<p style="margin-bottom:10px;">World Athletics uznaje reakcję &lt;100ms za falstart. Jednak <a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;text-decoration:underline;">Komi et al. (2009)</a> wykazali reakcje poniżej 80ms.</p>'
+    +'<div style="font-size:13px;font-weight:800;margin-top:12px;margin-bottom:6px;">🧠 CO WPŁYWA</div>'
+    +'<p style="margin-bottom:10px;">Wiek, sen, kawa, aktywność fizyczna, nawodnienie. <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;text-decoration:underline;">MindCrowd</a>: degradacja ~3-7ms/rok.</p>'
+    +'<div style="font-size:13px;font-weight:800;margin-top:12px;margin-bottom:6px;">📊 NORMY</div>'
+    +'<div style="margin-bottom:10px;font-size:11px;">&lt;200ms elita | 200-280ms bardzo dobry | 280-350ms przeciętny | &gt;350ms do poprawy</div>'
+    +'<div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.35);line-height:1.6;">📚 <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Jain 2015</a> | <a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain & Hibbs 2007</a> | <a href="https://www.academia.edu/26592344/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Brosnan 2017</a></div>'
     +'</div>'
-    +'<button onclick="document.getElementById(\'motion-info-modal\').remove()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
-  var box=document.createElement('div'); box.innerHTML=h; modal.appendChild(box.firstChild);
-  document.body.appendChild(modal);
+    +'<div style="font-size:9px;font-style:italic;color:rgba(255,255,255,.25);margin-top:8px;">Część treści opracowana z wykorzystaniem narzędzi AI i zweryfikowana na podstawie recenzowanych publikacji naukowych.</div>';
+  _motionModalWrap('motion-info-modal','⚡ Czas Reakcji - O module',body);
+}
+function openGameInfo(game){
+  var data={
+    simple:{t:'🎯 Reakcja - Jak grać?',b:''
+      +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">📋 ZASADY</div>'
+      +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Czekaj na sygnał. Gdy pojawi się bodziec - reaguj jak najszybciej!<br><br>📱 Ruch: przechyl telefon<br>👆 Dotyk: tapnij w ekran<br>💻 Komputer: kliknij lub naciśnij klawisz</div>'
+      +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">⚡ PUNKTY</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:12px;">&lt;200ms = 5 pkt | &lt;300ms = 4 | &lt;400ms = 3 | &lt;600ms = 2 | &lt;800ms = 1<br>Fałszywy start: -1 pkt + ❤️ | Brak reakcji: 0 pkt + ❤️</div>'
+      +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">📈 WYŻSZE LEVELE</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.6;">Szybsze bodźce, krótsze okno reakcji. Od Lv.4 fałszywe bodźce.</div>'},
+    directions:{t:'🧭 Kierunki - Jak grać?',b:''
+      +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">📋 ZASADY</div>'
+      +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Pojawi się strzałka - reaguj w odpowiednim kierunku!<br><br>📱 Ruch: przechyl telefon w kierunku strzałki<br>👆 Dotyk: swipe palcem w kierunku strzałki<br>💻 Komputer: naciśnij strzałkę na klawiaturze</div>'
+      +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">⚡ PUNKTY</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:12px;">Jak w Reakcji + kara za zły kierunek (-2 pkt + ❤️)</div>'
+      +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">📈 WYŻSZE LEVELE</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.6;">Szybciej, od Lv.5 fałszywe strzałki.</div>'},
+    gonogo:{t:'👁 Go/No-Go - Jak grać?',b:''
+      +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">📋 ZASADY</div>'
+      +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;"><span style="color:#4ade80;font-weight:800;">🟢 Zielone = REAGUJ!</span><br><span style="color:#f87171;font-weight:800;">🔴 Czerwone = STÓJ!</span><br><br>Twój mózg naturalnie chce reagować na każdy bodziec. Tu musisz się hamować.</div>'
+      +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">⚡ PUNKTY</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:12px;">Poprawne Go: punkty wg czasu<br>Poprawne No-Go (zignorowałeś czerwone): +1 pkt<br>Fałszywy alarm (na czerwone): -2 pkt + ❤️</div>'
+      +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">📈 WYŻSZE LEVELE</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.6;">Więcej czerwonych bodźców, szybsze zmiany.</div>'}
+  };
+  var d=data[game]; if(!d) return;
+  _motionModalWrap('game-info-modal',d.t,d.b);
 }
 
 // ── Modal "Wzorce  - Jak grać?" ──
@@ -231,7 +246,7 @@ function openPatternInfo(){
   var h='<div style="max-width:420px;width:calc(100% - 32px);background-color:#1a1a1a !important;color:#f2f2f2 !important;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">🧩 Wzorce  - Jak grać?</div><button onclick="document.getElementById(\'pattern-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;">✕</button></div>'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">🎯 Zasady</div>'
-    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Na górze ekranu widzisz <strong style="color:#3b82f6;">WZORZEC</strong> (cel)  - zapamiętaj go.<br>Na dole zmieniają się różne wzorce.<br><br>Gdy dolny wzorzec <strong style="color:#4ade80;">PASUJE</strong> do górnego → reaguj!<br>Gdy <strong style="color:#f87171;">NIE PASUJE</strong> → nie ruszaj się.</div>'
+    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Na górze ekranu widzisz <strong style="color:#3b82f6;">WZORZEC</strong> (cel) - zapamiętaj go.<br>Na dole zmieniają się różne wzorce.<br><br>Gdy dolny wzorzec <strong style="color:#4ade80;">PASUJE</strong> do górnego → reaguj!<br>Gdy <strong style="color:#f87171;">NIE PASUJE</strong> → nie ruszaj się.<br><br><span style="font-size:11px;color:rgba(255,255,255,.5);">📱 Ruch: przechyl w kierunku wzorca<br>👆 Dotyk: tapnij (center) lub swipe (kierunkowy)<br>💻 Komputer: kliknij (center) lub strzałki</span></div>'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">⚡ Punkty i życia</div>'
     +'<div style="font-size:12px;color:#f2f2f2;line-height:1.8;margin-bottom:12px;">Szybka reakcja na pasujący wzorzec = punkty<br>Reakcja na niepasujący = utrata życia<br>Brak reakcji na pasujący = utrata życia<br>🔥 Combo za serie szybkich trafień!</div>'
     // Progresja
