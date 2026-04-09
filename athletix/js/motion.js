@@ -193,18 +193,27 @@ function openMotionInfo(){
     // Postacie
     +'<button onclick="var cl=document.getElementById(\'mi-charlist\');cl.style.display=cl.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🏆 Pokaż wszystkie postacie</button>'
     +'<div id="mi-charlist" style="display:none;max-height:220px;overflow-y:auto;margin-bottom:10px;">'+_charListHtml()+'</div>'
-    // Nerd
-    +'<button onclick="var nd=document.getElementById(\'motion-nerd-section\');nd.style.display=nd.style.display===\'none\'?\'block\':\'none\';" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;width:100%;text-align:center;">🤓 Jak to NAPRAWDĘ działa?</button>'
-    +'<div id="motion-nerd-section" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;margin-top:8px;font-size:12px;font-weight:500;line-height:1.7;color:#f2f2f2;">'
-    +'<div style="font-size:13px;font-weight:800;margin-bottom:6px;">⏱️ CZAS REAKCJI</div>'
-    +'<p style="margin-bottom:10px;">Czas reakcji to przedział od pojawienia się bodźca do początku odpowiedzi ruchowej. Średni prosty czas reakcji na bodziec wzrokowy to ~190-250 ms (Welford 1980, Jain et al. 2015).</p>'
-    +'<div style="font-size:13px;font-weight:800;margin-top:12px;margin-bottom:6px;">🏅 SPRINTERZY I 100 MS</div>'
-    +'<p style="margin-bottom:10px;">World Athletics uznaje reakcję &lt;100ms za falstart. Jednak <a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;text-decoration:underline;">Komi et al. (2009)</a> wykazali reakcje poniżej 80ms.</p>'
-    +'<div style="font-size:13px;font-weight:800;margin-top:12px;margin-bottom:6px;">🧠 CO WPŁYWA</div>'
-    +'<p style="margin-bottom:10px;">Wiek, sen, kawa, aktywność fizyczna, nawodnienie. <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;text-decoration:underline;">MindCrowd</a>: degradacja ~3-7ms/rok.</p>'
-    +'<div style="font-size:13px;font-weight:800;margin-top:12px;margin-bottom:6px;">📊 NORMY</div>'
-    +'<div style="margin-bottom:10px;font-size:11px;">&lt;200ms elita | 200-280ms bardzo dobry | 280-350ms przeciętny | &gt;350ms do poprawy</div>'
-    +'<div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.35);line-height:1.6;">📚 <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Jain 2015</a> | <a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain & Hibbs 2007</a> | <a href="https://www.academia.edu/26592344/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Brosnan 2017</a></div>'
+    // Nerd - wyrazisty przycisk
+    +'<div onclick="var nd=document.getElementById(\'motion-nerd-section\');var ar=document.getElementById(\'nerd-arrow\');if(nd.style.display===\'none\'){nd.style.display=\'block\';ar.style.transform=\'rotate(180deg)\';}else{nd.style.display=\'none\';ar.style.transform=\'\';}" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:12px;padding:12px 14px;margin:14px 0;cursor:pointer;transition:background .2s;" onmouseenter="this.style.background=\'rgba(59,130,246,.1)\'" onmouseleave="this.style.background=\'rgba(59,130,246,.06)\'">'
+    +'<div style="font-size:24px;flex-shrink:0;">🧠</div>'
+    +'<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#3b82f6;">Sekcja dla nerdow</div><div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.45);">Jak to NAPRAWDE dziala? Nauka, fakty, zrodla.</div></div>'
+    +'<div id="nerd-arrow" style="font-size:12px;color:rgba(255,255,255,.3);transition:transform .2s;">▼</div></div>'
+    +'<div id="motion-nerd-section" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;font-size:12px;font-weight:500;line-height:1.7;color:rgba(255,255,255,.6);">'
+    +'<div style="font-size:13px;font-weight:800;color:#3b82f6;margin-bottom:6px;">⏱️ CZAS REAKCJI</div>'
+    +'<p style="margin-bottom:10px;">Czas reakcji to przedzial od pojawienia sie bodzca do poczatku odpowiedzi ruchowej. Sredni prosty czas reakcji na bodziec wzrokowy to ~190-250 ms (Welford 1980, Jain et al. 2015).</p>'
+    +'<div style="font-size:13px;font-weight:800;color:#3b82f6;margin-top:16px;margin-bottom:6px;">🏅 SPRINTERZY I 100 MS</div>'
+    +'<p style="margin-bottom:10px;">World Athletics uznaje reakcje &lt;100ms za falstart. Jednak <a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">Komi et al. (2009)</a> wykazali reakcje ponizej 80ms.</p>'
+    +'<div style="font-size:13px;font-weight:800;color:#3b82f6;margin-top:16px;margin-bottom:6px;">🧠 CO WPLYWA</div>'
+    +'<p style="margin-bottom:10px;">Wiek, sen, kawa, aktywnosc fizyczna, nawodnienie. <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">MindCrowd</a>: degradacja ~3-7ms/rok.</p>'
+    +'<div style="font-size:13px;font-weight:800;color:#3b82f6;margin-top:16px;margin-bottom:6px;">📊 NORMY</div>'
+    +'<div style="margin-bottom:10px;font-size:11px;">&lt;200ms elita | 200-280ms bardzo dobry | 280-350ms przecietny | &gt;350ms do poprawy</div>'
+    +'<div style="background:rgba(59,130,246,.04);border-radius:8px;padding:10px;margin-top:10px;">'
+    +'<div style="font-size:11px;font-weight:700;color:#3b82f6;margin-bottom:6px;">📚 Zrodla</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.5);line-height:1.8;">'
+    +'<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">Jain et al. (2015)</a> - czas reakcji wzrokowej vs sluchowej<br>'
+    +'<a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">Pain & Hibbs (2007)</a> - minimalny czas reakcji sprinterow<br>'
+    +'<a href="https://www.academia.edu/26592344/" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">Brosnan et al. (2017)</a> - progi falstartu w sprincie<br>'
+    +'<a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;font-weight:600;text-decoration:underline;">MindCrowd Study</a> - czas reakcji a wiek</div></div>'
     +'</div>'
     +'<div style="font-size:9px;font-style:italic;color:rgba(255,255,255,.25);margin-top:8px;">Część treści opracowana z wykorzystaniem narzędzi AI i zweryfikowana na podstawie recenzowanych publikacji naukowych.</div>';
   _motionModalWrap('motion-info-modal','⚡ Czas Reakcji - O module',body);
@@ -234,7 +243,8 @@ function openGameInfo(game){
       +'<div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.6;">Więcej czerwonych bodźców, szybsze zmiany.</div>'}
   };
   var d=data[game]; if(!d) return;
-  _motionModalWrap('game-info-modal',d.t,d.b);
+  var nerdTeaser='<div style="background:rgba(59,130,246,.04);border-radius:10px;padding:10px;margin-top:12px;"><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.4);">🧠 Ciekawi Cie nauka za tym? Sprawdz sekcje nerdowa w opisie modulu ⚡ Czas Reakcji!</div></div>';
+  _motionModalWrap('game-info-modal',d.t,d.b+nerdTeaser);
 }
 
 // ── Modal "Wzorce  - Jak grać?" ──
