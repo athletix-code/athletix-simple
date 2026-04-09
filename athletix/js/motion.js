@@ -322,59 +322,93 @@ function _setMotionInput(m){
   if(mb){ mb.className='chip'+(m==='motion'?' on-blue':''); }
   if(mt){ mt.className='chip'+(m==='touch'?' on-blue':''); }
 }
-// Desktop/touch click handler
-var _swipeStart=null, _motionTouchStartFn=null, _motionTouchEndFn=null;
-function _onMotionClick(e){
-  if(!_motionState.listening) return;
-  if(e.target.closest('button')) return;
-  // W trybie dotyk reakcja idzie przez touchend — click ignoruj aby nie podwajać
-  if(_motionInputMode==='touch') return;
-  _motionState._keyPressed=' ';
-}
+// ── Unified input handling ──
+var _swipeStart=null, _inputListeners=[], _lastMousePos=null;
+
+function _isCloseBtn(e){ return e.target.id==='motion-close-x'||e.target.closest('#motion-close-x'); }
+
 function _addInputListeners(){
-  document.addEventListener('keydown',_onDesktopKey);
   var ma=el('motion-active');
-  ma.addEventListener('click',_onMotionClick);
-  // Swipe detection dla dotyk
-  _motionTouchStartFn=function(e){
+  var ls=[];
+
+  // Keyboard — any key (except Escape)
+  var onKey=function(e){
     if(!_motionState.listening) return;
-    if(e.target.closest('button,#motion-close-x')) return;
+    if(e.key==='Escape') return;
+    e.preventDefault();
+    // Arrows → direction keys, everything else → generic reaction
+    if(e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown') _motionState._keyPressed=e.key;
+    else _motionState._keyPressed=' ';
+  };
+  document.addEventListener('keydown',onKey);
+  ls.push(['keydown',onKey,document]);
+
+  // Mousedown — fast click reaction
+  var onMouse=function(e){
+    if(!_motionState.listening) return;
+    if(_isCloseBtn(e)) return;
+    if(e.target.closest('button')) return;
+    _motionState._keyPressed=' ';
+  };
+  ma.addEventListener('mousedown',onMouse);
+  ls.push(['mousedown',onMouse,ma]);
+
+  // Mousemove — movement > 20px threshold, with direction for directions mode
+  _lastMousePos=null;
+  var onMove=function(e){
+    if(!_motionState.listening) return;
+    if(!_lastMousePos){ _lastMousePos={x:e.clientX,y:e.clientY}; return; }
+    var dx=e.clientX-_lastMousePos.x, dy=e.clientY-_lastMousePos.y;
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist>20){
+      _lastMousePos={x:e.clientX,y:e.clientY};
+      if(_motionMode==='directions'){
+        if(Math.abs(dx)>Math.abs(dy)) _motionState._keyPressed=dx>0?'ArrowRight':'ArrowLeft';
+        else _motionState._keyPressed=dy>0?'ArrowDown':'ArrowUp';
+      } else {
+        _motionState._keyPressed=' ';
+      }
+    }
+  };
+  ma.addEventListener('mousemove',onMove);
+  ls.push(['mousemove',onMove,ma]);
+
+  // Touch — swipe for directions, tap for others
+  var onTouchStart=function(e){
+    if(!_motionState.listening) return;
+    if(_isCloseBtn(e)||e.target.closest('button')) return;
     _swipeStart={x:e.touches[0].clientX,y:e.touches[0].clientY,time:Date.now()};
   };
-  _motionTouchEndFn=function(e){
+  var onTouchEnd=function(e){
     if(!_motionState.listening||!_swipeStart) return;
-    if(e.target.closest('button,#motion-close-x')) return;
+    if(_isCloseBtn(e)||e.target.closest('button')) return;
     var dx=e.changedTouches[0].clientX-_swipeStart.x;
     var dy=e.changedTouches[0].clientY-_swipeStart.y;
     var dt=Date.now()-_swipeStart.time;
     _swipeStart=null;
     if(dt>1000) return;
-    var minDist=30;
-    if(_motionInputMode==='touch'&&(_motionMode==='directions'||(_motionMode==='pattern'&&_patCfg(_gameLevel).pos==='quad'))){
-      if(Math.abs(dx)<minDist&&Math.abs(dy)<minDist) return; // za krótki swipe — ignoruj
-      if(Math.abs(dx)>Math.abs(dy)){
-        _motionState._keyPressed=dx>0?'ArrowRight':'ArrowLeft';
-      } else {
-        _motionState._keyPressed=dy>0?'ArrowDown':'ArrowUp';
-      }
+    var needDir=(_motionMode==='directions'||(_motionMode==='pattern'&&_patCfg(_gameLevel).pos==='quad'));
+    if(needDir){
+      if(Math.abs(dx)<30&&Math.abs(dy)<30) return;
+      if(Math.abs(dx)>Math.abs(dy)) _motionState._keyPressed=dx>0?'ArrowRight':'ArrowLeft';
+      else _motionState._keyPressed=dy>0?'ArrowDown':'ArrowUp';
     } else {
-      // Tap = reakcja (prosty, gonogo, wzorce center)
       _motionState._keyPressed=' ';
     }
   };
-  ma.addEventListener('touchstart',_motionTouchStartFn,{passive:true});
-  ma.addEventListener('touchend',_motionTouchEndFn,{passive:true});
+  ma.addEventListener('touchstart',onTouchStart,{passive:true});
+  ma.addEventListener('touchend',onTouchEnd,{passive:true});
+  ls.push(['touchstart',onTouchStart,ma]);
+  ls.push(['touchend',onTouchEnd,ma]);
+
+  _inputListeners=ls;
 }
+
 function _removeInputListeners(){
-  document.removeEventListener('keydown',_onDesktopKey);
-  var ma=el('motion-active');
-  if(_motionTouchStartFn) ma.removeEventListener('touchstart',_motionTouchStartFn);
-  if(_motionTouchEndFn) ma.removeEventListener('touchend',_motionTouchEndFn);
-  _motionTouchStartFn=null; _motionTouchEndFn=null;
-}
-function _onDesktopKey(e){
-  if(!_motionState.listening) return;
-  if(e.key===' '||e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'||e.key==='Enter'){ e.preventDefault(); _motionState._keyPressed=e.key; }
+  _inputListeners.forEach(function(l){ l[2].removeEventListener(l[0],l[1]); });
+  _inputListeners=[];
+  _lastMousePos=null;
+  _swipeStart=null;
 }
 
 function _spawnCloseX(){
@@ -575,8 +609,8 @@ function _runTrial(idx,cfg,trialResults,cb){
   _motionState.listening=false; _motionState._keyPressed=null;
   var delay=cfg.delayMin+Math.random()*(cfg.delayMax-cfg.delayMin);
   var falseStart=false;
-  _motionState.listening=true;
-  var wc=setInterval(function(){ if(detectMovement()||(_desktopFallback&&_motionState._keyPressed)){ falseStart=true; _motionState._keyPressed=null; } },50);
+  _motionState.listening=true; _lastMousePos=null;
+  var wc=setInterval(function(){ if(detectMovement()||_motionState._keyPressed){ falseStart=true; _motionState._keyPressed=null; } },50);
 
   setTimeout(function(){
     clearInterval(wc); _motionState.listening=false;
@@ -597,9 +631,9 @@ function _runTrial(idx,cfg,trialResults,cb){
       // Fałszywy bodziec — nie reaguj
       ma.innerHTML=_mHUD()+_mCircle('nogo','<div style="font-size:48px;">⛔</div>','NIE reaguj!');
       _sndBad();
-      _motionState.listening=true; _motionState._keyPressed=null;
+      _motionState.listening=true; _motionState._keyPressed=null; _lastMousePos=null;
       var fakeReacted=false;
-      var fc=setInterval(function(){ if(detectMovement()||(_desktopFallback&&_motionState._keyPressed)){ fakeReacted=true; _motionState._keyPressed=null; } },50);
+      var fc=setInterval(function(){ if(detectMovement()||_motionState._keyPressed){ fakeReacted=true; _motionState._keyPressed=null; } },50);
       setTimeout(function(){
         clearInterval(fc); _motionState.listening=false;
         _gameTotalTrials++;
@@ -619,9 +653,9 @@ function _runTrial(idx,cfg,trialResults,cb){
       ma.innerHTML=_mHUD()+_mCircle('go','<div style="font-size:60px;font-weight:900;">'+arrows[dirTarget]+'</div>','');
     } else if(isNoGo){
       ma.innerHTML=_mHUD()+_mCircle('nogo','','STÓJ!');
-      _motionState.listening=true; _motionState._keyPressed=null;
+      _motionState.listening=true; _motionState._keyPressed=null; _lastMousePos=null;
       var nogoReacted=false;
-      var nc=setInterval(function(){ if(detectMovement()||(_desktopFallback&&_motionState._keyPressed)){ nogoReacted=true; _motionState._keyPressed=null; } },16);
+      var nc=setInterval(function(){ if(detectMovement()||_motionState._keyPressed){ nogoReacted=true; _motionState._keyPressed=null; } },16);
       setTimeout(function(){
         clearInterval(nc); _motionState.listening=false; _gameTotalTrials++;
         if(nogoReacted){ _gameLives--; setTimeout(_flashLives,50); _gamePoints-=3; _gameCombo=0; _mPtsAnim('-3 💥','var(--red-text)'); _sndBad(); ma.innerHTML=_mHUD()+_mCircle('wrong','<div style="font-size:24px;">Fałszywy alarm!</div>',''); }
@@ -634,19 +668,18 @@ function _runTrial(idx,cfg,trialResults,cb){
       ma.innerHTML=_mHUD()+_mCircle('go','','REAGUJ!');
     }
     _sndStim();
-    _motionState.listening=true; _motionState._keyPressed=null;
+    _motionState.listening=true; _motionState._keyPressed=null; _lastMousePos=null;
     var rc=setInterval(function(){
       if(_motionAbort){ clearInterval(rc); return; }
       var moved=false;
       if(_motionMode==='directions'){
         var dir;
-        if(_desktopFallback||_motionInputMode==='touch'){
-          var kp=_motionState._keyPressed;
-          dir=kp?({ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[kp]||null):null;
-        } else { dir=detectDirection(); }
+        var kp=_motionState._keyPressed;
+        if(kp) dir={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[kp]||null;
+        if(!dir&&_motionInputMode==='motion'&&!_desktopFallback) dir=detectDirection();
         if(dir){ moved=true; _motionState._keyPressed=null; var correct=dir===dirTarget; _finishTrial(clearInterval,rc,rt,stimTime,correct,correct?null:'wrong_dir',trialResults,idx,cfg,cb); return; }
       } else {
-        if(detectMovement()||(_desktopFallback&&_motionState._keyPressed)||(_motionInputMode==='touch'&&_motionState._keyPressed)){ moved=true; _motionState._keyPressed=null; _finishTrial(clearInterval,rc,rt,stimTime,true,null,trialResults,idx,cfg,cb); return; }
+        if(detectMovement()||_motionState._keyPressed){ moved=true; _motionState._keyPressed=null; _finishTrial(clearInterval,rc,rt,stimTime,true,null,trialResults,idx,cfg,cb); return; }
       }
     },16);
     var rt=setTimeout(function(){
@@ -954,11 +987,11 @@ function _runPatternLevel(idx,cfg,results,cb){
     +'<div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:4px;">'+(idx+1)+'/'+pc.total+'</div>'
     +'<div style="height:4px;background:rgba(255,255,255,.08);border-radius:2px;"><div style="width:'+Math.round((idx+1)/pc.total*100)+'%;height:4px;background:var(--accent);border-radius:2px;transition:width .3s;"></div></div></div>';
   _sndStim();
-  _motionState.listening=true; _motionState._keyPressed=null;
+  _motionState.listening=true; _motionState._keyPressed=null; _lastMousePos=null;
   var reacted=false;
   var rc=setInterval(function(){
     if(_motionAbort){ clearInterval(rc); return; }
-    if(detectMovement()||(_desktopFallback&&_motionState._keyPressed)){
+    if(detectMovement()||_motionState._keyPressed){
       clearInterval(rc); clearTimeout(rt); _motionState.listening=false; _motionState._keyPressed=null;
       reacted=true; var t=Date.now()-stimTime; _gameTotalTrials++;
       if(isMatch){
