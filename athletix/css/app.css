@@ -3,16 +3,7 @@ html{touch-action:manipulation;overflow-x:hidden;}
 body{overflow-x:hidden;margin:0;}
 input,select,textarea{font-size:16px!important;}
 
-/* ── LIGHT THEME ── */
-html[data-theme="light"]{
-  --bg:#F4F2EE;--s1:#FFFFFF;--s2:#eceae6;--s3:#dddbd7;
-  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.15);
-  --text:#1a1a1a;--muted:rgba(0,0,0,.5);--dim:rgba(0,0,0,.35);
-  --accent:#1E7E3E;--accent-bg:rgba(30,126,62,.08);
-  --red-text:#E24B4A;--green-text:#1E7E3E;--green:#1E7E3E;
-  --amber-text:#92400e;--amber:#A67C00;--purple-text:#6b21a8;--purple:#7c3aed;
-  --red:#E24B4A;--orange-text:#c2410c;--blue-text:#1A5FA8;
-}
+/* ── LIGHT THEME colors in theme.css ── */
 html[data-theme="light"] .preset-btn.active{ color:#9a3412; background:rgba(154,52,18,.1); border-color:rgba(154,52,18,.4); }
 html[data-theme="light"] .preset-btn.active .pb-vals{ color:#7c2d12; }
 html[data-theme="light"] .hdr-app{ color:#0f0f0f; }
@@ -42,17 +33,7 @@ html[data-theme="light"] #motion-active{
 #lock-bar-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.9);}
 .lock-btn{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.35);border-radius:var(--r-xs);padding:8px 12px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;}
 
-:root{
-  --bg:#1A1A1A;--s1:#151515;--s2:#222222;--s3:#2a2a2a;
-  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.12);
-  --text:#F0F0F0;--muted:#777777;--dim:rgba(255,255,255,.35);
-  --accent:#52C97B;--accent-bg:rgba(82,201,123,.12);
-  --red:#E24B4A;--red-bg:rgba(226,75,74,.13);--red-text:#E24B4A;--red-fill:#7f1d1d;
-  --amber:#D4A843;--amber-fill:#78350f;--amber-text:#D4A843;
-  --green:#52C97B;--green-bg:rgba(82,201,123,.13);--green-text:#52C97B;--green-fill:#14532d;
-  --purple:#a855f7;--purple-bg:rgba(168,85,247,.14);--purple-text:#c084fc;
-  --r:14px;--r-sm:9px;--r-xs:6px;
-}
+/* ── Colors defined in theme.css ── */
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:none;}
 
 .mini-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:9px;}

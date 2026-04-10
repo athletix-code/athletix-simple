@@ -1,0 +1,127 @@
+/* ═══════════════════════════════════════
+   THEME - Single Source of Truth
+   AthletiX App - paleta 1:1 z CRM
+   ═══════════════════════════════════════ */
+
+:root {
+  /* === TŁA === */
+  --bg: #1A1A1A;
+  --surface: #151515;
+  --card: #222222;
+  --card-hover: #2a2a2a;
+  --card-border: rgba(255,255,255,0.08);
+
+  /* === AKCENTY === */
+  --green: #52C97B;
+  --green-hover: #3fa866;
+  --green-bg: rgba(82,201,123,0.08);
+  --green-border: rgba(82,201,123,0.15);
+  --green-glow: rgba(82,201,123,0.1);
+
+  --gold: #D4A843;
+  --gold-hover: #b8922e;
+  --gold-bg: rgba(212,168,67,0.08);
+  --gold-border: rgba(212,168,67,0.15);
+
+  --red: #E24B4A;
+  --red-bg: rgba(226,75,74,0.08);
+  --red-border: rgba(226,75,74,0.15);
+
+  --blue: #3A8FD8;
+  --orange: #FF8C42;
+  --purple: #a855f7;
+  --purple-bg: rgba(168,85,247,0.14);
+
+  --brand-red: #dc2626;
+
+  /* === TEKST === */
+  --text: #F0F0F0;
+  --text-secondary: #AAAAAA;
+  --muted: #777777;
+  --hint: #555555;
+  --dim: rgba(255,255,255,0.35);
+
+  /* === GRADIENTY === */
+  --gradient-line: linear-gradient(90deg, transparent, rgba(82,201,123,0.12), rgba(212,168,67,0.18), rgba(82,201,123,0.12), transparent);
+  --gradient-progress: linear-gradient(90deg, #52C97B, #D4A843);
+  --gradient-btn-primary: linear-gradient(135deg, rgba(82,201,123,0.1), rgba(212,168,67,0.06));
+  --gradient-team-bar: linear-gradient(135deg, rgba(82,201,123,0.08), rgba(212,168,67,0.05));
+
+  /* === BACKWARD COMPAT (stare zmienne) === */
+  --accent: var(--green);
+  --accent-bg: var(--green-bg);
+  --s1: var(--surface);
+  --s2: var(--card);
+  --s3: var(--card-hover);
+  --border: var(--card-border);
+  --border2: rgba(255,255,255,0.12);
+  --red-text: var(--red);
+  --green-text: var(--green);
+  --amber: var(--gold);
+  --amber-text: var(--gold);
+  --amber-fill: #78350f;
+  --red-fill: #7f1d1d;
+  --green-fill: #14532d;
+  --green-bg-compat: rgba(82,201,123,0.13);
+  --red-bg-compat: rgba(226,75,74,0.13);
+  --purple-text: #c084fc;
+
+  /* === LAYOUT === */
+  --r: 14px;
+  --r-sm: 9px;
+  --r-xs: 6px;
+  --font-main: 'Montserrat', -apple-system, sans-serif;
+}
+
+/* === LIGHT THEME === */
+[data-theme="light"] {
+  --bg: #F4F2EE;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --card-hover: #f0ede8;
+  --card-border: rgba(0,0,0,0.08);
+
+  --green: #1E7E3E;
+  --green-hover: #186b33;
+  --green-bg: rgba(30,126,62,0.08);
+  --green-border: rgba(30,126,62,0.15);
+  --green-glow: rgba(30,126,62,0.08);
+
+  --gold: #A67C00;
+  --gold-hover: #8a6700;
+  --gold-bg: rgba(166,124,0,0.08);
+  --gold-border: rgba(166,124,0,0.15);
+
+  --red: #E24B4A;
+  --red-bg: rgba(226,75,74,0.08);
+  --red-border: rgba(226,75,74,0.15);
+
+  --blue: #1A5FA8;
+  --orange: #d97706;
+
+  --text: #2a2418;
+  --text-secondary: rgba(42,36,24,0.6);
+  --muted: rgba(42,36,24,0.4);
+  --hint: rgba(42,36,24,0.25);
+  --dim: rgba(42,36,24,0.35);
+
+  --gradient-line: linear-gradient(90deg, transparent, rgba(30,126,62,0.1), rgba(166,124,0,0.15), rgba(30,126,62,0.1), transparent);
+  --gradient-progress: linear-gradient(90deg, #1E7E3E, #A67C00);
+  --gradient-btn-primary: linear-gradient(135deg, rgba(30,126,62,0.08), rgba(166,124,0,0.05));
+  --gradient-team-bar: linear-gradient(135deg, rgba(30,126,62,0.06), rgba(166,124,0,0.04));
+
+  --border2: rgba(0,0,0,0.15);
+  --accent: var(--green);
+  --accent-bg: var(--green-bg);
+  --s1: var(--surface);
+  --s2: var(--card);
+  --s3: var(--card-hover);
+  --border: var(--card-border);
+  --red-text: var(--red);
+  --green-text: var(--green);
+  --amber: var(--gold);
+  --amber-text: #92400e;
+  --purple-text: #6b21a8;
+  --green-bg-compat: rgba(30,126,62,0.13);
+  --red-bg-compat: rgba(226,75,74,0.13);
+}
