@@ -1,5 +1,33 @@
 # AthletiXApp Simple — Sigma AthletiX
 
+## ARCHITEKTURA
+
+### Pliki konfiguracyjne (Single Source of Truth):
+- `css/theme.css` - WSZYSTKIE kolory, oba tryby (dark/light), gradienty, radiusy
+- `js/config.js` - wersja, branding, ATP system, rangi, postacie, feature flags, storage keys
+- `js/i18n.js` - WSZYSTKIE teksty UI w PL i EN, helper `AX_LANG.t('key')`
+
+### Zasady:
+1. ZERO hardcoded kolorów poza theme.css (wyjątek: brand-red #dc2626)
+2. ZERO hardcoded tekstów UI poza i18n.js (docelowo)
+3. ZERO magicznych liczb poza config.js (ATP wartości, progi rang)
+4. Nowy motyw = nowy blok `[data-theme="nazwa"]` w theme.css
+5. Nowy język = nowy obiekt w i18n.js
+6. Nowa ranga/postać = nowy wpis w config.js
+
+### Kolejność ładowania:
+1. `css/theme.css` (kolory)
+2. `css/app.css` (layout, komponenty)
+3. `js/config.js` (konfiguracja)
+4. `js/i18n.js` (tłumaczenia)
+5. `js/storage.js` → `js/core.js` → ... → `js/motion.js` → `js/search.js` → `js/sniper.js` → `js/agility.js` → `js/share.js` → `js/quiz.js`
+
+### Paleta kolorów (CRM 1:1):
+- Dark: bg #1A1A1A, surface #151515, card #222222, green #52C97B, gold #D4A843, red #E24B4A, text #F0F0F0, muted #777
+- Light: bg #F4F2EE, surface #FFF, green #1E7E3E, gold #A67C00, red #E24B4A, text #1a1a1a
+
+---
+
 ## 1. Opis projektu
 Aplikacja webowa (PWA) dla trenera personalnego / S&C coacha. Wersja modularna z oddzielnymi plikami JS/CSS. Służy do:
 - Prowadzenia sesji treningowych z kontrolą tempa ruchu (tempo timer)

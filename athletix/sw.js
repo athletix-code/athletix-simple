@@ -1,7 +1,8 @@
-var CACHE_NAME = 'athletix-v62';
+var CACHE_NAME = 'athletix-v63';
 var URLS_TO_CACHE = [
   './', './index.html', './manifest.json',
   './css/theme.css', './css/app.css',
+  './js/config.js', './js/i18n.js',
   './js/storage.js', './js/core.js', './js/timers.js',
   './js/athletes.js', './js/wallet.js', './js/status.js',
   './js/diary.js', './js/reports.js', './js/plans.js', './js/data.js', './js/settings.js',
