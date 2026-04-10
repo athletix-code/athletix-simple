@@ -624,7 +624,15 @@
     <button onclick="event.stopPropagation();openMotionInfo()" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:16px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;">ℹ️</button>
   </div>
   <div style="background:var(--s1);border:1px dashed var(--border2);border-radius:16px;padding:14px;margin-bottom:6px;opacity:.4;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:24px;">🎯</span><div><div style="font-size:15px;font-weight:800;color:var(--text);">Stabilność</div><div style="font-size:11px;color:var(--muted);">Kontrola postawy, równowaga</div></div><span style="font-size:8px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-left:auto;">Wkrótce</span></div></div>
-  <div style="background:var(--s1);border:1px dashed var(--border2);border-radius:16px;padding:14px;margin-bottom:6px;opacity:.4;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:24px;">🏃</span><div><div style="font-size:15px;font-weight:800;color:var(--text);">Agility</div><div style="font-size:11px;color:var(--muted);">Zmiana kierunku, COD</div></div><span style="font-size:8px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-left:auto;">Wkrótce</span></div></div>
+  <div onclick="document.getElementById('agility-opts').style.display=document.getElementById('agility-opts').style.display==='block'?'none':'block'" style="background:var(--s1);border:2px solid var(--accent);border-radius:16px;padding:16px;margin-bottom:6px;cursor:pointer;position:relative;">
+    <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:24px;">🏃</span><div><div style="font-size:15px;font-weight:800;color:var(--text);">Agility</div><div style="font-size:11px;color:var(--muted);">Zmiana kierunku, COD, lokomocja</div></div></div>
+    <button onclick="event.stopPropagation();openAgilityInfo()" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:16px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;">ℹ️</button>
+  </div>
+  <div id="agility-opts" style="display:none;margin-bottom:6px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">WYBIERZ GRĘ</div>
+    <div id="mt-agility" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s1);border:1px solid var(--border);border-radius:14px;cursor:pointer;font-family:Montserrat,sans-serif;"><span style="font-size:28px;">🏃</span><div style="flex:1;"><div style="font-size:13px;font-weight:800;color:var(--text);">Agility Dash</div><div style="font-size:10px;color:var(--muted);">Unikaj przeszkód. Ruszaj się naprawdę.</div></div><button onclick="event.stopPropagation();openAgilityGameInfo()" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);font-size:14px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">ℹ️</button><button onclick="event.stopPropagation();_setMotionMode('agility');startMotionGame()" style="width:44px;height:44px;border-radius:12px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(59,130,246,.3);">▶</button></div>
+    <div style="font-size:10px;color:var(--muted);margin-top:6px;padding:0 4px;">📱 Wymaga ruchu ciałem - tylko tryb akcelerometru</div>
+  </div>
 
   <div id="motion-reaction-opts" style="display:block;margin-top:12px;">
     <div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Reakcja na</div>
@@ -853,11 +861,12 @@
 <script src="js/supabase-config.js?v=54"></script>
 <script src="js/sync.js?v=54"></script>
 <script src="js/autogrow.js?v=54"></script>
-<script src="js/motion.js?v=83"></script>
+<script src="js/motion.js?v=84"></script>
 <script src="js/search.js?v=6"></script>
 <script src="js/share.js?v=5"></script>
 <script src="js/quiz.js?v=7"></script>
 <script src="js/sniper.js?v=3"></script>
+<script src="js/agility.js?v=1"></script>
 
 </body>
 </html>
