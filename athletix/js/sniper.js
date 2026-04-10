@@ -125,7 +125,7 @@ function _runSniperRound(lv,round,results){
   // Crosshair
   var xh='<div id="sn-crosshair" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;pointer-events:none;z-index:20;">'
     +'<div style="position:absolute;inset:0;border:1.5px solid rgba(255,255,255,0.4);border-radius:50%;"></div>'
-    +'<div style="position:absolute;top:50%;left:50%;width:3px;height:3px;background:#3b82f6;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(59,130,246,0.3);"></div>'
+    +'<div style="position:absolute;top:50%;left:50%;width:3px;height:3px;background:#4ade80;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(59,130,246,0.3);"></div>'
     +'<div style="position:absolute;top:8px;left:50%;width:1.5px;height:16px;background:rgba(255,255,255,0.5);transform:translateX(-50%);"></div>'
     +'<div style="position:absolute;bottom:8px;left:50%;width:1.5px;height:16px;background:rgba(255,255,255,0.5);transform:translateX(-50%);"></div>'
     +'<div style="position:absolute;left:8px;top:50%;width:16px;height:1.5px;background:rgba(255,255,255,0.5);transform:translateY(-50%);"></div>'
@@ -138,7 +138,7 @@ function _runSniperRound(lv,round,results){
     var te=document.getElementById('sn-timer'); if(!te){ clearInterval(_snTimerInt); return; }
     var sec=(Date.now()-_snStart)/1000;
     te.textContent=sec.toFixed(1)+'s';
-    te.style.color=sec<2?'#4ade80':sec<4?'#3b82f6':sec<6?'#d97706':'#f87171';
+    te.style.color=sec<2?'#4ade80':sec<4?'#4ade80':sec<6?'#d97706':'#f87171';
   },100);
   // Timeout
   _snTout=setTimeout(function(){

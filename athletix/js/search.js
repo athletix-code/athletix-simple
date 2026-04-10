@@ -46,7 +46,7 @@ function _stopSearchTimer(){ if(_searchTimerInt){ clearInterval(_searchTimerInt)
 function _timerColor(sec,mode,lv){
   var t=_getThresholds(mode,lv);
   if(sec<t[0]) return '#4ade80';
-  if(sec<t[1]) return '#3b82f6';
+  if(sec<t[1]) return '#4ade80';
   if(sec<t[2]) return '#d97706';
   return '#f87171';
 }
@@ -191,7 +191,7 @@ function _runPairsLevel(lv,round,results){
     var idx=parseInt(cell.dataset.idx);
     if(selected===null){
       selected=idx;
-      cell.style.borderColor='#3b82f6'; cell.style.background='rgba(59,130,246,.1)'; cell.style.transform='scale(1.05)';
+      cell.style.borderColor='#4ade80'; cell.style.background='rgba(59,130,246,.1)'; cell.style.transform='scale(1.05)';
     } else if(selected===idx){
       cell.style.borderColor='rgba(255,255,255,.1)'; cell.style.background='rgba(255,255,255,.06)'; cell.style.transform='';
       selected=null;
@@ -401,7 +401,7 @@ function _runWordsLevel(lv,round,results){
     var r=parseInt(cell.dataset.r),c=parseInt(cell.dataset.c);
     if(!selStart){
       selStart={r:r,c:c};
-      cell.style.borderColor='#3b82f6'; cell.style.background='rgba(59,130,246,.15)';
+      cell.style.borderColor='#4ade80'; cell.style.background='rgba(59,130,246,.15)';
     } else {
       var dr=r-selStart.r,dc=c-selStart.c;
       var len=Math.max(Math.abs(dr),Math.abs(dc))+1;
@@ -460,7 +460,7 @@ function openSearchInfo(){
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">🔍 Wyszukiwanie - Jak grać?</div><button onclick="document.getElementById(\'search-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;">✕</button></div>'
     +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;"><strong>🔢 Pary</strong> - znajdź dwie takie same cyfry<br><strong>📊 Kolejność</strong> - klikaj cyfry od 1 do N po kolei<br><strong>📝 Słowa</strong> - znajdź ukryte słowa</div>'
     +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin:8px 0;">⏱️ Timeout = 0 pkt. Życie tracisz za 3 timeouty z rzędu.</div>'
-    +'<button onclick="document.getElementById(\'search-info-modal\').remove()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
+    +'<button onclick="document.getElementById(\'search-info-modal\').remove()" style="width:100%;padding:12px;background:#4ade80;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
   var box=document.createElement('div'); box.innerHTML=h; modal.appendChild(box.firstChild);
   document.body.appendChild(modal);
 }

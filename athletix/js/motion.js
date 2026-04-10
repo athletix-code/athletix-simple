@@ -159,13 +159,13 @@ function _setMotionMode(m){
 // ── Modal "Jak grać?" ──
 function _nerdSectionContent(){
   return '<div style="font-size:12px;line-height:1.8;color:rgba(255,255,255,0.65);">'
-+'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:16px 0 8px;">📱 Akcelerometr MEMS - maleństwo, które Cię mierzy</div>'
++'<div style="font-size:14px;font-weight:800;color:#4ade80;margin:16px 0 8px;">📱 Akcelerometr MEMS - maleństwo, które Cię mierzy</div>'
 +'<p>W Twoim telefonie siedzi mikroskopijny czujnik ruchu - akcelerometr MEMS (Micro-Electro-Mechanical System). To struktura krzemowa mniejsza niż ziarno ryżu. Wewnątrz znajduje się maleńka masa zawieszona na sprężynkach - gdy telefon się porusza, masa przesuwa się względem obudowy, zmieniając pojemność elektryczną kondensatorów. Ta zmiana jest przeliczana na wartość przyspieszenia w trzech osiach: X, Y i Z.</p>'
 +'<p>Twój telefon próbkuje dane z akcelerometru około 60 razy na sekundę (60 Hz) - co ~16.7 ms. Dla porównania - profesjonalne systemy w laboratoriach biomechanicznych próbkują z częstotliwością 1000-2000 Hz. Nasze pomiary są przybliżone, ale wystarczające do śledzenia trendów.</p>'
 +'<p>Pierwszy telefon z akcelerometrem? Nokia 5500 Sport (2006). Ale to iPhone w 2007 spopularyzował ten czujnik. Dziś kosztują mniej niż 1 dolar za sztukę.</p>'
 +'<p style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:6px;">Uwaga: nasze pomiary dodają własne opóźnienia (transmisja danych, przetwarzanie w przeglądarce), więc bezwzględne wartości nie są porównywalne z pomiarami laboratoryjnymi. Traktuj je jako wskaźnik relatywny.</p>'
 
-+'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">⏱️ Anatomia czasu reakcji - co się dzieje w Twoim ciele</div>'
++'<div style="font-size:14px;font-weight:800;color:#4ade80;margin:20px 0 8px;">⏱️ Anatomia czasu reakcji - co się dzieje w Twoim ciele</div>'
 +'<p>Czas reakcji to kaskada zdarzeń neurobiologicznych:</p>'
 +'<p><span style="font-weight:700;color:rgba(255,255,255,0.8);">1. Detekcja bodźca (~20-40 ms wzrok, ~8-10 ms słuch)</span><br>Światło pada na siatkówkę, fotoreceptory przekształcają je w sygnał elektryczny, który podróżuje nerwem wzrokowym do kory wzrokowej. Dźwięk jest szybszy - krótsza droga nerwowa (<a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain & Hibbs, 2007</a>).</p>'
 +'<p><span style="font-weight:700;color:rgba(255,255,255,0.8);">2. Przetwarzanie w korze mózgowej (~40-100 ms)</span><br>Mózg rozpoznaje bodziec, podejmuje decyzję i wybiera odpowiedź. W zadaniach go/no-go wymaga to zaangażowania kory przedczołowej i trwa dłużej.</p>'
@@ -173,46 +173,46 @@ function _nerdSectionContent(){
 +'<p><span style="font-weight:700;color:rgba(255,255,255,0.8);">4. Aktywacja mięśnia i ruch (~30-50 ms)</span><br>Acetylocholina uruchamia skurcz włókien mięśniowych. Sam skurcz i ruch to tak zwane opóźnienie elektromechaniczne (EMD).</p>'
 +'<p>Suma: ~190-250 ms dla prostego bodźca wzrokowego u młodych dorosłych (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Jain et al., 2015</a>).</p>'
 
-+'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🧠 Mielinizacja - jak trening dosłownie zmienia Twój mózg</div>'
++'<div style="font-size:14px;font-weight:800;color:#4ade80;margin:20px 0 8px;">🧠 Mielinizacja - jak trening dosłownie zmienia Twój mózg</div>'
 +'<p>Mielina to substancja tłuszczowa (70-80% lipidów) produkowana przez oligodendrocyty. Owijając aksony neuronów, tworzy izolację elektryczną. Bez niej sygnał płynie z prędkością 0.5-2 m/s. Z mieliną "skacze" między węzłami Ranviera (przewodzenie skokowe) - nawet 120 m/s.</p>'
 +'<p><span style="font-weight:700;color:rgba(255,255,255,0.8);">Mielinizacja jest procesem dynamicznym.</span> Badanie McKenzie et al. w Science (<a href="https://pubmed.ncbi.nlm.nih.gov/25324381/" target="_blank" style="color:#3b82f6;text-decoration:underline;">2014</a>) wykazało, że uczenie się nowych umiejętności motorycznych wymaga aktywnej mielinizacji. Zablokowanie tego procesu u myszy uniemożliwiało im nauczenie się nowych zadań.</p>'
 +'<p>Daniel Coyle w "The Talent Code" opisał "deep practice" - powtarzanie z naciskiem na precyzję, w strefie na granicy umiejętności. Neuronaukowcy potwierdzają: ten typ praktyki najsilniej stymuluje mielinizację. Każde powtórzenie to kolejna warstwa izolacji na Twoich "kablach nerwowych".</p>'
 +'<p>Badania na szczurach (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6140121/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pajevic et al., 2018</a>) wykazały, że mielinizacja w korze przedczołowej odpowiada prawie dwukrotnemu zwiększeniu prędkości transmisji.</p>'
 
-+'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🏅 Sprinterzy i kontrowersja 100 ms</div>'
++'<div style="font-size:14px;font-weight:800;color:#4ade80;margin:20px 0 8px;">🏅 Sprinterzy i kontrowersja 100 ms</div>'
 +'<p>Od 1991 roku World Athletics uznaje reakcję szybszą niż 100 ms za falstart. Ale nauka mówi: to nie takie proste.</p>'
 +'<p><a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain i Hibbs (2007)</a> zbadali 9 sprinterów. Pięciu miało średnie czasy &lt;100 ms. Jeden osiągał średnią 87 ms (SD = 4 ms). Latencje EMG schodziły poniżej 60 ms.</p>'
 +'<p><a href="https://worldathletics.org/news/news/iaaf-sprint-start-research-project-is-the-100" target="_blank" style="color:#3b82f6;text-decoration:underline;">Komi et al. (2009)</a> - badanie zlecone przez IAAF. Wniosek: "Potwierdzamy reakcje tak szybkie jak 80 ms. Rekomendujemy obniżenie progu do 80-85 ms."</p>'
 +'<p><a href="https://www.academia.edu/26592344/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Brosnan et al. (2017)</a> przeanalizowali >8500 startów z MŚ i ME (1999-2014). 95% czasów mieściło się powyżej 122 ms. Zaproponowali progi: 115 ms (mężczyźni), 119 ms (kobiety).</p>'
 +'<p>Dennis Mitchell na MŚ w Tokio 1991 zareagował w 90 ms i NIE został zdyskwalifikowany - zdobył brąz na 100 m.</p>'
 
-+'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🧪 Go/No-Go - dlaczego NIE reagowanie jest trudniejsze</div>'
++'<div style="font-size:14px;font-weight:800;color:#4ade80;margin:20px 0 8px;">🧪 Go/No-Go - dlaczego NIE reagowanie jest trudniejsze</div>'
 +'<p>Zadanie wymyślone przez Francisca Dondersa w 1868 roku bada zdolność hamowania reakcji. Twój mózg domyślnie działa w trybie "reaguj" - ewolucja premiowała szybkie reakcje. Zdolność hamowania to ewolucyjnie nowsza umiejętność kontrolowana przez korę przedczołową.</p>'
 +'<p><a href="https://pubmed.ncbi.nlm.nih.gov/18799345/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Verbruggen i Logan (2008)</a> opisali model "wyścigu koni": proces "go" i "stop" rywalizują. Który skończy pierwszy - ten wygrywa.</p>'
 +'<p>Trening go/no-go ma zastosowanie kliniczne - od ADHD, przez concussion protocol, po rehabilitację po udarze. Sportowcy z lepszą kontrolą hamowania podejmują lepsze decyzje pod presją.</p>'
 
-+'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🔍 Wyszukiwanie wzrokowe - Twoje oczy jako skaner</div>'
++'<div style="font-size:14px;font-weight:800;color:#4ade80;margin:20px 0 8px;">🔍 Wyszukiwanie wzrokowe - Twoje oczy jako skaner</div>'
 +'<p>Szukając pary na planszy, Twoje oczy wykonują 3-4 sakkady na sekundę (<a href="https://pubmed.ncbi.nlm.nih.gov/9811504/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Rayner, 1998</a>). Między nimi fiksacje (200-300 ms), podczas których mózg przetwarza informację z fovea - zaledwie 2 stopnie kąta widzenia.</p>'
 +'<p>Trail Making Test (<a href="https://pubmed.ncbi.nlm.nih.gov/13601598/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Reitan, 1958</a>) to złoty standard neuropsychologii. Wersja A (1-2-3-4...) mierzy prędkość psychomotoryczną. Wersja B (1-A-2-B-3-C...) angażuje przełączanie uwagi. Nasza gra "Kolejność" jest inspirowana TMT-A.</p>'
 
-+'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">📊 Co wpływa na czas reakcji</div>'
++'<div style="font-size:14px;font-weight:800;color:#4ade80;margin:20px 0 8px;">📊 Co wpływa na czas reakcji</div>'
 +'<p><span style="font-weight:700;color:#4ade80;">POPRAWIA:</span> aktywność fizyczna, rozgrzewka, kofeina (~3-6 mg/kg), dobry sen (7-9h), nawodnienie, trening specyficzny, gry akcji (Bediou et al., 2018).</p>'
 +'<p><span style="font-weight:700;color:#f87171;">POGARSZA:</span> wiek (~3-7 ms/rok wg <a href="https://mindcrowd.org/reaction-time-as-a-measure-of-brain-health-mindcrowd-study-findings/" target="_blank" style="color:#3b82f6;text-decoration:underline;">MindCrowd</a>), zmęczenie, brak snu, alkohol, odwodnienie, obfity posiłek, multitasking, chroniczny stres.</p>'
 +'<p>Ciekawostka z MindCrowd: mężczyźni reagowali średnio o 34 ms szybciej niż kobiety.</p>'
 
-+'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🧬 Neuroplastyczność - Twój mózg się zmienia</div>'
++'<div style="font-size:14px;font-weight:800;color:#4ade80;margin:20px 0 8px;">🧬 Neuroplastyczność - Twój mózg się zmienia</div>'
 +'<p>~86 miliardów neuronów (<a href="https://pubmed.ncbi.nlm.nih.gov/19226510/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Azevedo et al., 2009</a>), ~100 bilionów synaps, ~1.4 kg, 20% energii ciała (<a href="https://pubmed.ncbi.nlm.nih.gov/12149485/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Raichle & Gusnard, 2002</a>). I nie jest stały.</p>'
 +'<p>Meta-analiza we <a href="https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2022.868450/full" target="_blank" style="color:#3b82f6;text-decoration:underline;">Frontiers in Human Neuroscience (2022)</a> wykazała, że trening neurofeedback istotnie poprawia czas reakcji u sportowców (SMD = -1.08, p = 0.0009). Neuroplastyczność nie ma daty ważności. Trening działa w każdym wieku.</p>'
 
-+'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">🎯 Orientacyjne normy</div>'
++'<div style="font-size:14px;font-weight:800;color:#4ade80;margin:20px 0 8px;">🎯 Orientacyjne normy</div>'
 +'<p style="font-size:10px;color:rgba(255,255,255,0.35);">Prosty czas reakcji wzrokowej, warunki laboratoryjne. Pomiar akcelerometryczny daje wolniejsze wyniki.</p>'
 +'<p style="color:#4ade80;font-weight:600;">&lt; 200 ms - Elita sportowa, piloci myśliwców</p>'
-+'<p style="color:#3b82f6;font-weight:600;">200-280 ms - Bardzo dobry, osoby aktywne</p>'
++'<p style="color:#4ade80;font-weight:600;">200-280 ms - Bardzo dobry, osoby aktywne</p>'
 +'<p style="color:rgba(255,255,255,0.7);font-weight:600;">280-350 ms - Przeciętny wynik młodych dorosłych</p>'
 +'<p style="color:#d97706;font-weight:600;">350-500 ms - Zmęczenie lub brak wprawy. Trenowalny.</p>'
 +'<p style="color:#f87171;font-weight:600;">&gt; 500 ms - Powód do trenowania, nie do niepokoju.</p>'
 
-+'<div style="font-size:14px;font-weight:800;color:#3b82f6;margin:20px 0 8px;">💡 Czy wiesz, że...</div>'
++'<div style="font-size:14px;font-weight:800;color:#4ade80;margin:20px 0 8px;">💡 Czy wiesz, że...</div>'
 +'<p>- Twoje ciało produkuje ~11 mln bitów informacji sensorycznej/s. Świadomie przetwarzasz ~50.<br>'
 +'- Mięśnie okoruchowe to najszybsze mięśnie w ciele - sakkady trwają 20-200 ms.<br>'
 +'- Praworęczni mają ~5-10 ms szybszą reakcję prawą ręką.<br>'
@@ -220,7 +220,7 @@ function _nerdSectionContent(){
 +'- Graczy gier akcji (FPS) cechuje szybsze przetwarzanie wzrokowe.</p>'
 
 +'<div style="background:rgba(59,130,246,0.06);border-radius:10px;padding:14px;margin:20px 0;">'
-+'<div style="font-size:13px;font-weight:800;color:#3b82f6;margin-bottom:8px;">📚 Spis literatury</div>'
++'<div style="font-size:13px;font-weight:800;color:#4ade80;margin-bottom:8px;">📚 Spis literatury</div>'
 +'<div style="font-size:10px;color:rgba(255,255,255,0.45);line-height:2;">'
 +'1. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4456887/" target="_blank" style="color:#3b82f6;text-decoration:underline;">Jain A et al. (2015). Int J Appl Basic Med Res, 5(2), 124-127.</a><br>'
 +'2. <a href="https://www.tandfonline.com/doi/abs/10.1080/02640410600718004" target="_blank" style="color:#3b82f6;text-decoration:underline;">Pain MTG, Hibbs A (2007). J Sports Sciences, 25(1), 79-86.</a><br>'
@@ -251,7 +251,7 @@ function _nerdChallengeNote(){
     +'<div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.6;margin-top:6px;">Wszystkie informacje opierają się na recenzowanych publikacjach naukowych. Ale nauka się zmienia, a my nie jesteśmy nieomylni.</div>'
     +'<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6);margin-top:6px;">Znajdź błąd merytoryczny, potwierdź go źródłem - dostaniesz miesiąc bezpłatnego korzystania z AthletiX App.</div>'
     +'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);margin-top:4px;">Challenge\'uj siebie i nas. Rozwijajmy się wspólnie. 🧠</div>'
-    +'<div style="font-size:11px;color:#3b82f6;margin-top:6px;">📧 Zgłoś: kontakt@sigmaathletix.pl</div></div>';
+    +'<div style="font-size:11px;color:#4ade80;margin-top:6px;">📧 Zgłoś: kontakt@sigmaathletix.pl</div></div>';
 }
 function _motionModalWrap(id,title,body){
   var old=document.getElementById(id); if(old) old.remove();
@@ -261,7 +261,7 @@ function _motionModalWrap(id,title,body){
   m.innerHTML='<div style="max-width:420px;width:calc(100% - 32px);background-color:#1a1a1a !important;color:#f2f2f2 !important;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">'+title+'</div><div onclick="document.getElementById(\''+id+'\').remove()" style="cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</div></div>'
     +body
-    +'<button onclick="document.getElementById(\''+id+'\').remove()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
+    +'<button onclick="document.getElementById(\''+id+'\').remove()" style="width:100%;padding:12px;background:#4ade80;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
   document.body.appendChild(m);
 }
 function _charListHtml(){
@@ -272,9 +272,9 @@ function _charListHtml(){
   }catch(e){}
   return LEVEL_CHARACTERS.map(function(c){
     var unlocked=maxLv>=c.level; var isCurrent=c===getLevelCharacter(maxLv);
-    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.06);'+(isCurrent?'border-left:2px solid #3b82f6;padding-left:6px;':'')+(unlocked?'':'opacity:.35;')+'">'
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.06);'+(isCurrent?'border-left:2px solid #4ade80;padding-left:6px;':'')+(unlocked?'':'opacity:.35;')+'">'
       +'<span style="font-size:20px;">'+c.emoji+'</span>'
-      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:#f2f2f2;">'+c.name+' <span style="font-size:9px;color:rgba(255,255,255,.18);">Lv.'+c.level+'</span>'+(isCurrent?' <span style="font-size:9px;color:#3b82f6;">← Tu jesteś</span>':'')+(unlocked?'':' <span style="font-size:10px;">🔒</span>')+'</div>'
+      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:#f2f2f2;">'+c.name+' <span style="font-size:9px;color:rgba(255,255,255,.18);">Lv.'+c.level+'</span>'+(isCurrent?' <span style="font-size:9px;color:#4ade80;">← Tu jesteś</span>':'')+(unlocked?'':' <span style="font-size:10px;">🔒</span>')+'</div>'
       +'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);">'+c.desc+'</div>'
       +'</div></div>';
   }).join('');
@@ -297,7 +297,7 @@ function openMotionInfo(){
     // Nerd - wyrazisty przycisk
     +'<div onclick="var nd=document.getElementById(\'motion-nerd-section\');var ar=document.getElementById(\'nerd-arrow\');if(nd.style.display===\'none\'){nd.style.display=\'block\';ar.style.transform=\'rotate(180deg)\';}else{nd.style.display=\'none\';ar.style.transform=\'\';}" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:12px;padding:12px 14px;margin:14px 0;cursor:pointer;transition:background .2s;" onmouseenter="this.style.background=\'rgba(59,130,246,.1)\'" onmouseleave="this.style.background=\'rgba(59,130,246,.06)\'">'
     +'<div style="font-size:24px;flex-shrink:0;">🧠</div>'
-    +'<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#3b82f6;">Sekcja dla nerdów</div><div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.45);">Jak to NAPRAWDĘ działa? Nauka, fakty, źródła.</div></div>'
+    +'<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#4ade80;">Sekcja dla nerdów</div><div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.45);">Jak to NAPRAWDĘ działa? Nauka, fakty, źródła.</div></div>'
     +'<div id="nerd-arrow" style="font-size:12px;color:rgba(255,255,255,.3);transition:transform .2s;">▼</div></div>'
     +'<div id="motion-nerd-section" style="display:none;background:rgba(59,130,246,.04);border-radius:12px;padding:16px;">'+_nerdSectionContent()+'</div>';
   _motionModalWrap('motion-info-modal','⚡ Czas Reakcji - O module',body);
@@ -340,12 +340,12 @@ function openPatternInfo(){
   var h='<div style="max-width:420px;width:calc(100% - 32px);background-color:#1a1a1a !important;color:#f2f2f2 !important;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">🧩 Wzorce  - Jak grać?</div><button onclick="document.getElementById(\'pattern-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;">✕</button></div>'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">🎯 Zasady</div>'
-    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Na górze ekranu widzisz <strong style="color:#3b82f6;">WZORZEC</strong> (cel) - zapamiętaj go.<br>Na dole zmieniają się różne wzorce.<br><br>Gdy dolny wzorzec <strong style="color:#4ade80;">PASUJE</strong> do górnego → reaguj!<br>Gdy <strong style="color:#f87171;">NIE PASUJE</strong> → nie ruszaj się.<br><br><span style="font-size:11px;color:rgba(255,255,255,.5);">📱 Ruch: przechyl w kierunku wzorca<br>👆 Dotyk: tapnij (center) lub swipe (kierunkowy)<br>💻 Komputer: kliknij (center) lub strzałki</span></div>'
+    +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;">Na górze ekranu widzisz <strong style="color:#4ade80;">WZORZEC</strong> (cel) - zapamiętaj go.<br>Na dole zmieniają się różne wzorce.<br><br>Gdy dolny wzorzec <strong style="color:#4ade80;">PASUJE</strong> do górnego → reaguj!<br>Gdy <strong style="color:#f87171;">NIE PASUJE</strong> → nie ruszaj się.<br><br><span style="font-size:11px;color:rgba(255,255,255,.5);">📱 Ruch: przechyl w kierunku wzorca<br>👆 Dotyk: tapnij (center) lub swipe (kierunkowy)<br>💻 Komputer: kliknij (center) lub strzałki</span></div>'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:4px;">⚡ Punkty i życia</div>'
     +'<div style="font-size:12px;color:#f2f2f2;line-height:1.8;margin-bottom:12px;">Szybka reakcja na pasujący wzorzec = punkty<br>Reakcja na niepasujący = utrata życia<br>Brak reakcji na pasujący = utrata życia<br>🔥 Combo za serie szybkich trafień!</div>'
     // Progresja
     +'<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px;margin:12px 0;">'
-    +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#3b82f6;margin-bottom:10px;">📈 PROGRESJA POZIOMÓW</div>'
+    +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#4ade80;margin-bottom:10px;">📈 PROGRESJA POZIOMÓW</div>'
     +'<div style="font-size:12px;font-weight:500;color:rgba(255,255,255,.6);line-height:2;">'
     +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 1-2: Dwa symbole, proste wzorce. Nauka mechaniki.</div>'
     +'<div style="padding-left:8px;border-left:2px solid rgba(59,130,246,.2);margin-bottom:4px;">Level 3-4: Cztery symbole (siatka 2×2). Więcej kolorów.</div>'
@@ -356,7 +356,7 @@ function openPatternInfo(){
     +'</div>'
     +'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);margin-top:10px;">Każdy level jest trudniejszy  - ale Ty też jesteś lepszy z każdą próbą. 💪</div>'
     +'</div>'
-    +'<button onclick="document.getElementById(\'pattern-info-modal\').remove()" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
+    +'<button onclick="document.getElementById(\'pattern-info-modal\').remove()" style="width:100%;padding:12px;background:#4ade80;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
   var box=document.createElement('div'); box.innerHTML=h; modal.appendChild(box.firstChild);
   document.body.appendChild(modal);
 }
@@ -655,7 +655,7 @@ function _mHUD(){
   var validTimes=_gameTimes.filter(function(t){ return isSearch?true:t<3000; });
   var avgMs=validTimes.length?Math.round(validTimes.reduce(function(a,b){return a+b;},0)/validTimes.length):0;
   var bestMs=_gameTimes.length?Math.min.apply(null,_gameTimes):0;
-  function _tc(ms){ if(isSearch){ return ms<3000?'#4ade80':ms<6000?'#3b82f6':ms<10000?'#d97706':'#dc2626'; } return ms<250?'#4ade80':ms<400?'#3b82f6':ms<600?'#d97706':'#dc2626'; }
+  function _tc(ms){ if(isSearch){ return ms<3000?'#4ade80':ms<6000?'#4ade80':ms<10000?'#d97706':'#dc2626'; } return ms<250?'#4ade80':ms<400?'#4ade80':ms<600?'#d97706':'#dc2626'; }
   var isWide=window.innerWidth>=768;
   var tPad=isWide?'8px 6px':'4px 4px';
   var tValFs=isWide?'18px':'14px';
@@ -689,7 +689,7 @@ function _flashLives(){
   setTimeout(function(){ lv.style.color='#f87171'; lv.style.transform='scale(1)'; },300);
 }
 function _mTimeAnim(ms){
-  var col=ms<250?'#4ade80':ms<400?'#3b82f6':ms<600?'#d97706':'#dc2626';
+  var col=ms<250?'#4ade80':ms<400?'#4ade80':ms<600?'#d97706':'#dc2626';
   var d=document.createElement('div'); d.style.cssText='position:fixed;top:55%;left:50%;transform:translate(-50%,0);font-size:24px;font-weight:900;color:'+col+';z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;text-shadow:0 0 12px '+col+'40;';
   d.textContent=ms+' ms'; document.getElementById('motion-active').appendChild(d);
   requestAnimationFrame(function(){ d.style.opacity='1'; });
@@ -879,8 +879,8 @@ function _showLevelComplete(lv,trialResults){
   var lvCombo=0,curC=0; trialResults.forEach(function(r){ if(r.correct&&r.time>0&&r.time<350){ curC++; if(curC>lvCombo) lvCombo=curC; } else curC=0; });
   var msg=_LEVEL_MSGS[Math.floor(Math.random()*_LEVEL_MSGS.length)];
   var moveHint=lv<4?'Delikatny ruch wystarczy 🤏':lv<7?'Ruszaj się zdecydowanie! 💪':lv<11?'Potrzeba mocnego ruchu! 🏋️':'Full power! Daj z siebie wszystko! 🔥';
-  var avgCol=lvAvg<250?'#4ade80':lvAvg<400?'#3b82f6':lvAvg<600?'#d97706':'#dc2626';
-  var accCol=lvAcc>90?'#4ade80':lvAcc>70?'#3b82f6':'#d97706';
+  var avgCol=lvAvg<250?'#4ade80':lvAvg<400?'#4ade80':lvAvg<600?'#d97706':'#dc2626';
+  var accCol=lvAcc>90?'#4ade80':lvAcc>70?'#4ade80':'#d97706';
   var tileS='background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;text-align:center;';
   var ma=el('motion-active');
   ma.style.overflow='auto';
@@ -978,8 +978,8 @@ function _showGameOver(){
 function _mResultTiles(avg,best,acc){
   var worst=_gameTimes.length?Math.max.apply(null,_gameTimes):0;
   var stdDev=0; if(_gameTimes.length>1){ var mean=avg; stdDev=Math.round(Math.sqrt(_gameTimes.reduce(function(s,t){return s+(t-mean)*(t-mean);},0)/(_gameTimes.length-1))); }
-  var avgCol=avg<250?'#4ade80':avg<400?'#3b82f6':avg<600?'#d97706':'#dc2626';
-  var accCol=acc>90?'#4ade80':acc>70?'#3b82f6':'#d97706';
+  var avgCol=avg<250?'#4ade80':avg<400?'#4ade80':avg<600?'#d97706':'#dc2626';
+  var accCol=acc>90?'#4ade80':acc>70?'#4ade80':'#d97706';
   var ts='background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;text-align:center;cursor:pointer;';
   var descs={avg:'Średni czas reakcji. Niższy = szybszy mózg.',best:'Najszybsza reakcja  - Twój potencjał.',worst:'Najwolniejsza reakcja  - moment utraty skupienia.',acc:'Poprawne reakcje / wszystkie. 100% = perfekcja.',combo:'Seria szybkich reakcji (<350ms). ×2 przy 3+, ×3 przy 5+.',sd:'Powtarzalność reakcji. Niskie = stabilny czas.'};
   function tile(icon,val,unit,label,color,key,sub){
@@ -1015,7 +1015,7 @@ function _getStdThresholds(lv){
 function _scoringHtml(lv){
   var t=_getStdThresholds(lv);
   return '<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;margin:10px 0;">'
-    +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#3b82f6;margin-bottom:4px;">⚡ PUNKTY W TYM LEVELU</div>'
+    +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#4ade80;margin-bottom:4px;">⚡ PUNKTY W TYM LEVELU</div>'
     +'<div style="font-size:11px;font-weight:500;color:rgba(255,255,255,.5);line-height:1.6;">'
     +'&lt;'+t.t5+'ms = 5 pkt ⚡ | &lt;'+t.t4+'ms = 4 | &lt;'+t.t3+'ms = 3 | &lt;'+t.t2+'ms = 2 | &lt;'+t.t1+'ms = 1<br>'
     +'Fałszywy start: -2 pkt + ❤️ | Brak reakcji: -1 pkt + ❤️</div></div>';
@@ -1024,7 +1024,7 @@ function _searchScoringHtml(lv){
   // Pobierz progi z search.js
   var t=_getThresholds(_motionMode,lv);
   return '<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;margin:10px 0;">'
-    +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#3b82f6;margin-bottom:4px;">⚡ PUNKTY W TYM LEVELU</div>'
+    +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#4ade80;margin-bottom:4px;">⚡ PUNKTY W TYM LEVELU</div>'
     +'<div style="font-size:11px;font-weight:500;color:rgba(255,255,255,.5);line-height:1.6;">'
     +'&lt; '+t[0]+'s = 5 pkt ⚡ | &lt; '+t[1]+'s = 3 pkt | &lt; '+t[2]+'s = 1 pkt<br>'
     +'Błędne kliknięcie: -1 pkt + ❤️ | Timeout: 0 pkt</div></div>';
@@ -1062,7 +1062,7 @@ function _patScoringHtml(lv){
   var ctx=['Proste wzorce  - liczy się szybkość!','Proste wzorce  - liczy się szybkość!','Więcej symboli  - masz trochę więcej czasu.','Więcej symboli  - masz trochę więcej czasu.','Zmieniający się cel wymaga skupienia  - progi łagodniejsze.','Zmieniający się cel wymaga skupienia  - progi łagodniejsze.','Kierunkowe reagowanie = dodatkowe wyzwanie  - progi dostosowane.','Kierunkowe reagowanie = dodatkowe wyzwanie  - progi dostosowane.'];
   var ctxTxt=lv<=8?(ctx[lv-1]||''):'Złożone wzorce  - więcej czasu na decyzję. Ale nie za dużo. 😏';
   return '<div style="background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px;margin-top:6px;">'
-    +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#3b82f6;margin-bottom:4px;">⚡ PUNKTY</div>'
+    +'<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#4ade80;margin-bottom:4px;">⚡ PUNKTY</div>'
     +'<div style="font-size:10px;font-weight:500;color:rgba(255,255,255,.45);line-height:1.6;">'
     +'&lt; '+t.t5+'ms = 5 pkt ⚡ | &lt; '+t.t3+'ms = 3 pkt | &lt; '+t.t2+'ms = 2 pkt | &lt; '+t.t1+'ms = 1 pkt<br>'
     +'Poprawne zignorowanie: +1 pkt<br>'

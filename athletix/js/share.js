@@ -2,7 +2,7 @@
 //  SHARE - Generowanie grafik wynikow
 // ═══════════════════════════════════════
 
-var _sharePhoto=null, _shareFormat='story', _shareColor='blue';
+var _sharePhoto=null, _shareFormat='story', _shareColor='green';
 
 // roundRect polyfill
 function _rrect(ctx,x,y,w,h,r){
@@ -41,7 +41,7 @@ var _THEMES={
 
 function _openShareModal(){
   var old=document.getElementById('share-modal'); if(old) old.remove();
-  _sharePhoto=null; _shareFormat='story'; _shareColor='blue';
+  _sharePhoto=null; _shareFormat='story'; _shareColor='green';
   var ov=document.createElement('div'); ov.id='share-modal';
   ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px;';
   ov.onclick=function(e){ if(e.target===ov) ov.remove(); };

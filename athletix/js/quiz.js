@@ -49,7 +49,7 @@ var NERD_BADGES={
   pre_synaptic:{emoji:'😴',name:'Pre-synaptyczny',desc:'Twoje dendryty jeszcze śpią. Obudź je lekturą.',color:'#6b7280'},
   synaptyczny:{emoji:'🔬',name:'Synaptyczny Świeżak',desc:'Iskra jest. Czas ją wzmocnić.',color:'#d97706'},
   aksonowy:{emoji:'🧬',name:'Aksonowy Adept',desc:'Sygnał płynie, ale jeszcze wolno.',color:'#22c55e'},
-  mielinowy:{emoji:'🧠',name:'Mielinowy Nerd',desc:'Izolacja gruba. Prawie elita.',color:'#3b82f6'},
+  mielinowy:{emoji:'🧠',name:'Mielinowy Nerd',desc:'Izolacja gruba. Prawie elita.',color:'#4ade80'},
   reaktywny:{emoji:'⚡',name:'Reaktywny Nerd',desc:'Szybki mózg, solidna wiedza. Respekt.',color:'#a855f7'},
   elitarny:{emoji:'🏆',name:'Neuroprzekaźnik Elitarny',desc:'Twoje synapsy strzelają jak u noblisty.',color:'#eab308'},
   bog:{emoji:'👑',name:'Bóg Mieliny',desc:'Każdy akson Ci zazdrości. 100% izolacji.',color:'#dc2626'}
@@ -143,7 +143,7 @@ function _showLevelResult(){
   var lvCfg=QUIZ_LEVELS[_qLevel];
   var fb; if(_qLevelScore>=5) fb=_pick(QUIZ_FEEDBACK.perfect); else if(_qLevelScore>=4) fb=_pick(QUIZ_FEEDBACK.great); else if(_qLevelScore>=3) fb=_pick(QUIZ_FEEDBACK.pass); else if(_qLevelScore>=2) fb=_pick(QUIZ_FEEDBACK.fail_2); else fb=_pick(QUIZ_FEEDBACK.fail_low);
   _qLastFeedback=fb;
-  var scCol=_qLevelScore>=5?'#4ade80':_qLevelScore>=4?'#3b82f6':_qLevelScore>=3?'#d97706':'#f87171';
+  var scCol=_qLevelScore>=5?'#4ade80':_qLevelScore>=4?'#4ade80':_qLevelScore>=3?'#d97706':'#f87171';
   var m=document.getElementById('nerd-quiz-modal'); if(!m) return;
   var nextLv=_qLevel+1;
   var hasNext=passed&&nextLv<4;
