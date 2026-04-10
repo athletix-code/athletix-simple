@@ -111,7 +111,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .reps-val-display{font-size:22px;font-weight:900;letter-spacing:-.03em;line-height:1;}
 
 .go-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--green-bg),var(--gold-bg));color:var(--accent);border:1px solid var(--green-border);border-radius:var(--r);font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .18s;margin-bottom:0;box-shadow:0 0 15px var(--green-bg);}
-.go-btn:hover{background:#2563eb;}
+.go-btn:hover{background:var(--green-hover);}
 .go-btn:active{transform:scale(.99);}
 
 /* ── REACTIVE ── */
@@ -359,10 +359,10 @@ select.time-select{width:100%;padding:10px 12px;background:var(--s2);border:1px 
 
 /* ── Zaokrąglenia UX ── */
 .ex-set-input{border-radius:10px;box-shadow:inset 0 1px 3px rgba(0,0,0,.06);}
-.ex-set-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(59,130,246,.15);}
+.ex-set-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--green-glow);}
 .ex-cat-badge{border-radius:20px;padding:3px 10px;font-size:8px;}
 .ex-add-set-btn{border-radius:12px;border-width:1.5px;}
-.ex-add-set-btn:hover{background:rgba(59,130,246,.04);border-color:var(--accent);}
+.ex-add-set-btn:hover{background:var(--green-bg);border-color:var(--accent);}
 .ex-general-note-btn{border-radius:12px;}
 /* Przyciski okrągłe ↑↓🗑 */
 .pe-move-btn{width:30px;height:30px;border-radius:50%;background:var(--s2);border:1px solid var(--border2);cursor:pointer;font-size:10px;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
@@ -372,4 +372,4 @@ select.time-select{width:100%;padding:10px 12px;background:var(--s2);border:1px 
 .pe-del-btn:hover{color:var(--red-text);border-color:var(--red);}
 /* Motion animations */
 @keyframes mPulse{0%{transform:scale(0.8);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
-@keyframes mBtnPulse{0%,100%{box-shadow:0 0 0 0 rgba(59,130,246,.4);}50%{box-shadow:0 0 0 8px rgba(59,130,246,0);}}
+@keyframes mBtnPulse{0%,100%{box-shadow:0 0 0 0 rgba(82,201,123,.4);}50%{box-shadow:0 0 0 8px rgba(82,201,123,0);}}
