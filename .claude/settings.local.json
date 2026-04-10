@@ -9,7 +9,16 @@
       "Bash(rm *)",
       "Bash(cp *)",
       "Bash(mkdir *)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(sed -i '' 's/background:var\\(--green\\);color:#fff;border:none/background:rgba\\(74,222,128,.08\\);color:#4ade80;border:1px solid rgba\\(74,222,128,.2\\)/g' athletix/js/wallet.js)",
+      "Bash(sed -i '' 's/background:#c2410c;color:#fff;border:none/background:rgba\\(234,179,8,.08\\);color:#eab308;border:1px solid rgba\\(234,179,8,.2\\)/g' athletix/js/wallet.js)",
+      "Bash(sed -i '' 's/background:#71717a;color:#fff;border:none/background:rgba\\(220,38,38,.08\\);color:#f87171;border:1px solid rgba\\(220,38,38,.2\\)/g' athletix/js/wallet.js)",
+      "Bash(sed -i '' 's/background:#7c3aed;color:#fff;border:none/background:rgba\\(168,85,247,.1\\);color:#a855f7;border:1px solid rgba\\(168,85,247,.25\\)/g' athletix/js/wallet.js)",
+      "Bash(sed -i '' 's/background:#ef4444;color:#fff;border:none/background:rgba\\(220,38,38,.1\\);color:#f87171;border:1px solid rgba\\(220,38,38,.25\\)/g' athletix/js/wallet.js)",
+      "Bash(sed -i '' 's/js\\\\/wallet.js?v=55/js\\\\/wallet.js?v=56/g' athletix/index.html)",
+      "Bash(sed -i '' 's/js\\\\/athletes.js?v=54/js\\\\/athletes.js?v=55/g' athletix/index.html)",
+      "Bash(sed -i '' 's/js\\\\/gamification.js?v=54/js\\\\/gamification.js?v=55/g' athletix/index.html)",
+      "Bash(sed -i '' 's/js\\\\/core.js?v=57/js\\\\/core.js?v=58/g' athletix/index.html)"
     ]
   }
 }

@@ -74,11 +74,11 @@ function _buildWalletSection(a){
     +'</div>'
     // Przyciski
     +'<div style="display:flex;gap:6px;margin-bottom:6px;">'
-    +'<button onclick="openAddCredits(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:var(--green);color:#fff;border:none;border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">+ Doładuj</button>'
-    +'<button onclick="deductEntry(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:#c2410c;color:#fff;border:none;border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">− Wejście</button>'
+    +'<button onclick="openAddCredits(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">+ Doładuj</button>'
+    +'<button onclick="deductEntry(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:rgba(234,179,8,.08);color:#eab308;border:1px solid rgba(234,179,8,.2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">− Wejście</button>'
     +'</div>'
     +'<div style="display:flex;gap:6px;margin-bottom:10px;">'
-    +'<button onclick="openCancellation(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:#71717a;color:#fff;border:none;border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">🚫 Odwołanie</button>'
+    +'<button onclick="openCancellation(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:rgba(220,38,38,.08);color:#f87171;border:1px solid rgba(220,38,38,.2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">🚫 Odwołanie</button>'
     +'<button onclick="openRateModal(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:transparent;border:1.5px dashed var(--border2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;">💰 Stawka</button>'
     +'</div>';
 
@@ -160,7 +160,7 @@ function openAddCredits(athleteName){
     // Edit packages link
     +'<div style="text-align:center;margin-bottom:12px;"><button onclick="openEditPackages()" style="background:transparent;border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--muted);text-decoration:underline;">✏️ Edytuj pakiety</button></div>'
     +'<div style="display:flex;gap:8px;">'
-    +'<button id="credit-save" style="flex:1;padding:12px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💰 Doładuj</button>'
+    +'<button id="credit-save" style="flex:1;padding:12px;background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💰 Doładuj</button>'
     +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
   ov.style.display='flex';
   document.getElementById('credit-save').onclick=function(){
@@ -231,7 +231,7 @@ function deductEntry(athleteName){
     +'</div>'
     +'<div style="font-size:11px;color:var(--muted);margin:8px 0;">📅 '+dateStr+' ⏰ '+timeStr+'</div>'
     +'<input id="deduct-note" type="text" placeholder="Notatka (opcjonalnie)" style="width:100%;padding:9px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;box-sizing:border-box;margin:8px 0;">'
-    +'<button id="deduct-yes" style="width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:12px;">Tak, odbij wejście</button>'
+    +'<button id="deduct-yes" style="width:100%;padding:14px;background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:12px;">Tak, odbij wejście</button>'
     +'<button id="deduct-no" style="width:100%;padding:12px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;">Anuluj</button>'
     +'</div>';
   document.body.appendChild(ov);
@@ -294,7 +294,7 @@ function openAddPower(athleteName){
     +'<div style="margin-bottom:14px;"><div style="font-size:10px;color:var(--dim);margin-bottom:3px;">Za co? (wiadomość dla zawodnika)</div>'
     +'<input id="power-note" type="text" placeholder="np. Za życiówkę! 💪, Samodzielny trening, Regularność..." style="width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;box-sizing:border-box;"/></div>'
     +'<div style="display:flex;gap:8px;">'
-    +'<button id="power-save" style="flex:1;padding:12px;background:#7c3aed;color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">⚡ Dodaj moc</button>'
+    +'<button id="power-save" style="flex:1;padding:12px;background:rgba(168,85,247,.1);color:#a855f7;border:1px solid rgba(168,85,247,.25);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">⚡ Dodaj moc</button>'
     +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
   ov.style.display='flex';
   document.getElementById('power-save').onclick=function(){
@@ -382,7 +382,7 @@ function openCancellation(athleteName){
     +'<button onclick="el(\'cancel-msg\').value=_pickMsg(_cancelMsgPool)" style="background:transparent;border:none;cursor:pointer;font-size:10px;color:var(--accent);font-weight:700;margin-top:4px;">🎲 Losuj inny tekst</button></div>'
     // Save
     +'<div id="cancel-save-wrap" style="display:none;margin-top:12px;display:none;">'
-    +'<button id="cancel-save" style="width:100%;padding:12px;background:#71717a;color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">📵 Zapisz odwołanie</button></div>'
+    +'<button id="cancel-save" style="width:100%;padding:12px;background:rgba(220,38,38,.08);color:#f87171;border:1px solid rgba(220,38,38,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">📵 Zapisz odwołanie</button></div>'
     +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="width:100%;padding:10px;background:transparent;color:var(--muted);border:none;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px;">Anuluj</button>'
     +'</div>';
   ov.style.display='flex';
@@ -464,7 +464,7 @@ function deleteTransaction(txId, athleteName){
     +'<option value="inne">Inne (wpisz powód)...</option></select>'
     +'<input id="del-tx-other" type="text" placeholder="Wpisz powód..." style="display:none;width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;box-sizing:border-box;"/></div>'
     +'<div style="display:flex;gap:8px;">'
-    +'<button id="del-tx-confirm" style="flex:1;padding:12px;background:#ef4444;color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Usuń</button>'
+    +'<button id="del-tx-confirm" style="flex:1;padding:12px;background:rgba(220,38,38,.1);color:#f87171;border:1px solid rgba(220,38,38,.25);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Usuń</button>'
     +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
   ov.style.display='flex';
   document.getElementById('del-tx-confirm').onclick=function(){
