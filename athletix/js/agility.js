@@ -5,14 +5,15 @@
 var _agCal={x:0,y:0,z:0},_agLane=1,_agState='stand',_agObstacles=[],_agActive=false;
 var _agInt=null,_agSpawnInt=null,_agRound=0,_agTotal=0,_agResults=[],_agCoins=0;
 var _agCooldown=0,_agLastMove=0;
+var _agBuf={x:[0,0,0],y:[0,0,0],z:[0,0,0],i:0}; // rolling average buffer
 
 function _agCfg(lv){
   var cfgs=[
-    {interval:3000,speed:2000,count:10,types:['barrier'],coins:false},
-    {interval:2500,speed:1800,count:12,types:['barrier'],coins:true},
-    {interval:2200,speed:1600,count:12,types:['barrier','beam'],coins:true},
-    {interval:2000,speed:1500,count:14,types:['barrier','beam'],coins:true},
-    {interval:1800,speed:1400,count:14,types:['barrier','beam','pit'],coins:true},
+    {interval:4000,speed:4000,count:8,types:['barrier'],coins:false,narrow:true},
+    {interval:3500,speed:3500,count:10,types:['barrier'],coins:true,narrow:true},
+    {interval:3000,speed:3000,count:10,types:['barrier','beam'],coins:true,narrow:true},
+    {interval:2500,speed:2500,count:12,types:['barrier','beam'],coins:true},
+    {interval:2200,speed:2200,count:12,types:['barrier','beam','pit'],coins:true},
     {interval:1800,speed:1300,count:16,types:['barrier','beam','pit'],coins:true},
     {interval:1500,speed:1200,count:16,types:['barrier','beam','pit','combo'],coins:true},
     {interval:1300,speed:1100,count:18,types:['barrier','beam','pit','combo'],coins:true},
@@ -118,9 +119,17 @@ function _spawnObstacle(ma,cfg,lv,lanes){
   var div=document.createElement('div');
   if(type==='barrier'){
     var freeLane=Math.floor(Math.random()*3);
-    var blockedLanes=[0,1,2].filter(function(l){return l!==freeLane;});
-    var x1=Math.min(lanes[blockedLanes[0]],lanes[blockedLanes[1]])-30;
-    var x2=Math.max(lanes[blockedLanes[0]],lanes[blockedLanes[1]])+30;
+    var x1,x2;
+    if(cfg.narrow){
+      // Narrow: block only 1 lane
+      var blockedLane=([0,1,2].filter(function(l){return l!==freeLane;}))[Math.floor(Math.random()*2)];
+      x1=lanes[blockedLane]-Math.round(W*0.15); x2=lanes[blockedLane]+Math.round(W*0.15);
+      obs.freeLanes=[0,1,2].filter(function(l){return l!==blockedLane;}); obs.freeLane=obs.freeLanes[0];
+    } else {
+      var blockedLanes=[0,1,2].filter(function(l){return l!==freeLane;});
+      x1=Math.min(lanes[blockedLanes[0]],lanes[blockedLanes[1]])-30;
+      x2=Math.max(lanes[blockedLanes[0]],lanes[blockedLanes[1]])+30;
+    }
     div.style.cssText='position:absolute;top:-30px;left:'+x1+'px;width:'+(x2-x1)+'px;height:16px;background:rgba(248,113,113,0.6);border:2px solid #f87171;border-radius:4px;box-shadow:0 0 8px rgba(248,113,113,0.2);transition:top linear;';
     obs.freeLane=freeLane; obs.action='shuffle';
   } else if(type==='beam'){
@@ -174,18 +183,24 @@ function _spawnObstacle(ma,cfg,lv,lanes){
 }
 
 function _readAgilityInput(lanes){
-  if(Date.now()-_agCooldown<400) return;
-  var dx=_motionState.ax-_agCal.x;
-  var dz=_motionState.az-_agCal.z;
-  var dy=_motionState.ay-_agCal.y;
+  // Rolling average (3 samples)
+  var bi=_agBuf.i%3;
+  _agBuf.x[bi]=_motionState.ax; _agBuf.y[bi]=_motionState.ay; _agBuf.z[bi]=_motionState.az; _agBuf.i++;
+  var ax=(_agBuf.x[0]+_agBuf.x[1]+_agBuf.x[2])/3;
+  var az=(_agBuf.z[0]+_agBuf.z[1]+_agBuf.z[2])/3;
+  if(Date.now()-_agCooldown<600) return;
+  var dx=ax-_agCal.x;
+  var dz=az-_agCal.z;
+  // Noise filter
+  if(Math.abs(dx)<1.5&&Math.abs(dz)<1.5) return;
   // Shuffle left
-  if(dx<-3.0&&_agLane>0){ _agLane--; _agCooldown=Date.now(); _movePlayer(lanes); }
+  if(dx<-4.5&&_agLane>0){ _agLane--; _agCooldown=Date.now(); _movePlayer(lanes); }
   // Shuffle right
-  if(dx>3.0&&_agLane<2){ _agLane++; _agCooldown=Date.now(); _movePlayer(lanes); }
+  if(dx>4.5&&_agLane<2){ _agLane++; _agCooldown=Date.now(); _movePlayer(lanes); }
   // Jump
-  if(dz>4.0&&_agState!=='jump'){ _agState='jump'; _agCooldown=Date.now(); _animJump(); setTimeout(function(){ _agState='stand'; },600); }
+  if(dz>5.5&&_agState!=='jump'){ _agState='jump'; _agCooldown=Date.now(); _animJump(); setTimeout(function(){ _agState='stand'; },600); }
   // Duck
-  if(dz<-3.0&&_agState!=='duck'){ _agState='duck'; _agCooldown=Date.now(); _animDuck(); setTimeout(function(){ _agState='stand'; _animStand(); },800); }
+  if(dz<-4.0&&_agState!=='duck'){ _agState='duck'; _agCooldown=Date.now(); _animDuck(); setTimeout(function(){ _agState='stand'; _animStand(); },800); }
 }
 
 function _movePlayer(lanes){
@@ -217,7 +232,8 @@ function _checkCollisions(ma,lanes,cfg,lv){
     if(rect.bottom<pH-22||rect.top>pH+44) return; // not at player height
     var collides=false;
     if(obs.action==='shuffle'){
-      if(_agLane!==obs.freeLane) collides=true;
+      var safe=obs.freeLanes?obs.freeLanes.indexOf(_agLane)!==-1:_agLane===obs.freeLane;
+      if(!safe) collides=true;
     } else if(obs.action==='duck'){
       if(_agState!=='duck') collides=true;
     } else if(obs.action==='jump'){
