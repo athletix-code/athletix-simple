@@ -575,6 +575,7 @@ function startMotionGame(){
 }
 function stopMotion(){
   el('motion-active').style.overflow='hidden';
+  if(typeof _cleanSniper==='function') _cleanSniper();
   _motionAbort=true; _motionRunning=false; _motionBlockSwipeClose=false;
   if(_motionHandler) window.removeEventListener('devicemotion',_motionHandler);
   _removeInputListeners();
