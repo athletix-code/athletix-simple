@@ -130,10 +130,9 @@ function _runSniperRound(lv,round,results){
     +'<div style="position:absolute;bottom:8px;left:50%;width:1.5px;height:16px;background:rgba(255,255,255,0.5);transform:translateX(-50%);"></div>'
     +'<div style="position:absolute;left:8px;top:50%;width:16px;height:1.5px;background:rgba(255,255,255,0.5);transform:translateY(-50%);"></div>'
     +'<div style="position:absolute;right:8px;top:50%;width:16px;height:1.5px;background:rgba(255,255,255,0.5);transform:translateY(-50%);"></div></div>';
-  // Timer + shoot button
-  var timer='<div id="sn-timer" style="position:fixed;bottom:170px;left:50%;transform:translateX(-50%);z-index:15;font-size:24px;font-weight:900;color:rgba(255,255,255,0.6);">0.0s</div>';
-  var shootBtn='<div id="sn-shoot" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:25;width:100px;height:100px;border-radius:50%;background:rgba(220,38,38,0.15);border:3px solid rgba(220,38,38,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.1s;"><div style="width:32px;height:32px;border:3px solid rgba(255,255,255,0.5);border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:6px;height:6px;background:rgba(255,255,255,0.6);border-radius:50%;"></div></div></div>';
-  ma.innerHTML=_mHUD()+arena+xh+timer+shootBtn;
+  // Timer (no shoot button)
+  var timer='<div id="sn-timer" style="position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:15;font-size:24px;font-weight:900;color:rgba(255,255,255,0.6);">0.0s</div>';
+  ma.innerHTML=_mHUD()+arena+xh+timer;
   // Timer interval
   _snTimerInt=setInterval(function(){
     var te=document.getElementById('sn-timer'); if(!te){ clearInterval(_snTimerInt); return; }
@@ -163,16 +162,18 @@ function _runSniperRound(lv,round,results){
     });
   },50):null;
 
-  // ── INPUT: drag to aim, button to shoot ──
+  // ── INPUT: drag to aim, release to shoot ──
   _snDragStart=null;
+  var lastShotTime=0;
+  function shoot(){ if(Date.now()-lastShotTime<200) return; lastShotTime=Date.now(); _doSniperShoot(ma,W,H,arenaW,arenaH,lv,round,results,cfg); }
   var onTouchStart=function(e){
-    if(e.target.closest('#motion-close-x,#sn-shoot')) return;
+    if(e.target.closest('#motion-close-x')) return;
     e.preventDefault();
     var pt=e.touches[0];
     _snDragStart={x:pt.clientX,y:pt.clientY,vx:_snViewX,vy:_snViewY};
   };
   var onTouchMove=function(e){
-    e.preventDefault(); // BLOCK all browser gestures
+    e.preventDefault();
     if(!_snDragStart) return;
     var pt=e.touches[0];
     _snViewX=_snDragStart.vx+(pt.clientX-_snDragStart.x);
@@ -182,10 +183,14 @@ function _runSniperRound(lv,round,results){
     var ar=document.getElementById('sn-arena');
     if(ar) ar.style.transform='translate(calc(-50% + '+_snViewX+'px),calc(-50% + '+_snViewY+'px))';
   };
-  var onTouchEnd=function(e){ _snDragStart=null; };
+  var onTouchEnd=function(e){
+    if(!_snDragStart) return;
+    _snDragStart=null;
+    shoot();
+  };
   var onMouseDown=function(e){
-    if(e.target.closest('#motion-close-x,#sn-shoot')) return;
-    if(e.button===2){ e.preventDefault(); _doSniperShoot(ma,W,H,arenaW,arenaH,lv,round,results,cfg); return; }
+    if(e.target.closest('#motion-close-x')) return;
+    e.preventDefault();
     _snDragStart={x:e.clientX,y:e.clientY,vx:_snViewX,vy:_snViewY};
   };
   var onMouseMove=function(e){
@@ -197,27 +202,21 @@ function _runSniperRound(lv,round,results){
     var ar=document.getElementById('sn-arena');
     if(ar) ar.style.transform='translate(calc(-50% + '+_snViewX+'px),calc(-50% + '+_snViewY+'px))';
   };
-  var onMouseUp=function(){ _snDragStart=null; };
+  var onMouseUp=function(e){
+    if(!_snDragStart) return;
+    _snDragStart=null;
+    shoot();
+  };
   var onContext=function(e){ e.preventDefault(); };
   var onKey=function(e){
-    if(e.key===' '||e.key==='Enter'){ e.preventDefault(); _doSniperShoot(ma,W,H,arenaW,arenaH,lv,round,results,cfg); }
-    if(e.key==='ArrowLeft') _snViewX=Math.max(-extraW,_snViewX-8);
-    if(e.key==='ArrowRight') _snViewX=Math.min(extraW,_snViewX+8);
-    if(e.key==='ArrowUp') _snViewY=Math.max(-extraH,_snViewY-8);
-    if(e.key==='ArrowDown') _snViewY=Math.min(extraH,_snViewY+8);
-    var ar=document.getElementById('sn-arena');
-    if(ar) ar.style.transform='translate(calc(-50% + '+_snViewX+'px),calc(-50% + '+_snViewY+'px))';
+    if(e.key===' '||e.key==='Enter'){ e.preventDefault(); shoot(); }
+    var moved=false;
+    if(e.key==='ArrowLeft'){ _snViewX=Math.max(-extraW,_snViewX-8); moved=true; }
+    if(e.key==='ArrowRight'){ _snViewX=Math.min(extraW,_snViewX+8); moved=true; }
+    if(e.key==='ArrowUp'){ _snViewY=Math.max(-extraH,_snViewY-8); moved=true; }
+    if(e.key==='ArrowDown'){ _snViewY=Math.min(extraH,_snViewY+8); moved=true; }
+    if(moved){ var ar=document.getElementById('sn-arena'); if(ar) ar.style.transform='translate(calc(-50% + '+_snViewX+'px),calc(-50% + '+_snViewY+'px))'; }
   };
-  // Shoot button
-  var shootEl=document.getElementById('sn-shoot');
-  var onShootBtn=function(e){
-    e.preventDefault(); e.stopPropagation();
-    shootEl.style.background='rgba(220,38,38,0.4)'; shootEl.style.transform='translateX(-50%) scale(0.92)'; shootEl.style.borderColor='#dc2626';
-    setTimeout(function(){ shootEl.style.background='rgba(220,38,38,0.15)'; shootEl.style.transform='translateX(-50%) scale(1)'; shootEl.style.borderColor='rgba(220,38,38,0.4)'; },100);
-    _doSniperShoot(ma,W,H,arenaW,arenaH,lv,round,results,cfg);
-  };
-  if(shootEl){ shootEl.addEventListener('touchstart',onShootBtn,{passive:false}); shootEl.addEventListener('click',onShootBtn); }
-
   ma.addEventListener('touchstart',onTouchStart,{passive:false});
   ma.addEventListener('touchmove',onTouchMove,{passive:false});
   ma.addEventListener('touchend',onTouchEnd);
@@ -228,7 +227,6 @@ function _runSniperRound(lv,round,results){
   document.addEventListener('keydown',onKey);
   _snListeners=[['touchstart',onTouchStart],['touchmove',onTouchMove],['touchend',onTouchEnd],['mousedown',onMouseDown],['mousemove',onMouseMove],['mouseup',onMouseUp],['contextmenu',onContext]];
   _snListeners._keyFn=onKey;
-  _snListeners._shootFn=onShootBtn;
 }
 
 function _doSniperShoot(ma,W,H,arenaW,arenaH,lv,round,results,cfg){
