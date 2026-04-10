@@ -13,7 +13,7 @@
 <title>AthletiX Simple — Sigma AthletiX</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/theme.css?v=1">
-<link rel="stylesheet" href="css/app.css?v=60">
+<link rel="stylesheet" href="css/app.css?v=61">
 </head>
 
 <!-- ════ SETTINGS ════ -->
@@ -30,7 +30,7 @@
 </div>
 
 <!-- ══ ATHLETE QUICK-SELECT BAR ══ -->
-<div id="athlete-bar" style="display:none;background:linear-gradient(135deg,rgba(82,201,123,0.08),rgba(212,168,67,0.05));border-bottom:1px solid rgba(82,201,123,0.12);border-radius:0;padding:4px 10px;align-items:center;justify-content:space-between;flex-wrap:nowrap;">
+<div id="athlete-bar" style="display:none;background:linear-gradient(135deg,var(--green-bg),var(--gold-bg));border-bottom:1px solid var(--green-border);border-radius:0;padding:4px 10px;align-items:center;justify-content:space-between;flex-wrap:nowrap;">
   <div id="athlete-bar-buttons" style="display:flex;gap:6px;align-items:center;flex:1;flex-wrap:nowrap;overflow:hidden;"></div>
   <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;margin-left:6px;">
     <span id="athlete-bar-more" style="display:none;font-family:Montserrat,sans-serif;font-size:9px;font-weight:800;color:rgba(255,255,255,.6);cursor:pointer;width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);align-items:center;justify-content:center;text-align:center;line-height:26px;" onclick="_athleteBarExpanded=!_athleteBarExpanded;renderAthleteBar();"></span>
@@ -40,7 +40,7 @@
 
 <!-- ══ MAIN NAV ══ -->
 <div style="background:var(--s1);border-bottom:1px solid var(--border);padding:4px 10px 0;display:flex;flex-direction:column;gap:0;flex-shrink:0;">
-  <button onclick="openAthleteBarSelector()" style="position:relative;width:100%;min-height:36px;background:linear-gradient(135deg,rgba(82,201,123,0.08),rgba(212,168,67,0.05))!important;border:1px solid rgba(82,201,123,0.12)!important;border-radius:10px;padding:4px 10px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,245,220,0.6);display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:5px;">
+  <button onclick="openAthleteBarSelector()" style="position:relative;width:100%;min-height:36px;background:linear-gradient(135deg,var(--green-bg),var(--gold-bg))!important;border:1px solid var(--green-border)!important;border-radius:10px;padding:4px 10px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,245,220,0.6);display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:5px;">
     <span style="font-size:11px;">👥</span>
     <span>MY ATHLETI<span style="color:#ef4444;">X</span> TEAM</span>
     <span style="position:absolute;right:10px;font-size:10px;color:rgba(255,255,255,.55);font-weight:700;" id="athlete-bar-count"></span>
@@ -864,7 +864,7 @@
 <script src="js/supabase-config.js?v=54"></script>
 <script src="js/sync.js?v=54"></script>
 <script src="js/autogrow.js?v=54"></script>
-<script src="js/motion.js?v=87"></script>
+<script src="js/motion.js?v=88"></script>
 <script src="js/search.js?v=8"></script>
 <script src="js/share.js?v=7"></script>
 <script src="js/quiz.js?v=9"></script>

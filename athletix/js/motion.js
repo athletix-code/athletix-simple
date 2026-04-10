@@ -3,6 +3,13 @@
 //  Akcelerometr + fallback klawiatura
 // ═══════════════════════════════════════
 
+// Theme helper for canvas (can't use var())
+function getThemeColor(name){
+  try{ return getComputedStyle(document.documentElement).getPropertyValue('--'+name).trim(); }catch(e){}
+  var defaults={green:'#52C97B',gold:'#D4A843',red:'#E24B4A',text:'#F0F0F0',muted:'#777777',bg:'#1A1A1A',surface:'#151515',card:'#222222','brand-red':'#dc2626'};
+  return defaults[name]||'#52C97B';
+}
+
 var _motionMode='simple';
 var _motionRunning=false, _motionAbort=false, _desktopFallback=false, _motionHandler=null;
 var _motionBlockSwipeClose=false;
