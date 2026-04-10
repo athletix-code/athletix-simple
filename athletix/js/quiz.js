@@ -72,7 +72,7 @@ function openNerdQuiz(){
     +'<div style="font-size:20px;font-weight:900;margin-bottom:8px;">Czy jesteś Reaktywnym Nerdem?</div>'
     +'<div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:4px;">4 levele po 5 pytań. Minimum 3/5 żeby przejść dalej.</div>'
     +'<div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:20px;">Zdobądź odznakę i pochwal się!</div>'
-    +'<button onclick="_startQuizLevel(0)" style="width:100%;max-width:300px;padding:14px;background:#a855f7;color:#fff;border:none;border-radius:12px;font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;cursor:pointer;">Zaczynamy! 🚀</button>'
+    +'<button onclick="_startQuizLevel(0)" style="width:100%;max-width:300px;padding:14px;background:rgba(168,85,247,.12);color:#a855f7;border:1px solid rgba(168,85,247,.3);border-radius:12px;font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;cursor:pointer;">Zaczynamy! 🚀</button>'
     +'</div></div>';
   _addQuizClose(m);
   document.body.appendChild(m);
@@ -156,7 +156,7 @@ function _showLevelResult(){
     +(hasNext?'<div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:12px;">Następny: '+QUIZ_LEVELS[nextLv].emoji+' '+QUIZ_LEVELS[nextLv].name+'</div>':'')
     +'<div style="display:flex;flex-direction:column;gap:6px;max-width:280px;margin:0 auto;">'
     +'<button onclick="_openQuizShareModal()" style="width:100%;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:10px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">📸 Udostępnij wynik</button>'
-    +(hasNext?'<button onclick="_startQuizLevel('+nextLv+')" style="width:100%;padding:14px;background:#a855f7;color:#fff;border:none;border-radius:12px;font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;cursor:pointer;">Dalej! 🚀</button>':'')
+    +(hasNext?'<button onclick="_startQuizLevel('+nextLv+')" style="width:100%;padding:14px;background:rgba(168,85,247,.12);color:#a855f7;border:1px solid rgba(168,85,247,.3);border-radius:12px;font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;cursor:pointer;">Dalej! 🚀</button>':'')
     +'<button onclick="_showQuizFinal()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:10px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">'+(passed&&!hasNext?'Pokaż wynik końcowy':'Zakończ quiz')+'</button>'
     +(!passed?'<button onclick="document.getElementById(\'nerd-quiz-modal\').remove();openMotionInfo();setTimeout(function(){var nd=document.getElementById(\'motion-nerd-section\');if(nd)nd.style.display=\'block\';},100);" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(168,85,247,.3);color:#a855f7;border-radius:10px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;cursor:pointer;">📖 Przeczytaj sekcję nerdową</button>':'')
     +'</div></div></div>';

@@ -261,7 +261,7 @@ function _motionModalWrap(id,title,body){
   m.innerHTML='<div style="max-width:420px;width:calc(100% - 32px);background-color:#1a1a1a !important;color:#f2f2f2 !important;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);padding:20px;max-height:80vh;overflow-y:auto;">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">'+title+'</div><div onclick="document.getElementById(\''+id+'\').remove()" style="cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;display:flex;align-items:center;justify-content:center;">✕</div></div>'
     +body
-    +'<button onclick="document.getElementById(\''+id+'\').remove()" style="width:100%;padding:12px;background:#4ade80;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
+    +'<button onclick="document.getElementById(\''+id+'\').remove()" style="width:100%;padding:12px;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.25);border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
   document.body.appendChild(m);
 }
 function _charListHtml(){
@@ -356,7 +356,7 @@ function openPatternInfo(){
     +'</div>'
     +'<div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.35);margin-top:10px;">Każdy level jest trudniejszy  - ale Ty też jesteś lepszy z każdą próbą. 💪</div>'
     +'</div>'
-    +'<button onclick="document.getElementById(\'pattern-info-modal\').remove()" style="width:100%;padding:12px;background:#4ade80;color:#fff;border:none;border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
+    +'<button onclick="document.getElementById(\'pattern-info-modal\').remove()" style="width:100%;padding:12px;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.25);border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
   var box=document.createElement('div'); box.innerHTML=h; modal.appendChild(box.firstChild);
   document.body.appendChild(modal);
 }
@@ -634,7 +634,7 @@ function _showBriefing(onReady){
     +'<div style="font-size:11px;font-weight:600;color:var(--accent);margin-top:6px;">'+inputHint+'</div></div>'
     +(_motionMode==='pattern'?_patScoringHtml(_gameLevel):(_motionMode==='pairs'||_motionMode==='sequence'||_motionMode==='words')?_searchScoringHtml(_gameLevel):_scoringHtml(_gameLevel))
     +'<div style="margin-top:14px;font-size:12px;font-weight:600;font-style:italic;color:rgba(255,255,255,.45);line-height:1.5;padding:0 8px;">\u201E'+quote+'\u201D</div>'
-    +'<button id="briefing-go-btn" style="margin-top:20px;width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.04em;">DAWAJ! \uD83D\uDE80</button>'
+    +'<button id="briefing-go-btn" style="margin-top:20px;width:100%;padding:14px;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.25);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.04em;">DAWAJ! \uD83D\uDE80</button>'
     +'</div>';
   document.getElementById('briefing-go-btn').onclick=function(){ onReady(); };
 }
@@ -904,7 +904,7 @@ function _showLevelComplete(lv,trialResults){
     +(_motionMode==='pattern'?_patScoringCompare(lv,lv+1):(_motionMode==='pairs'||_motionMode==='sequence'||_motionMode==='words')?_searchScoringCompare(lv,lv+1):_stdScoringCompare(lv,lv+1))
     +'<div style="font-size:10px;font-style:italic;color:rgba(255,255,255,.3);margin-top:4px;">'+_pick(['Dasz radę. Pewnie.','Twój mózg jest gotowy. Chyba.','Skupienie to klucz. 🔑','Oddychaj i działaj.','Level wyżej = Ty lepszy.','Gdyby było łatwe, każdy by to robił.'])+'</div></div>'
     +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">'
-    +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
+    +'<button onclick="_nextLevel()" style="width:100%;padding:14px;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.25);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;cursor:pointer;animation:mBtnPulse 1.5s infinite;">🚀 LEVEL '+(lv+1)+' → '+nextCh.emoji+' '+nextCh.name+'</button>'
     +'<button onclick="_endGame()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏁 Zakończ grę</button></div></div></div>';
 }
 function _nextLevel(){
@@ -959,7 +959,7 @@ function _showGameOver(){
     +'<div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:4px;">TRENER MÓWI</div>'
     +'<div style="font-size:11px;font-weight:500;line-height:1.5;color:rgba(255,255,255,.6);">'+getFinalFeedback(avg,_gameLevel)+'</div></div>'
     +'<div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;max-width:280px;margin-left:auto;margin-right:auto;">'
-    +'<button onclick="_motionRetry()" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Zagraj ponownie</button>'
+    +'<button onclick="_motionRetry()" style="width:100%;padding:10px;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.25);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 Zagraj ponownie</button>'
     +'<button onclick="stopMotion()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🏠 Wróć</button>'
     +'<button onclick="_openShareModal()" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:2px;">📸 Udostępnij wynik</button>'
     +(!athlete?'<div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:4px;">Wybierz zawodnika żeby zapisywać wyniki i zdobywać ATP</div>':'')
