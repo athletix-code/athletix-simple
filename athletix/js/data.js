@@ -110,7 +110,7 @@ function checkAutoBackupDue(){
 function showBackupReminder(){
   var existing=document.getElementById('backup-reminder'); if(existing) return;
   var div=document.createElement('div'); div.id='backup-reminder';
-  div.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9500;background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.3);';
+  div.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9500;background:linear-gradient(135deg,rgba(74,222,128,.1),rgba(234,179,8,.06));color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.3);';
   div.innerHTML='<div style="flex:1;min-width:0;">'
     +'<div style="font-size:13px;font-weight:800;">💾 Czas na backup!</div>'
     +'<div style="font-size:11px;opacity:.8;margin-top:2px;">Wyeksportuj dane, żeby ich nie stracić.</div>'

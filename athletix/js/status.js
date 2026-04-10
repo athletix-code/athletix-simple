@@ -266,7 +266,7 @@ function renderAthleteList(){
         var safeName=a.name.replace(/'/g,"\\'");
         contentHtml+='<div style="display:flex;align-items:center;justify-content:space-between;margin:10px 0 5px;padding-bottom:4px;border-bottom:2px solid var(--border2);">'
           +'<div style="font-size:10px;font-weight:800;color:var(--text);">'+dayLabel+' <span style="color:var(--dim);font-weight:600;">('+itemCount+')</span></div>'
-          +'<button onclick="event.stopPropagation();printAthleteDay(\''+safeName+'\',\''+dk+'\')" style="background:#1d4ed8;border:none;border-radius:var(--r-xs);padding:3px 8px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;gap:3px;">🖨 Raport</button>'
+          +'<button onclick="event.stopPropagation();printAthleteDay(\''+safeName+'\',\''+dk+'\')" style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:var(--r-xs);padding:3px 8px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;gap:3px;">🖨 Raport</button>'
           +'</div>';
         // Sessions for this day
         data.sessions.forEach(function(s){

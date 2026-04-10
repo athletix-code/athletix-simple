@@ -18,7 +18,12 @@
       "Bash(sed -i '' 's/js\\\\/wallet.js?v=55/js\\\\/wallet.js?v=56/g' athletix/index.html)",
       "Bash(sed -i '' 's/js\\\\/athletes.js?v=54/js\\\\/athletes.js?v=55/g' athletix/index.html)",
       "Bash(sed -i '' 's/js\\\\/gamification.js?v=54/js\\\\/gamification.js?v=55/g' athletix/index.html)",
-      "Bash(sed -i '' 's/js\\\\/core.js?v=57/js\\\\/core.js?v=58/g' athletix/index.html)"
+      "Bash(sed -i '' 's/js\\\\/core.js?v=57/js\\\\/core.js?v=58/g' athletix/index.html)",
+      "Bash(grep -rn \"background.*0f172\\\\|background.*1e293\\\\|background.*1e3a5\\\\|background.*1d4ed\\\\|gradient.*0f17\\\\|gradient.*1e29\\\\|gradient.*1e3a\\\\|gradient.*1d4e\" athletix/js/*.js)",
+      "Bash(sed -i '' 's/background:linear-gradient\\(135deg,#1d4ed8,#3b82f6\\)/background:linear-gradient\\(135deg,rgba\\(74,222,128,.1\\),rgba\\(234,179,8,.06\\)\\)/g' athletix/js/data.js)",
+      "Bash(sed -i '' 's/background:#1d4ed8;/background:rgba\\(74,222,128,.1\\);color:#4ade80;/g; s/color:#fff;border:none/border:1px solid rgba\\(74,222,128,.2\\)/g' athletix/js/diary.js)",
+      "Bash(sed -i '' \"s/background:#1d4ed8;color:#fff/background:rgba\\(74,222,128,.1\\);color:#4ade80/g\" athletix/js/reports.js)",
+      "Bash(sed -i '' 's/background:#1d4ed8;border:none/background:rgba\\(74,222,128,.1\\);border:1px solid rgba\\(74,222,128,.2\\)/g' athletix/js/status.js)"
     ]
   }
 }

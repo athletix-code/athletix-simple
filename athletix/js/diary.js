@@ -94,7 +94,7 @@ function openAddCustomTest(){
     +'<div style="margin-bottom:14px;"><div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;">Jednostka</div>'
     +'<input id="ct-unit" class="crm-input" type="text" placeholder="np. kg, s, m, reps" style="margin-bottom:0;max-width:120px;"/></div>'
     +'<div style="display:flex;gap:8px;">'
-    +'<button id="ct-save" style="flex:1;padding:12px;background:#a855f7;color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Dodaj</button>'
+    +'<button id="ct-save" style="flex:1;padding:12px;background:#a855f7;border:1px solid rgba(74,222,128,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Dodaj</button>'
     +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="padding:12px 14px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
   ov.style.display='flex';
   var catSel=document.getElementById('ct-cat');
@@ -132,7 +132,7 @@ function deleteNote(id){
     +'<div style="font-size:12px;color:var(--muted);margin-bottom:6px;line-height:1.4;max-height:60px;overflow:hidden;">'+preview.replace(/</g,'&lt;')+'</div>'
     +(entry.athlete?'<div style="font-size:11px;color:var(--dim);margin-bottom:16px;">'+entry.athlete+' · '+entry.time+'</div>':'<div style="margin-bottom:16px;"></div>')
     +'<div style="display:flex;gap:8px;">'
-    +'<button id="confirm-del-note" style="flex:1;padding:12px;background:#ef4444;color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Usuń</button>'
+    +'<button id="confirm-del-note" style="flex:1;padding:12px;background:#ef4444;border:1px solid rgba(74,222,128,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Usuń</button>'
     +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button>'
     +'</div></div>';
   ov.style.display='flex';
@@ -155,7 +155,7 @@ function editNote(id){
     +(entry.type==='test'?' · <span style="color:#7e22ce;font-weight:800;">TEST</span>':'')+'</div>'
     +'<textarea id="edit-note-textarea" rows="8" style="width:100%;padding:12px 14px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:Montserrat,sans-serif;font-size:14px;font-weight:600;outline:none;resize:vertical;line-height:1.6;box-sizing:border-box;min-height:160px;">'+((entry.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'))+'</textarea>'
     +'<div style="display:flex;gap:8px;margin-top:12px;">'
-    +'<button id="edit-note-save" style="flex:1;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.06em;">Zapisz</button>'
+    +'<button id="edit-note-save" style="flex:1;padding:13px;background:var(--accent);border:1px solid rgba(74,222,128,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.06em;">Zapisz</button>'
     +'<button id="edit-note-cancel" style="padding:13px 18px;background:var(--s2);color:var(--muted);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button>'
     +'</div></div>';
   ov.style.display='flex';
@@ -237,7 +237,7 @@ function renderDayDetail(day){
     hdr.innerHTML='<span style="font-size:14px;font-weight:900;color:var(--text);">👤 '+athlete+'</span>'
       +'<div style="display:flex;gap:8px;align-items:center;">'
       +'<span style="font-size:11px;color:var(--muted);">'+totalTxt+'</span>'
-      +'<button onclick="event.stopPropagation();printAthleteDay(\''+athlete.replace(/'/g,"\\'")+'\',\''+day+'\')" style="background:#1d4ed8;border:none;border-radius:var(--r-xs);padding:4px 10px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:800;color:#fff;display:flex;align-items:center;gap:4px;">🖨 RAPORT</button>'
+      +'<button onclick="event.stopPropagation();printAthleteDay(\''+athlete.replace(/'/g,"\\'")+'\',\''+day+'\')" style="background:rgba(74,222,128,.1);color:#4ade80;border:none;border-radius:var(--r-xs);padding:4px 10px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:800;color:#fff;display:flex;align-items:center;gap:4px;">🖨 RAPORT</button>'
       +'<span style="color:var(--muted);font-size:14px;transition:transform .2s;'+(isCollapsed?'':'transform:rotate(180deg)')+'">▼</span>'
       +'</div>';
     section.appendChild(hdr);

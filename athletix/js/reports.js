@@ -22,7 +22,7 @@ function _buildReportHtml(athleteName, day, entries){
     +'.back-bar{display:flex;gap:10px;align-items:center;margin-bottom:16px;}'
     +'.back-btn{padding:10px 20px;background:#111;color:#fff;border:none;border-radius:8px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.04em;}'
     +'.back-btn:hover{background:#333;}'
-    +'.print-btn{padding:10px 20px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.04em;}'
+    +'.print-btn{padding:10px 20px;background:rgba(74,222,128,.1);color:#4ade80;border:none;border-radius:8px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.04em;}'
     +'@media print{body{padding:10px;}.header{break-inside:avoid;}.back-bar{display:none!important;}}</style></head><body>';
 
   html+='<div class="back-bar"><button class="back-btn" onclick="window.close()">← Zamknij</button><button class="print-btn" onclick="window.print()">🖨 Drukuj</button></div>';
@@ -84,7 +84,7 @@ function printSimpleReport(){
       +'.entry-num{display:inline-block;width:24px;font-size:11px;font-weight:900;color:#999;}'
       +'.back-bar{display:flex;gap:10px;align-items:center;margin-bottom:16px;}'
       +'.back-btn{padding:10px 20px;background:#111;color:#fff;border:none;border-radius:8px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;}'
-      +'.print-btn{padding:10px 20px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;}'
+      +'.print-btn{padding:10px 20px;background:rgba(74,222,128,.1);color:#4ade80;border:none;border-radius:8px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;}'
       +'@media print{body{padding:10px;}.header{break-inside:avoid;}.back-bar{display:none!important;}}</style></head><body>';
     html+='<div class="back-bar"><button class="back-btn" onclick="window.close()">← Zamknij</button><button class="print-btn" onclick="window.print()">🖨 Drukuj</button></div>';
     html+='<div class="header"><div><div class="header-logo">Athleti<span class="x">X</span>App</div><div class="header-sub">Sigma AthletiX</div></div><div style="text-align:right;"><div class="header-date">'+dateStr+'</div></div></div>';
