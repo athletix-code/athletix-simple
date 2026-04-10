@@ -46,7 +46,7 @@ function _walletBadge(a){
 function _buildWalletSection(a){
   var w=_getWallet(a);
   var entries=w.entryRate>0?Math.floor(w.balance/w.entryRate):0;
-  var balColor=w.balance>w.entryRate*2?'#16a34a':w.balance>0?'#d97706':'#dc2626';
+  var balColor=w.balance>w.entryRate*2?'#16a34a':w.balance>0?'#d97706':'#E24B4A';
   var earned=calcEarned(w);
   var safeName=a.name.replace(/'/g,"\\'");
   // ATP z gamifikacji
@@ -74,11 +74,11 @@ function _buildWalletSection(a){
     +'</div>'
     // Przyciski
     +'<div style="display:flex;gap:6px;margin-bottom:6px;">'
-    +'<button onclick="openAddCredits(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">+ Doładuj</button>'
-    +'<button onclick="deductEntry(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:rgba(234,179,8,.08);color:#eab308;border:1px solid rgba(234,179,8,.2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">− Wejście</button>'
+    +'<button onclick="openAddCredits(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:rgba(82,201,123,.08);color:#52C97B;border:1px solid rgba(82,201,123,.2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">+ Doładuj</button>'
+    +'<button onclick="deductEntry(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:rgba(212,168,67,.08);color:#D4A843;border:1px solid rgba(212,168,67,.2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">− Wejście</button>'
     +'</div>'
     +'<div style="display:flex;gap:6px;margin-bottom:10px;">'
-    +'<button onclick="openCancellation(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:rgba(220,38,38,.08);color:#f87171;border:1px solid rgba(220,38,38,.2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">🚫 Odwołanie</button>'
+    +'<button onclick="openCancellation(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:rgba(226,75,74,.08);color:#E24B4A;border:1px solid rgba(226,75,74,.2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">🚫 Odwołanie</button>'
     +'<button onclick="openRateModal(\''+safeName+'\')" style="flex:1;padding:10px 6px;background:transparent;border:1.5px dashed var(--border2);border-radius:var(--r-xs);font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;">💰 Stawka</button>'
     +'</div>';
 
@@ -160,7 +160,7 @@ function openAddCredits(athleteName){
     // Edit packages link
     +'<div style="text-align:center;margin-bottom:12px;"><button onclick="openEditPackages()" style="background:transparent;border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--muted);text-decoration:underline;">✏️ Edytuj pakiety</button></div>'
     +'<div style="display:flex;gap:8px;">'
-    +'<button id="credit-save" style="flex:1;padding:12px;background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💰 Doładuj</button>'
+    +'<button id="credit-save" style="flex:1;padding:12px;background:rgba(82,201,123,.08);color:#52C97B;border:1px solid rgba(82,201,123,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💰 Doładuj</button>'
     +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
   ov.style.display='flex';
   document.getElementById('credit-save').onclick=function(){
@@ -231,7 +231,7 @@ function deductEntry(athleteName){
     +'</div>'
     +'<div style="font-size:11px;color:var(--muted);margin:8px 0;">📅 '+dateStr+' ⏰ '+timeStr+'</div>'
     +'<input id="deduct-note" type="text" placeholder="Notatka (opcjonalnie)" style="width:100%;padding:9px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r-xs);color:var(--text);font-family:Montserrat,sans-serif;font-size:13px;box-sizing:border-box;margin:8px 0;">'
-    +'<button id="deduct-yes" style="width:100%;padding:14px;background:rgba(74,222,128,.08);color:#4ade80;border:1px solid rgba(74,222,128,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:12px;">Tak, odbij wejście</button>'
+    +'<button id="deduct-yes" style="width:100%;padding:14px;background:rgba(82,201,123,.08);color:#52C97B;border:1px solid rgba(82,201,123,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:12px;">Tak, odbij wejście</button>'
     +'<button id="deduct-no" style="width:100%;padding:12px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;">Anuluj</button>'
     +'</div>';
   document.body.appendChild(ov);
@@ -359,7 +359,7 @@ function openCancellation(athleteName){
     +'<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">'
     // Full charge
     +'<button onclick="_selectCancelOption(\'full\','+rate+')" id="co-full" style="text-align:left;padding:12px 14px;background:var(--s2);border:2px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;font-weight:800;color:var(--text);">Pełne naliczenie</span><span style="font-size:14px;font-weight:900;color:#dc2626;">-'+rate+' pkt</span></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;font-weight:800;color:var(--text);">Pełne naliczenie</span><span style="font-size:14px;font-weight:900;color:#E24B4A;">-'+rate+' pkt</span></div>'
     +'<div style="font-size:10px;color:var(--muted);margin-top:2px;">Odwołanie = pełna stawka za trening</div></button>'
     // Partial
     +'<button onclick="_selectCancelOption(\'partial\','+half+')" id="co-partial" style="text-align:left;padding:12px 14px;background:var(--s2);border:2px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-family:Montserrat,sans-serif;">'
@@ -382,7 +382,7 @@ function openCancellation(athleteName){
     +'<button onclick="el(\'cancel-msg\').value=_pickMsg(_cancelMsgPool)" style="background:transparent;border:none;cursor:pointer;font-size:10px;color:var(--accent);font-weight:700;margin-top:4px;">🎲 Losuj inny tekst</button></div>'
     // Save
     +'<div id="cancel-save-wrap" style="display:none;margin-top:12px;display:none;">'
-    +'<button id="cancel-save" style="width:100%;padding:12px;background:rgba(220,38,38,.08);color:#f87171;border:1px solid rgba(220,38,38,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">📵 Zapisz odwołanie</button></div>'
+    +'<button id="cancel-save" style="width:100%;padding:12px;background:rgba(226,75,74,.08);color:#E24B4A;border:1px solid rgba(226,75,74,.2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">📵 Zapisz odwołanie</button></div>'
     +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="width:100%;padding:10px;background:transparent;color:var(--muted);border:none;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px;">Anuluj</button>'
     +'</div>';
   ov.style.display='flex';
@@ -394,7 +394,7 @@ function openCancellation(athleteName){
 function _selectCancelOption(type, amount){
   window._cancelType=type;
   ['co-full','co-partial','co-free'].forEach(function(id){ var b=el(id); if(b){ b.style.borderColor='var(--border2)'; b.style.background='var(--s2)'; } });
-  var sel=el('co-'+type); if(sel){ sel.style.borderColor=type==='full'?'#dc2626':type==='partial'?'#d97706':'var(--green)'; sel.style.background=type==='full'?'rgba(220,38,38,.06)':type==='partial'?'rgba(217,119,6,.06)':'rgba(22,163,74,.06)'; }
+  var sel=el('co-'+type); if(sel){ sel.style.borderColor=type==='full'?'#E24B4A':type==='partial'?'#d97706':'var(--green)'; sel.style.background=type==='full'?'rgba(226,75,74,.06)':type==='partial'?'rgba(217,119,6,.06)':'rgba(22,163,74,.06)'; }
   el('cancel-custom-wrap').style.display=type==='partial'?'block':'none';
   if(type==='partial'){ el('cancel-custom-amt').value=amount; el('cancel-custom-amt').focus(); }
   window._cancelMsgPool=type==='full'?CANCEL_MSGS_FULL:type==='partial'?CANCEL_MSGS_PARTIAL:CANCEL_MSGS_FREE;
@@ -464,7 +464,7 @@ function deleteTransaction(txId, athleteName){
     +'<option value="inne">Inne (wpisz powód)...</option></select>'
     +'<input id="del-tx-other" type="text" placeholder="Wpisz powód..." style="display:none;width:100%;padding:8px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:Montserrat,sans-serif;font-size:12px;box-sizing:border-box;"/></div>'
     +'<div style="display:flex;gap:8px;">'
-    +'<button id="del-tx-confirm" style="flex:1;padding:12px;background:rgba(220,38,38,.1);color:#f87171;border:1px solid rgba(220,38,38,.25);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Usuń</button>'
+    +'<button id="del-tx-confirm" style="flex:1;padding:12px;background:rgba(226,75,74,.1);color:#E24B4A;border:1px solid rgba(226,75,74,.25);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">Usuń</button>'
     +'<button onclick="el(\'confirm-overlay\').style.display=\'none\'" style="flex:1;padding:12px;background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Anuluj</button></div></div>';
   ov.style.display='flex';
   document.getElementById('del-tx-confirm').onclick=function(){

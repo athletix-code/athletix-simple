@@ -49,10 +49,10 @@ var NERD_BADGES={
   pre_synaptic:{emoji:'😴',name:'Pre-synaptyczny',desc:'Twoje dendryty jeszcze śpią. Obudź je lekturą.',color:'#6b7280'},
   synaptyczny:{emoji:'🔬',name:'Synaptyczny Świeżak',desc:'Iskra jest. Czas ją wzmocnić.',color:'#d97706'},
   aksonowy:{emoji:'🧬',name:'Aksonowy Adept',desc:'Sygnał płynie, ale jeszcze wolno.',color:'#22c55e'},
-  mielinowy:{emoji:'🧠',name:'Mielinowy Nerd',desc:'Izolacja gruba. Prawie elita.',color:'#4ade80'},
+  mielinowy:{emoji:'🧠',name:'Mielinowy Nerd',desc:'Izolacja gruba. Prawie elita.',color:'#52C97B'},
   reaktywny:{emoji:'⚡',name:'Reaktywny Nerd',desc:'Szybki mózg, solidna wiedza. Respekt.',color:'#a855f7'},
-  elitarny:{emoji:'🏆',name:'Neuroprzekaźnik Elitarny',desc:'Twoje synapsy strzelają jak u noblisty.',color:'#eab308'},
-  bog:{emoji:'👑',name:'Bóg Mieliny',desc:'Każdy akson Ci zazdrości. 100% izolacji.',color:'#dc2626'}
+  elitarny:{emoji:'🏆',name:'Neuroprzekaźnik Elitarny',desc:'Twoje synapsy strzelają jak u noblisty.',color:'#D4A843'},
+  bog:{emoji:'👑',name:'Bóg Mieliny',desc:'Każdy akson Ci zazdrości. 100% izolacji.',color:'#E24B4A'}
 };
 
 var _qLevel=0, _qLevelScore=0, _qIdx=0, _qTotal=0, _qLevelScores=[], _qOrder=[], _qLastFeedback='';
@@ -123,15 +123,15 @@ function _answerQuiz(el2,picked,correct){
   if(isCorrect){ _qLevelScore++; _qTotal++; }
   answers.forEach(function(a){
     var oidx=parseInt(a.dataset.oidx);
-    if(oidx===correct){ a.style.background='rgba(74,222,128,.15)'; a.style.borderColor='rgba(74,222,128,.4)'; a.querySelector('span').style.color='#4ade80'; }
-    else if(oidx===picked&&!isCorrect){ a.style.background='rgba(248,113,113,.15)'; a.style.borderColor='rgba(248,113,113,.4)'; a.querySelector('span').style.color='#f87171'; }
+    if(oidx===correct){ a.style.background='rgba(82,201,123,.15)'; a.style.borderColor='rgba(82,201,123,.4)'; a.querySelector('span').style.color='#52C97B'; }
+    else if(oidx===picked&&!isCorrect){ a.style.background='rgba(226,75,74,.15)'; a.style.borderColor='rgba(226,75,74,.4)'; a.querySelector('span').style.color='#E24B4A'; }
   });
   var qi=_qOrder[_qIdx]; var q=NERD_QUIZ[qi];
   var exp=document.getElementById('quiz-explain');
   if(exp){
     exp.style.display='block';
     exp.innerHTML='<div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;margin:12px 0;padding:10px;background:rgba(255,255,255,.03);border-radius:8px;">'
-      +(isCorrect?'<span style="color:#4ade80;font-weight:700;">✓ Poprawnie!</span> ':'<span style="color:#f87171;font-weight:700;">✕ Źle!</span> ')
+      +(isCorrect?'<span style="color:#52C97B;font-weight:700;">✓ Poprawnie!</span> ':'<span style="color:#E24B4A;font-weight:700;">✕ Źle!</span> ')
       +q.explain+'<br><span style="font-size:10px;color:rgba(255,255,255,.35);">'+q.source+' <a href="'+q.link+'" target="_blank" style="color:#3b82f6;text-decoration:underline;">→ Źródło</a></span></div>'
       +'<div onclick="_qIdx++;_showQuizQ();" style="color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;text-align:center;padding:8px;">'+(_qIdx<4?'Następne pytanie >':'Pokaż wynik levelu >')+'</div>';
   }
@@ -143,7 +143,7 @@ function _showLevelResult(){
   var lvCfg=QUIZ_LEVELS[_qLevel];
   var fb; if(_qLevelScore>=5) fb=_pick(QUIZ_FEEDBACK.perfect); else if(_qLevelScore>=4) fb=_pick(QUIZ_FEEDBACK.great); else if(_qLevelScore>=3) fb=_pick(QUIZ_FEEDBACK.pass); else if(_qLevelScore>=2) fb=_pick(QUIZ_FEEDBACK.fail_2); else fb=_pick(QUIZ_FEEDBACK.fail_low);
   _qLastFeedback=fb;
-  var scCol=_qLevelScore>=5?'#4ade80':_qLevelScore>=4?'#4ade80':_qLevelScore>=3?'#d97706':'#f87171';
+  var scCol=_qLevelScore>=5?'#52C97B':_qLevelScore>=4?'#52C97B':_qLevelScore>=3?'#d97706':'#E24B4A';
   var m=document.getElementById('nerd-quiz-modal'); if(!m) return;
   var nextLv=_qLevel+1;
   var hasNext=passed&&nextLv<4;
@@ -258,7 +258,7 @@ function _onQsPhoto(input){
     var img=new Image(); img.onload=function(){
       _qsPhoto=img;
       var p=document.getElementById('qs-photo-prev');
-      if(p){ p.style.display='flex'; p.innerHTML='<img src="'+e.target.result+'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div onclick="_qsPhoto=null;this.parentElement.style.display=\'none\'" style="font-size:11px;color:#f87171;cursor:pointer;margin-left:8px;">✕ Usuń</div>'; }
+      if(p){ p.style.display='flex'; p.innerHTML='<img src="'+e.target.result+'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div onclick="_qsPhoto=null;this.parentElement.style.display=\'none\'" style="font-size:11px;color:#E24B4A;cursor:pointer;margin-left:8px;">✕ Usuń</div>'; }
     }; img.src=e.target.result;
   }; reader.readAsDataURL(input.files[0]);
 }
@@ -289,7 +289,7 @@ function _genQuizShare(){
   // Branding top
   ctx.font='700 36px Montserrat,sans-serif'; ctx.fillStyle=_qsPhoto?'rgba(255,255,255,0.7)':t.sub; ctx.textAlign='left';
   ctx.fillText('Athleti',w*0.06,h*0.04); var aw=ctx.measureText('Athleti').width;
-  ctx.fillStyle='#dc2626'; ctx.fillText('X',w*0.06+aw,h*0.04);
+  ctx.fillStyle='#E24B4A'; ctx.fillText('X',w*0.06+aw,h*0.04);
   var xw2=ctx.measureText('X').width;
   ctx.font='500 28px Montserrat,sans-serif'; ctx.fillStyle=_qsPhoto?'rgba(255,255,255,0.5)':t.muted;
   ctx.fillText(' App',w*0.06+aw+xw2,h*0.04);
@@ -327,7 +327,7 @@ function _genQuizShare(){
   // Tiles 2x2
   var tW=(w-w*0.16-16)/2, tH=100, tY=cy+(customText?260+90:280);
   var lastLvScore=_qLevelScores.length>0?_qLevelScores[_qLevelScores.length-1]:0;
-  var tiles=[{v:badge.emoji+' '+badge.name.split(' ')[0],l:'ODZNAKA',c:badge.color},{v:'Level '+maxLv,l:'OSIĄGNIĘTY',c:t.accent},{v:lastLvScore+'/5',l:'WYNIK LEVELU',c:lastLvScore>=4?'#4ade80':lastLvScore>=3?'#d97706':'#f87171'},{v:_qTotal+'/20',l:'ŁĄCZNIE',c:_qsPhoto?'#fff':t.text}];
+  var tiles=[{v:badge.emoji+' '+badge.name.split(' ')[0],l:'ODZNAKA',c:badge.color},{v:'Level '+maxLv,l:'OSIĄGNIĘTY',c:t.accent},{v:lastLvScore+'/5',l:'WYNIK LEVELU',c:lastLvScore>=4?'#52C97B':lastLvScore>=3?'#d97706':'#E24B4A'},{v:_qTotal+'/20',l:'ŁĄCZNIE',c:_qsPhoto?'#fff':t.text}];
   for(var j=0;j<4;j++){
     var tx=w*0.08+(j%2)*(tW+16), ty=tY+Math.floor(j/2)*(tH+10);
     _rrect(ctx,tx,ty,tW,tH,16); ctx.fillStyle='rgba('+t.ar+',0.04)'; ctx.fill();

@@ -115,17 +115,17 @@ function _runSniperRound(lv,round,results){
   var acx=arenaW/2, acy=arenaH/2;
   _snTargets.forEach(function(t,i){
     if(!t.alive) return;
-    var colors={green:'#4ade80',red:'#f87171',gold:'#eab308',white:'rgba(255,255,255,0.5)'};
+    var colors={green:'#52C97B',red:'#E24B4A',gold:'#D4A843',white:'rgba(255,255,255,0.5)'};
     var c=colors[t.type];
-    var glow=t.type==='gold'?'0 0 15px rgba(234,179,8,0.4)':t.type==='white'?'0 0 6px rgba(255,255,255,0.15)':'0 0 12px '+c+'50';
-    var inner=t.type==='red'?'<div style="font-size:'+(t.size*0.5)+'px;font-weight:800;color:#f87171;">✕</div>':t.type==='gold'?'<div style="font-size:'+(t.size*0.4)+'px;font-weight:800;color:#eab308;">★</div>':'<div style="width:'+(t.size*0.2)+'px;height:'+(t.size*0.2)+'px;border-radius:50%;background:'+c+';"></div>';
+    var glow=t.type==='gold'?'0 0 15px rgba(212,168,67,0.4)':t.type==='white'?'0 0 6px rgba(255,255,255,0.15)':'0 0 12px '+c+'50';
+    var inner=t.type==='red'?'<div style="font-size:'+(t.size*0.5)+'px;font-weight:800;color:#E24B4A;">✕</div>':t.type==='gold'?'<div style="font-size:'+(t.size*0.4)+'px;font-weight:800;color:#D4A843;">★</div>':'<div style="width:'+(t.size*0.2)+'px;height:'+(t.size*0.2)+'px;border-radius:50%;background:'+c+';"></div>';
     arena+='<div class="sn-target" data-idx="'+i+'" style="position:absolute;left:'+(acx+t.x-t.size/2)+'px;top:'+(acy+t.y-t.size/2)+'px;width:'+t.size+'px;height:'+t.size+'px;border-radius:50%;border:3px solid '+c+';background:rgba('+(_snRgb(c))+',0.1);display:flex;align-items:center;justify-content:center;box-shadow:'+glow+';transition:transform 0.2s,opacity 0.2s;">'+inner+'</div>';
   });
   arena+='</div>';
   // Crosshair
   var xh='<div id="sn-crosshair" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;pointer-events:none;z-index:20;">'
     +'<div style="position:absolute;inset:0;border:1.5px solid rgba(255,255,255,0.4);border-radius:50%;"></div>'
-    +'<div style="position:absolute;top:50%;left:50%;width:3px;height:3px;background:#4ade80;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(59,130,246,0.3);"></div>'
+    +'<div style="position:absolute;top:50%;left:50%;width:3px;height:3px;background:#52C97B;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(59,130,246,0.3);"></div>'
     +'<div style="position:absolute;top:8px;left:50%;width:1.5px;height:16px;background:rgba(255,255,255,0.5);transform:translateX(-50%);"></div>'
     +'<div style="position:absolute;bottom:8px;left:50%;width:1.5px;height:16px;background:rgba(255,255,255,0.5);transform:translateX(-50%);"></div>'
     +'<div style="position:absolute;left:8px;top:50%;width:16px;height:1.5px;background:rgba(255,255,255,0.5);transform:translateY(-50%);"></div>'
@@ -138,7 +138,7 @@ function _runSniperRound(lv,round,results){
     var te=document.getElementById('sn-timer'); if(!te){ clearInterval(_snTimerInt); return; }
     var sec=(Date.now()-_snStart)/1000;
     te.textContent=sec.toFixed(1)+'s';
-    te.style.color=sec<2?'#4ade80':sec<4?'#4ade80':sec<6?'#d97706':'#f87171';
+    te.style.color=sec<2?'#52C97B':sec<4?'#52C97B':sec<6?'#d97706':'#E24B4A';
   },100);
   // Timeout
   _snTout=setTimeout(function(){
@@ -248,8 +248,8 @@ function _doSniperShoot(ma,W,H,arenaW,arenaH,lv,round,results,cfg){
     var tEl=ma.querySelector('.sn-target[data-idx="'+hit.idx+'"]');
     if(hit.t.type==='red'){
       _gameLives--; setTimeout(_flashLives,50); _gamePoints-=2; _snMissStreak=0;
-      ma.style.background='rgba(248,113,113,0.15)'; setTimeout(function(){ ma.style.background='#060606'; },200);
-      _mPtsAnim('✕ -2 pkt','#f87171'); _addKillFeed('✕ FAŁSZYWKA -2','#f87171');
+      ma.style.background='rgba(226,75,74,0.15)'; setTimeout(function(){ ma.style.background='#060606'; },200);
+      _mPtsAnim('✕ -2 pkt','#E24B4A'); _addKillFeed('✕ FAŁSZYWKA -2','#E24B4A');
       if(tEl){ tEl.style.transform='scale(1.3)'; tEl.style.opacity='0'; }
       if(navigator.vibrate) navigator.vibrate(200);
       results.push({time:0,correct:false,type:'red'});
@@ -262,14 +262,14 @@ function _doSniperShoot(ma,W,H,arenaW,arenaH,lv,round,results,cfg){
       var comboMult=_gameCombo>=10?4:_gameCombo>=5?3:_gameCombo>=3?2:1;
       var earned=pts*comboMult; _gamePoints+=earned; _gameCorrect++; _snMissStreak=0;
       _gameTimes.push(Math.round(sec*1000)); _gameLastTime=Math.round(sec*1000); _gameTotalTrials++;
-      _showHitmarker(ma); _spawnParticles(hit.sx,hit.sy,hit.t.type==='gold'?'#eab308':hit.t.type==='white'?'#fff':'#4ade80',ma);
+      _showHitmarker(ma); _spawnParticles(hit.sx,hit.sy,hit.t.type==='gold'?'#D4A843':hit.t.type==='white'?'#fff':'#52C97B',ma);
       if(tEl){ tEl.style.transform='scale(0)'; tEl.style.opacity='0'; }
       var label=hit.t.type==='white'?'💀 HEADSHOT':hit.t.type==='gold'?'★ BONUS':'🎯';
-      _mPtsAnim('+'+earned+' ⚡','var(--green-text)'); _addKillFeed(label+' +'+earned+' ('+sec.toFixed(1)+'s)',hit.t.type==='white'?'#fff':hit.t.type==='gold'?'#eab308':'#4ade80');
+      _mPtsAnim('+'+earned+' ⚡','var(--green-text)'); _addKillFeed(label+' +'+earned+' ('+sec.toFixed(1)+'s)',hit.t.type==='white'?'#fff':hit.t.type==='gold'?'#D4A843':'#52C97B');
       results.push({time:sec,correct:true,type:'hit'});
-      if(_gameCombo>=10){ var u=document.createElement('div'); u.style.cssText='position:fixed;top:45%;left:50%;transform:translateX(-50%);font-size:18px;font-weight:900;color:#eab308;z-index:30;pointer-events:none;transition:opacity 0.5s;'; u.textContent='🔥 UNSTOPPABLE'; ma.appendChild(u); setTimeout(function(){ u.style.opacity='0'; setTimeout(function(){u.remove();},500); },1000); }
+      if(_gameCombo>=10){ var u=document.createElement('div'); u.style.cssText='position:fixed;top:45%;left:50%;transform:translateX(-50%);font-size:18px;font-weight:900;color:#D4A843;z-index:30;pointer-events:none;transition:opacity 0.5s;'; u.textContent='🔥 UNSTOPPABLE'; ma.appendChild(u); setTimeout(function(){ u.style.opacity='0'; setTimeout(function(){u.remove();},500); },1000); }
     }
-    var pe=document.getElementById('m-pts'); if(pe){ pe.textContent='⚡ '+_gamePoints; pe.style.color=_gamePoints<0?'#f87171':'var(--accent)'; }
+    var pe=document.getElementById('m-pts'); if(pe){ pe.textContent='⚡ '+_gamePoints; pe.style.color=_gamePoints<0?'#E24B4A':'var(--accent)'; }
     var allDone=_snTargets.every(function(t2){ return !t2.alive||t2.type==='red'; });
     if(allDone){
       setTimeout(function(){ _runSniperRound(lv,round+1,results); },600);
@@ -277,11 +277,11 @@ function _doSniperShoot(ma,W,H,arenaW,arenaH,lv,round,results,cfg){
     }
   } else {
     _gamePoints-=1; _gameCombo=0; _snMissStreak++;
-    _mPtsAnim('-1 pudło','#f87171'); _addKillFeed('✕ PUDŁO -1','#f87171');
+    _mPtsAnim('-1 pudło','#E24B4A'); _addKillFeed('✕ PUDŁO -1','#E24B4A');
     var xh2=document.getElementById('sn-crosshair');
-    if(xh2&&xh2.firstChild){ xh2.firstChild.style.borderColor='#f87171'; setTimeout(function(){ if(xh2.firstChild) xh2.firstChild.style.borderColor='rgba(255,255,255,0.4)'; },150); }
-    if(_snMissStreak>=3){ _gameLives--; setTimeout(_flashLives,50); _snMissStreak=0; _mPtsAnim('❤️ -1','#f87171'); }
-    var pe2=document.getElementById('m-pts'); if(pe2){ pe2.textContent='⚡ '+_gamePoints; pe2.style.color=_gamePoints<0?'#f87171':'var(--accent)'; }
+    if(xh2&&xh2.firstChild){ xh2.firstChild.style.borderColor='#E24B4A'; setTimeout(function(){ if(xh2.firstChild) xh2.firstChild.style.borderColor='rgba(255,255,255,0.4)'; },150); }
+    if(_snMissStreak>=3){ _gameLives--; setTimeout(_flashLives,50); _snMissStreak=0; _mPtsAnim('❤️ -1','#E24B4A'); }
+    var pe2=document.getElementById('m-pts'); if(pe2){ pe2.textContent='⚡ '+_gamePoints; pe2.style.color=_gamePoints<0?'#E24B4A':'var(--accent)'; }
     results.push({time:0,correct:false,type:'miss'});
   }
   if(_gameLives<=0){ setTimeout(function(){ _cleanSniper(); _showGameOver(); },500); }

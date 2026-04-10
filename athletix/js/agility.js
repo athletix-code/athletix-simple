@@ -36,7 +36,7 @@ function _calibrateAgility(cb){
       +'<div style="font-size:64px;margin-bottom:8px;">🧍📱</div>'
       +'<div style="font-size:20px;font-weight:900;color:#f2f2f2;margin-bottom:8px;">Przygotuj się</div>'
       +'<div style="font-size:14px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:16px;">Stań prosto. Trzymaj telefon oburącz przed sobą, na wysokości klatki piersiowej.</div>'
-      +'<div id="ag-cal-timer" style="font-size:36px;font-weight:900;color:#4ade80;">3</div>'
+      +'<div id="ag-cal-timer" style="font-size:36px;font-weight:900;color:#52C97B;">3</div>'
       +'<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px;">Stój nieruchomo...</div>'
       +'</div></div>';
     var samples=[],n=3;
@@ -88,7 +88,7 @@ function _renderAgility(ma,cfg,lv){
   // Obstacle container
   html+='<div id="ag-obs" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;"></div>';
   // Player
-  html+='<div id="ag-player" style="position:absolute;bottom:80px;left:'+lanes[_agLane]+'px;transform:translateX(-50%);width:44px;height:44px;border-radius:50%;background:rgba(74,222,128,0.2);border:3px solid #4ade80;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(74,222,128,0.3);transition:left 0.2s ease-out,transform 0.3s;z-index:10;font-size:20px;">🏃</div>';
+  html+='<div id="ag-player" style="position:absolute;bottom:80px;left:'+lanes[_agLane]+'px;transform:translateX(-50%);width:44px;height:44px;border-radius:50%;background:rgba(82,201,123,0.2);border:3px solid #52C97B;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(82,201,123,0.3);transition:left 0.2s ease-out,transform 0.3s;z-index:10;font-size:20px;">🏃</div>';
   // Timer
   html+='<div id="ag-timer" style="position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:15;font-size:20px;font-weight:800;color:rgba(255,255,255,0.6);">0/'+cfg.count+'</div>';
   ma.innerHTML=html;
@@ -130,11 +130,11 @@ function _spawnObstacle(ma,cfg,lv,lanes){
       x1=Math.min(lanes[blockedLanes[0]],lanes[blockedLanes[1]])-30;
       x2=Math.max(lanes[blockedLanes[0]],lanes[blockedLanes[1]])+30;
     }
-    div.style.cssText='position:absolute;top:-30px;left:'+x1+'px;width:'+(x2-x1)+'px;height:16px;background:rgba(248,113,113,0.6);border:2px solid #f87171;border-radius:4px;box-shadow:0 0 8px rgba(248,113,113,0.2);transition:top linear;';
+    div.style.cssText='position:absolute;top:-30px;left:'+x1+'px;width:'+(x2-x1)+'px;height:16px;background:rgba(226,75,74,0.6);border:2px solid #E24B4A;border-radius:4px;box-shadow:0 0 8px rgba(226,75,74,0.2);transition:top linear;';
     obs.freeLane=freeLane; obs.action='shuffle';
   } else if(type==='beam'){
-    div.style.cssText='position:absolute;top:-30px;left:10px;right:10px;height:12px;background:rgba(234,179,8,0.6);border:2px solid #eab308;border-radius:4px;';
-    div.innerHTML='<div style="font-size:9px;font-weight:800;color:#eab308;text-align:center;margin-top:-14px;">SCHYL SIĘ</div>';
+    div.style.cssText='position:absolute;top:-30px;left:10px;right:10px;height:12px;background:rgba(212,168,67,0.6);border:2px solid #D4A843;border-radius:4px;';
+    div.innerHTML='<div style="font-size:9px;font-weight:800;color:#D4A843;text-align:center;margin-top:-14px;">SCHYL SIĘ</div>';
     obs.action='duck';
   } else if(type==='pit'){
     var pitLane=Math.floor(Math.random()*3);
@@ -147,7 +147,7 @@ function _spawnObstacle(ma,cfg,lv,lanes){
     if(freeLane2===0){ x1b=lanes[1]-30; x2b=lanes[2]+30; }
     else if(freeLane2===2){ x1b=lanes[0]-30; x2b=lanes[1]+30; }
     else { x1b=lanes[0]-30; x2b=lanes[0]+30; }
-    div.style.cssText='position:absolute;top:-30px;left:'+x1b+'px;width:'+(x2b-x1b)+'px;height:16px;background:rgba(248,113,113,0.5);border:2px solid #f87171;border-radius:4px;';
+    div.style.cssText='position:absolute;top:-30px;left:'+x1b+'px;width:'+(x2b-x1b)+'px;height:16px;background:rgba(226,75,74,0.5);border:2px solid #E24B4A;border-radius:4px;';
     obs.freeLane=freeLane2; obs.action='shuffle';
   }
   // Coin
@@ -156,7 +156,7 @@ function _spawnObstacle(ma,cfg,lv,lanes){
     var coin=document.createElement('div');
     coin.className='ag-coin';
     coin.dataset.lane=coinLane;
-    coin.style.cssText='position:absolute;top:-50px;left:'+(lanes[coinLane]-10)+'px;width:20px;height:20px;border-radius:50%;background:#eab308;box-shadow:0 0 8px rgba(234,179,8,0.4);transition:top linear;z-index:5;';
+    coin.style.cssText='position:absolute;top:-50px;left:'+(lanes[coinLane]-10)+'px;width:20px;height:20px;border-radius:50%;background:#D4A843;box-shadow:0 0 8px rgba(212,168,67,0.4);transition:top linear;z-index:5;';
     cont.appendChild(coin);
     setTimeout(function(){
       coin.style.top=(window.innerHeight+20)+'px';
@@ -215,12 +215,12 @@ function _animJump(){
 function _animDuck(){
   var p=document.getElementById('ag-player'); if(!p) return;
   p.style.transform='translateX(-50%) scaleY(0.6) translateY(10px)';
-  p.style.borderColor='#eab308';
+  p.style.borderColor='#D4A843';
 }
 function _animStand(){
   var p=document.getElementById('ag-player'); if(!p) return;
   p.style.transform='translateX(-50%)';
-  p.style.borderColor='#4ade80';
+  p.style.borderColor='#52C97B';
 }
 
 function _checkCollisions(ma,lanes,cfg,lv){
@@ -242,11 +242,11 @@ function _checkCollisions(ma,lanes,cfg,lv){
     if(collides){
       obs.hit=true;
       _gameLives--; setTimeout(_flashLives,50); _gamePoints-=1; _gameCombo=0;
-      _mPtsAnim('-1 💥','#f87171'); _mBeep(200,0.1);
+      _mPtsAnim('-1 💥','#E24B4A'); _mBeep(200,0.1);
       if(navigator.vibrate) navigator.vibrate(200);
-      ma.style.background='rgba(248,113,113,0.15)'; setTimeout(function(){ ma.style.background='#060606'; },200);
+      ma.style.background='rgba(226,75,74,0.15)'; setTimeout(function(){ ma.style.background='#060606'; },200);
       var p=document.getElementById('ag-player');
-      if(p){ p.style.borderColor='#f87171'; setTimeout(function(){ p.style.borderColor='#4ade80'; },500); }
+      if(p){ p.style.borderColor='#E24B4A'; setTimeout(function(){ p.style.borderColor='#52C97B'; },500); }
       _agResults.push({correct:false});
       if(_gameLives<=0){ _agActive=false; clearInterval(_agInt); clearInterval(_agSpawnInt); _unlockGestures(); setTimeout(function(){ _showGameOver(); },500); }
     }
@@ -257,13 +257,13 @@ function _checkCollisions(ma,lanes,cfg,lv){
     var cr=c.getBoundingClientRect();
     if(cr.bottom<pH-10||cr.top>pH+44) return;
     if(parseInt(c.dataset.lane)===_agLane){
-      _gamePoints+=3; _agCoins++; _mPtsAnim('+3 🪙','#eab308'); _mBeep(800,0.04); setTimeout(function(){_mBeep(1000,0.04);},40);
+      _gamePoints+=3; _agCoins++; _mPtsAnim('+3 🪙','#D4A843'); _mBeep(800,0.04); setTimeout(function(){_mBeep(1000,0.04);},40);
       c.style.transform='scale(1.5)'; c.style.opacity='0';
       setTimeout(function(){ c.remove(); },300);
     }
   });
   // Sync HUD
-  var pe=document.getElementById('m-pts'); if(pe){ pe.textContent='⚡ '+_gamePoints; pe.style.color=_gamePoints<0?'#f87171':'var(--accent)'; }
+  var pe=document.getElementById('m-pts'); if(pe){ pe.textContent='⚡ '+_gamePoints; pe.style.color=_gamePoints<0?'#E24B4A':'var(--accent)'; }
 }
 
 // ── Modals ──
@@ -272,7 +272,7 @@ function openAgilityInfo(){
     '<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:14px;">Moduł Agility rozwija zdolność szybkiej zmiany kierunku (COD), reaktywność i koordynację ruchową. Tu musisz się RUSZAĆ. Naprawdę.</div>'
     +'<div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:14px;">📱 Trzymaj telefon oburącz przed sobą. Akcelerometr mierzy Twoje ruchy: shuffle boczny, skok, przysiad.</div>'
     +'<div style="font-size:12px;color:#d97706;margin-bottom:14px;">⚠️ Upewnij się, że masz min. 2m × 2m miejsca. Zdejmij buty na śliskiej powierzchni.</div>'
-    +'<div style="background:rgba(74,222,128,.04);border-radius:10px;padding:10px;margin-top:12px;"><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.4);">🧠 Ciekawi Cię nauka? Sprawdź sekcję nerdową w module ⚡ Czas Reakcji!</div></div>'
+    +'<div style="background:rgba(82,201,123,.04);border-radius:10px;padding:10px;margin-top:12px;"><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.4);">🧠 Ciekawi Cię nauka? Sprawdź sekcję nerdową w module ⚡ Czas Reakcji!</div></div>'
   );
 }
 function openAgilityGameInfo(){

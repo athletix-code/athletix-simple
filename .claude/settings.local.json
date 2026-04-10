@@ -23,7 +23,10 @@
       "Bash(sed -i '' 's/background:linear-gradient\\(135deg,#1d4ed8,#3b82f6\\)/background:linear-gradient\\(135deg,rgba\\(74,222,128,.1\\),rgba\\(234,179,8,.06\\)\\)/g' athletix/js/data.js)",
       "Bash(sed -i '' 's/background:#1d4ed8;/background:rgba\\(74,222,128,.1\\);color:#4ade80;/g; s/color:#fff;border:none/border:1px solid rgba\\(74,222,128,.2\\)/g' athletix/js/diary.js)",
       "Bash(sed -i '' \"s/background:#1d4ed8;color:#fff/background:rgba\\(74,222,128,.1\\);color:#4ade80/g\" athletix/js/reports.js)",
-      "Bash(sed -i '' 's/background:#1d4ed8;border:none/background:rgba\\(74,222,128,.1\\);border:1px solid rgba\\(74,222,128,.2\\)/g' athletix/js/status.js)"
+      "Bash(sed -i '' 's/background:#1d4ed8;border:none/background:rgba\\(74,222,128,.1\\);border:1px solid rgba\\(74,222,128,.2\\)/g' athletix/js/status.js)",
+      "Bash(sed -i '' 's/rgba\\(74,222,128/rgba\\(82,201,123/g' athletix/css/app.css)",
+      "Bash(sed -i '' 's/rgba\\(234,179,8/rgba\\(212,168,67/g' athletix/css/app.css)",
+      "Bash(sed -i '' 's/#4ade80/#52C97B/g' athletix/css/app.css)"
     ]
   }
 }

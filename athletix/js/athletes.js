@@ -53,7 +53,7 @@ var TEST_LIBRARY={
     {name:'Cooper 12min',unit:'m'},{name:'2000m RowErg',unit:'s'},
     {name:'30-15 IFT',unit:'km/h'}
   ]},
-  szybkosc:{label:'Szybkość / COD',icon:'🏃',color:'#4ade80',tests:[
+  szybkosc:{label:'Szybkość / COD',icon:'🏃',color:'#52C97B',tests:[
     {name:'Sprint 10m',unit:'s'},{name:'Sprint 20m',unit:'s'},{name:'Sprint 30m',unit:'s'},
     {name:'T-test',unit:'s'},{name:'Illinois',unit:'s'},{name:'5-10-5',unit:'s'}
   ]},
@@ -104,11 +104,11 @@ function renderAthleteBar(){
     var wrap=document.createElement('div');
     wrap.style.cssText='display:flex;align-items:center;flex-shrink:0;margin-bottom:4px;';
     var btn=document.createElement('button'); btn.title=name;
-    btn.style.cssText='display:flex;align-items:center;gap:6px;padding:3px 10px 3px 3px;border-radius:24px;border:2px solid '+(isActive?'rgba(74,222,128,.4)':'rgba(255,255,255,.15)')+';background:'+(isActive?'rgba(74,222,128,.12)':'rgba(255,255,255,.04)')+';cursor:pointer;transition:all .15s;white-space:nowrap;';
+    btn.style.cssText='display:flex;align-items:center;gap:6px;padding:3px 10px 3px 3px;border-radius:24px;border:2px solid '+(isActive?'rgba(82,201,123,.4)':'rgba(255,255,255,.15)')+';background:'+(isActive?'rgba(82,201,123,.12)':'rgba(255,255,255,.04)')+';cursor:pointer;transition:all .15s;white-space:nowrap;';
     // Badge poziomu gamifikacji
     var lvBadge='';
     if(typeof getGamProfile==='function'){ var gp=getGamProfile(name); if(gp.totalPoints>0){ var rk=getRank(gp.totalPoints); lvBadge='<span style="font-size:7px;font-weight:800;background:'+rk.color+';color:#fff;border-radius:6px;padding:1px 3px;line-height:1.2;margin-left:2px;vertical-align:top;">Lv.'+gp.level+'</span>'; } }
-    btn.innerHTML='<div style="width:30px;height:30px;border-radius:50%;background:'+(isActive?'rgba(74,222,128,.25)':'rgba(255,255,255,.12)')+';display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;color:'+(isActive?'#4ade80':'rgba(255,255,255,.45)')+';flex-shrink:0;">'+initials+'</div>'
+    btn.innerHTML='<div style="width:30px;height:30px;border-radius:50%;background:'+(isActive?'rgba(82,201,123,.25)':'rgba(255,255,255,.12)')+';display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;color:'+(isActive?'#52C97B':'rgba(255,255,255,.45)')+';flex-shrink:0;">'+initials+'</div>'
       +'<span style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:'+(isActive?'800':'600')+';color:'+(isActive?'#fff':'rgba(255,255,255,.4)')+';letter-spacing:.04em;-webkit-user-select:none;user-select:none;">'+firstName+lvBadge+'</span>';
     btn.onclick=function(){ setActiveAthlete(name); };
     wrap.appendChild(btn);

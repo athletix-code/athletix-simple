@@ -31,10 +31,10 @@ function _getShareData(){
 }
 
 var _THEMES={
-  blue:{bg1:'#08080c',bg2:'#0a1428',accent:'#3b82f6',ar:'59,130,246',good:'#4ade80',text:'#ffffff',muted:'rgba(255,255,255,0.3)',sub:'rgba(255,255,255,0.5)'},
-  gold:{bg1:'#0c0c04',bg2:'#1a1808',accent:'#eab308',ar:'234,179,8',good:'#eab308',text:'#ffffff',muted:'rgba(255,255,255,0.3)',sub:'rgba(255,255,255,0.5)'},
-  green:{bg1:'#040c06',bg2:'#0a1a0e',accent:'#4ade80',ar:'74,222,128',good:'#4ade80',text:'#ffffff',muted:'rgba(255,255,255,0.3)',sub:'rgba(255,255,255,0.5)'},
-  fire:{bg1:'#0c0404',bg2:'#1a0808',accent:'#f87171',ar:'220,38,38',good:'#f87171',text:'#ffffff',muted:'rgba(255,255,255,0.3)',sub:'rgba(255,255,255,0.5)'},
+  blue:{bg1:'#08080c',bg2:'#0a1428',accent:'#3b82f6',ar:'59,130,246',good:'#52C97B',text:'#ffffff',muted:'rgba(255,255,255,0.3)',sub:'rgba(255,255,255,0.5)'},
+  gold:{bg1:'#0c0c04',bg2:'#1a1808',accent:'#D4A843',ar:'234,179,8',good:'#D4A843',text:'#ffffff',muted:'rgba(255,255,255,0.3)',sub:'rgba(255,255,255,0.5)'},
+  green:{bg1:'#040c06',bg2:'#0a1a0e',accent:'#52C97B',ar:'74,222,128',good:'#52C97B',text:'#ffffff',muted:'rgba(255,255,255,0.3)',sub:'rgba(255,255,255,0.5)'},
+  fire:{bg1:'#0c0404',bg2:'#1a0808',accent:'#E24B4A',ar:'220,38,38',good:'#E24B4A',text:'#ffffff',muted:'rgba(255,255,255,0.3)',sub:'rgba(255,255,255,0.5)'},
   purple:{bg1:'#08040c',bg2:'#140a1e',accent:'#a855f7',ar:'168,85,247',good:'#a855f7',text:'#ffffff',muted:'rgba(255,255,255,0.3)',sub:'rgba(255,255,255,0.5)'},
   light:{bg1:'#f5f5f5',bg2:'#ffffff',accent:'#2563eb',ar:'37,99,235',good:'#16a34a',text:'#1a1a1a',muted:'rgba(0,0,0,0.3)',sub:'rgba(0,0,0,0.5)'}
 };
@@ -97,7 +97,7 @@ function _onShareFile(input){
     var img=new Image(); img.onload=function(){
       _sharePhoto=img;
       var p=document.getElementById('share-photo-prev');
-      if(p){ p.style.display='flex'; p.innerHTML='<img src="'+e.target.result+'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div onclick="_sharePhoto=null;this.parentElement.style.display=\'none\'" style="font-size:11px;color:#f87171;cursor:pointer;">✕ Usuń</div>'; }
+      if(p){ p.style.display='flex'; p.innerHTML='<img src="'+e.target.result+'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div onclick="_sharePhoto=null;this.parentElement.style.display=\'none\'" style="font-size:11px;color:#E24B4A;cursor:pointer;">✕ Usuń</div>'; }
     };
     img.src=e.target.result;
   };
@@ -135,7 +135,7 @@ function _doGenerate(){
   ctx.font='700 36px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'rgba(255,255,255,0.7)':t.sub;
   ctx.fillText('Athleti',w*0.06,h*0.04);
   var aw=ctx.measureText('Athleti').width;
-  ctx.fillStyle='#dc2626'; ctx.fillText('X',w*0.06+aw,h*0.04);
+  ctx.fillStyle='#E24B4A'; ctx.fillText('X',w*0.06+aw,h*0.04);
   var xw=ctx.measureText('X').width;
   ctx.font='500 28px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'rgba(255,255,255,0.5)':t.muted;
   ctx.fillText(' App',w*0.06+aw+xw,h*0.04);
@@ -160,10 +160,10 @@ function _doGenerate(){
   ctx.fillText(d.gameName.toUpperCase(),w/2,cy+40);
 
   // 6. GLOWNA METRYKA (punkty)
-  var ptsCol=d.points<0?'#f87171':(_sharePhoto?'#ffffff':t.text);
+  var ptsCol=d.points<0?'#E24B4A':(_sharePhoto?'#ffffff':t.text);
   ctx.font='900 120px Montserrat,sans-serif'; ctx.fillStyle=ptsCol; ctx.textAlign='center';
   ctx.fillText(d.points+'',w/2,cy+160);
-  ctx.font='700 28px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'#4ade80':t.good;
+  ctx.font='700 28px Montserrat,sans-serif'; ctx.fillStyle=_sharePhoto?'#52C97B':t.good;
   ctx.fillText('⚡ PUNKTY',w/2,cy+198);
 
   // 7. SREDNI CZAS

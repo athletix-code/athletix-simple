@@ -27,14 +27,14 @@ var RANK_TABLE=[
   {level:1,points:0,name:'Nowicjusz',color:'#9ca3af',emoji:'🌱',desc:'Każda legenda zaczynała od pierwszego powtórzenia. Chodź, rozgrzewka czeka.'},
   {level:2,points:200,name:'Debiutant',color:'#6b7280',emoji:'🌿',desc:'Zakwasy to dowód, że mięśnie wiedzą, że istniejesz. Brawo.'},
   {level:3,points:500,name:'Początkujący',color:'#22c55e',emoji:'🍀',desc:'Trening to już nawyk, nie kara. Tak trzymaj.'},
-  {level:5,points:1000,name:'Regularny',color:'#4ade80',emoji:'💧',desc:'Konsekwencja bije talent. A Ty jesteś konsekwentny.'},
-  {level:7,points:2000,name:'Adept',color:'#eab308',emoji:'💪',desc:'Zaczynasz czuć różnicę. Inni zaczynają ją widzieć.'},
+  {level:5,points:1000,name:'Regularny',color:'#52C97B',emoji:'💧',desc:'Konsekwencja bije talent. A Ty jesteś konsekwentny.'},
+  {level:7,points:2000,name:'Adept',color:'#D4A843',emoji:'💪',desc:'Zaczynasz czuć różnicę. Inni zaczynają ją widzieć.'},
   {level:10,points:4000,name:'Wojownik',color:'#7c3aed',emoji:'⚔️',desc:'Nie trenujesz bo musisz. Trenujesz bo to część tego kim jesteś.'},
   {level:13,points:7000,name:'Weteran',color:'#9333ea',emoji:'🛡️',desc:'Rok za rokiem, seria za serią. Twoja dyscyplina jest inspiracją.'},
   {level:16,points:12000,name:'Gladiator',color:'#d97706',emoji:'🏛️',desc:'Arena jest Twoja. Każdy trening to kolejna walka — i kolejne zwycięstwo.'},
   {level:20,points:20000,name:'Spartanin',color:'#ea580c',emoji:'🔥',desc:'Nie znasz słowa "odpuszczam". Twoje ciało jest Twoją twierdzą.'},
-  {level:25,points:35000,name:'Mistrz',color:'#dc2626',emoji:'👑',desc:'Lata treningu. Tysiące powtórzeń. Jesteś dowodem na to, że się da.'},
-  {level:30,points:55000,name:'Legenda',color:'#eab308',emoji:'⭐',desc:'Twoje imię jest synonimem determinacji. Elevate Your Game — i innych.'},
+  {level:25,points:35000,name:'Mistrz',color:'#E24B4A',emoji:'👑',desc:'Lata treningu. Tysiące powtórzeń. Jesteś dowodem na to, że się da.'},
+  {level:30,points:55000,name:'Legenda',color:'#D4A843',emoji:'⭐',desc:'Twoje imię jest synonimem determinacji. Elevate Your Game — i innych.'},
   {level:40,points:85000,name:'Titan',color:'#f59e0b',emoji:'🏔️',desc:'Góry się nie przesuwają. Ale Ty owszem. Od lat.'},
   {level:50,points:130000,name:'Bóg Olimpu',color:'#fbbf24',emoji:'🏆',desc:'Jeśli ktoś mówi że to niemożliwe — pokaż mu swój profil. Elevate Your Game. ⚡'}
 ];

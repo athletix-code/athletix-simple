@@ -45,10 +45,10 @@ function _startSearchTimer(startTime,mode,lv){
 function _stopSearchTimer(){ if(_searchTimerInt){ clearInterval(_searchTimerInt); _searchTimerInt=null; } }
 function _timerColor(sec,mode,lv){
   var t=_getThresholds(mode,lv);
-  if(sec<t[0]) return '#4ade80';
-  if(sec<t[1]) return '#4ade80';
+  if(sec<t[0]) return '#52C97B';
+  if(sec<t[1]) return '#52C97B';
   if(sec<t[2]) return '#d97706';
-  return '#f87171';
+  return '#E24B4A';
 }
 function _getThresholds(mode,lv){
   if(mode==='pairs'){
@@ -191,7 +191,7 @@ function _runPairsLevel(lv,round,results){
     var idx=parseInt(cell.dataset.idx);
     if(selected===null){
       selected=idx;
-      cell.style.borderColor='#4ade80'; cell.style.background='rgba(59,130,246,.1)'; cell.style.transform='scale(1.05)';
+      cell.style.borderColor='#52C97B'; cell.style.background='rgba(59,130,246,.1)'; cell.style.transform='scale(1.05)';
     } else if(selected===idx){
       cell.style.borderColor='rgba(255,255,255,.1)'; cell.style.background='rgba(255,255,255,.06)'; cell.style.transform='';
       selected=null;
@@ -200,8 +200,8 @@ function _runPairsLevel(lv,round,results){
       if(board[selected]===board[idx]){
         foundPairs++; _searchTimeouts=0;
         _gameCorrect++; _gameCombo++; if(_gameCombo>_gameMaxCombo) _gameMaxCombo=_gameCombo;
-        cell.style.background='#4ade80'; cell.style.borderColor='#4ade80'; cell.style.transform='scale(1.2)';
-        if(selCell){ selCell.style.background='#4ade80'; selCell.style.borderColor='#4ade80'; selCell.style.transform='scale(1.2)'; }
+        cell.style.background='#52C97B'; cell.style.borderColor='#52C97B'; cell.style.transform='scale(1.2)';
+        if(selCell){ selCell.style.background='#52C97B'; selCell.style.borderColor='#52C97B'; selCell.style.transform='scale(1.2)'; }
         _sndMatch();
         setTimeout(function(){ cell.style.opacity='0'; cell.style.transform='scale(0)'; if(selCell){ selCell.style.opacity='0'; selCell.style.transform='scale(0)'; } },300);
         if(foundPairs>=cfg.pairs){
@@ -221,11 +221,11 @@ function _runPairsLevel(lv,round,results){
         _gameCombo=0; _gamePoints-=1; _gameLives--; setTimeout(_flashLives,50);
         _sndMiss(); if(navigator.vibrate) navigator.vibrate(200);
         var errD=document.createElement('div'); errD.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;';
-        errD.innerHTML='<div style="font-size:16px;font-weight:800;color:#f87171;">✕ Źle! -1 pkt</div><div style="font-size:11px;color:#f87171;margin-top:4px;">❤️ -1 życie!</div>';
+        errD.innerHTML='<div style="font-size:16px;font-weight:800;color:#E24B4A;">✕ Źle! -1 pkt</div><div style="font-size:11px;color:#E24B4A;margin-top:4px;">❤️ -1 życie!</div>';
         ma.appendChild(errD); requestAnimationFrame(function(){ errD.style.opacity='1'; });
         setTimeout(function(){ errD.style.transition='opacity .3s'; errD.style.opacity='0'; setTimeout(function(){ errD.remove(); },300); },1000);
-        cell.style.background='rgba(248,113,113,.3)'; cell.style.borderColor='#f87171';
-        if(selCell){ selCell.style.background='rgba(248,113,113,.3)'; selCell.style.borderColor='#f87171'; }
+        cell.style.background='rgba(226,75,74,.3)'; cell.style.borderColor='#E24B4A';
+        if(selCell){ selCell.style.background='rgba(226,75,74,.3)'; selCell.style.borderColor='#E24B4A'; }
         setTimeout(function(){
           cell.style.background='rgba(255,255,255,.06)'; cell.style.borderColor='rgba(255,255,255,.1)'; cell.style.transform='';
           if(selCell){ selCell.style.background='rgba(255,255,255,.06)'; selCell.style.borderColor='rgba(255,255,255,.1)'; selCell.style.transform=''; }
@@ -261,7 +261,7 @@ function _runSeqLevel(lv,round,results){
       if(val===undefined){ gridHtml+='<div style="width:'+_calcBtnSize(cfg.cols,cfg.rows).size+'px;height:'+_calcBtnSize(cfg.cols,cfg.rows).size+'px;"></div>'; continue; }
       var done=val<nextExpected;
       var hidden=cfg.hide>0&&!done;
-      gridHtml+='<div class="seq-cell'+(done?' done':'')+'" data-idx="'+g+'" data-val="'+val+'" style="'+s.cell+'background:'+(done?'rgba(74,222,128,.15)':'rgba(255,255,255,.06)')+';border-color:'+(done?'#4ade80':'rgba(255,255,255,.1)')+';color:'+(done?'#4ade80':'#f2f2f2')+';cursor:'+(done?'default':'pointer')+';">'+(done?'✓':(hidden?'':val))+'</div>';
+      gridHtml+='<div class="seq-cell'+(done?' done':'')+'" data-idx="'+g+'" data-val="'+val+'" style="'+s.cell+'background:'+(done?'rgba(82,201,123,.15)':'rgba(255,255,255,.06)')+';border-color:'+(done?'#52C97B':'rgba(255,255,255,.1)')+';color:'+(done?'#52C97B':'#f2f2f2')+';cursor:'+(done?'default':'pointer')+';">'+(done?'✓':(hidden?'':val))+'</div>';
     }
     gridHtml+='</div>';
     ma.innerHTML=_mHUD()+gridHtml+_searchBottomBar(round,cfg.rounds);
@@ -285,7 +285,7 @@ function _runSeqLevel(lv,round,results){
     if(val===nextExpected){
       nextExpected++;
       cell.classList.add('done');
-      cell.style.background='rgba(74,222,128,.15)'; cell.style.borderColor='#4ade80'; cell.style.color='#4ade80';
+      cell.style.background='rgba(82,201,123,.15)'; cell.style.borderColor='#52C97B'; cell.style.color='#52C97B';
       cell.textContent='✓'; _sndGood();
       if(cfg.vanish){ cell.style.transition='all .2s'; cell.style.opacity='0.3'; }
       if(cfg.reshuffle>0&&clicks%cfg.reshuffle===0&&nextExpected<=n){
@@ -318,10 +318,10 @@ function _runSeqLevel(lv,round,results){
       _gameCombo=0; _gamePoints-=1; _gameLives--; setTimeout(_flashLives,50);
       _sndMiss(); if(navigator.vibrate) navigator.vibrate(200);
       var errD2=document.createElement('div'); errD2.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;';
-      errD2.innerHTML='<div style="font-size:16px;font-weight:800;color:#f87171;">✕ Źle! -1 pkt</div><div style="font-size:11px;color:#f87171;margin-top:4px;">❤️ -1 życie!</div>';
+      errD2.innerHTML='<div style="font-size:16px;font-weight:800;color:#E24B4A;">✕ Źle! -1 pkt</div><div style="font-size:11px;color:#E24B4A;margin-top:4px;">❤️ -1 życie!</div>';
       ma.appendChild(errD2); requestAnimationFrame(function(){ errD2.style.opacity='1'; });
       setTimeout(function(){ errD2.style.transition='opacity .3s'; errD2.style.opacity='0'; setTimeout(function(){ errD2.remove(); },300); },1000);
-      cell.style.background='rgba(248,113,113,.3)'; cell.style.borderColor='#f87171';
+      cell.style.background='rgba(226,75,74,.3)'; cell.style.borderColor='#E24B4A';
       setTimeout(function(){ cell.style.background='rgba(255,255,255,.06)'; cell.style.borderColor='rgba(255,255,255,.1)'; },300);
       if(_gameLives<=0){ clearTimeout(tout); _stopSearchTimer(); setTimeout(function(){ _showGameOver(); },500); return; }
     }
@@ -401,7 +401,7 @@ function _runWordsLevel(lv,round,results){
     var r=parseInt(cell.dataset.r),c=parseInt(cell.dataset.c);
     if(!selStart){
       selStart={r:r,c:c};
-      cell.style.borderColor='#4ade80'; cell.style.background='rgba(59,130,246,.15)';
+      cell.style.borderColor='#52C97B'; cell.style.background='rgba(59,130,246,.15)';
     } else {
       var dr=r-selStart.r,dc=c-selStart.c;
       var len=Math.max(Math.abs(dr),Math.abs(dc))+1;
@@ -413,9 +413,9 @@ function _runWordsLevel(lv,round,results){
       for(var w2=0;w2<words.length;w2++){ if(found.indexOf(w2)===-1&&(letters===words[w2]||lettersRev===words[w2])){ matchIdx=w2; break; } }
       if(matchIdx>=0){
         found.push(matchIdx); _searchTimeouts=0;
-        cells2.forEach(function(c2){ if(c2){ c2.style.background='rgba(74,222,128,.15)'; c2.style.borderColor='#4ade80'; c2.style.color='#4ade80'; } });
+        cells2.forEach(function(c2){ if(c2){ c2.style.background='rgba(82,201,123,.15)'; c2.style.borderColor='#52C97B'; c2.style.color='#52C97B'; } });
         var wl=document.getElementById('wl-'+matchIdx);
-        if(wl){ wl.style.textDecoration='line-through'; wl.style.color='#4ade80'; }
+        if(wl){ wl.style.textDecoration='line-through'; wl.style.color='#52C97B'; }
         _sndMatch(); _gameCorrect++;
         _gameCombo++; if(_gameCombo>_gameMaxCombo) _gameMaxCombo=_gameCombo;
         if(found.length>=words.length){
@@ -432,10 +432,10 @@ function _runWordsLevel(lv,round,results){
         _sndMiss(); _gamePoints-=1; _gameCombo=0; _gameLives--; setTimeout(_flashLives,50);
         if(navigator.vibrate) navigator.vibrate(200);
         var errD3=document.createElement('div'); errD3.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .1s;';
-        errD3.innerHTML='<div style="font-size:16px;font-weight:800;color:#f87171;">✕ Źle! -1 pkt</div><div style="font-size:11px;color:#f87171;margin-top:4px;">❤️ -1 życie!</div>';
+        errD3.innerHTML='<div style="font-size:16px;font-weight:800;color:#E24B4A;">✕ Źle! -1 pkt</div><div style="font-size:11px;color:#E24B4A;margin-top:4px;">❤️ -1 życie!</div>';
         ma.appendChild(errD3); requestAnimationFrame(function(){ errD3.style.opacity='1'; });
         setTimeout(function(){ errD3.style.transition='opacity .3s'; errD3.style.opacity='0'; setTimeout(function(){ errD3.remove(); },300); },1000);
-        cells2.forEach(function(c2){ if(c2){ c2.style.background='rgba(248,113,113,.2)'; c2.style.borderColor='#f87171'; } });
+        cells2.forEach(function(c2){ if(c2){ c2.style.background='rgba(226,75,74,.2)'; c2.style.borderColor='#E24B4A'; } });
         setTimeout(function(){ cells2.forEach(function(c2){ if(c2){ c2.style.background='rgba(255,255,255,.06)'; c2.style.borderColor='rgba(255,255,255,.08)'; } }); },300);
         if(_gameLives<=0){ clearTimeout(tout); _stopSearchTimer(); setTimeout(function(){ _showGameOver(); },500); return; }
       }
@@ -460,7 +460,7 @@ function openSearchInfo(){
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:16px;font-weight:900;color:#f2f2f2;">🔍 Wyszukiwanie - Jak grać?</div><button onclick="document.getElementById(\'search-info-modal\').remove()" style="background:transparent;border:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);width:32px;height:32px;">✕</button></div>'
     +'<div style="font-size:13px;color:#f2f2f2;line-height:1.6;margin-bottom:12px;"><strong>🔢 Pary</strong> - znajdź dwie takie same cyfry<br><strong>📊 Kolejność</strong> - klikaj cyfry od 1 do N po kolei<br><strong>📝 Słowa</strong> - znajdź ukryte słowa</div>'
     +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin:8px 0;">⏱️ Timeout = 0 pkt. Życie tracisz za 3 timeouty z rzędu.</div>'
-    +'<button onclick="document.getElementById(\'search-info-modal\').remove()" style="width:100%;padding:12px;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.25);border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
+    +'<button onclick="document.getElementById(\'search-info-modal\').remove()" style="width:100%;padding:12px;background:rgba(82,201,123,.1);color:#52C97B;border:1px solid rgba(82,201,123,.25);border-radius:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;">Rozumiem! 💪</button></div>';
   var box=document.createElement('div'); box.innerHTML=h; modal.appendChild(box.firstChild);
   document.body.appendChild(modal);
 }

@@ -115,7 +115,7 @@ function getFinishMsg(){ return FINISH_MSGS[Math.floor(Math.random()*FINISH_MSGS
 function launchConfetti(){
   var cv=document.createElement('canvas'); cv.style.cssText='position:fixed;inset:0;z-index:4000;pointer-events:none;width:100%;height:100%;';
   cv.width=window.innerWidth; cv.height=window.innerHeight; document.body.appendChild(cv); var ctx=cv.getContext('2d');
-  var colors=['#4ade80','#15803d','#eab308','#f97316','#7e22ce','#ec4899','#ffffff','#86efac','#fca5a5','#ef4444'];
+  var colors=['#52C97B','#15803d','#D4A843','#f97316','#7e22ce','#ec4899','#ffffff','#86efac','#fca5a5','#ef4444'];
   var parts=[]; for(var i=0;i<160;i++) parts.push({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*0.5,w:6+Math.random()*8,h:3+Math.random()*5,color:colors[Math.floor(Math.random()*colors.length)],vx:(Math.random()-.5)*6,vy:2+Math.random()*4,rot:Math.random()*360,rotV:(Math.random()-.5)*8,alpha:1});
   var start=Date.now(),dur=3400;
   function frame(){ ctx.clearRect(0,0,cv.width,cv.height); var prog=Math.min(1,(Date.now()-start)/dur);
