@@ -5,12 +5,12 @@ input,select,textarea{font-size:16px!important;}
 
 /* ── LIGHT THEME ── */
 html[data-theme="light"]{
-  --bg:#efefef;--s1:#ffffff;--s2:#e6e6e6;--s3:#d8d8d8;
-  --border:rgba(0,0,0,.09);--border2:rgba(0,0,0,.18);
-  --text:#0f0f0f;--muted:rgba(0,0,0,.6);--dim:rgba(0,0,0,.45);
-  --accent:#16a34a;--accent-bg:rgba(22,163,74,.1);
-  --red-text:#b91c1c;--green-text:#15803d;--green:#15803d;
-  --amber-text:#92400e;--amber:#b45309;--purple-text:#6b21a8;--purple:#7c3aed;
+  --bg:#f5f0e8;--s1:#faf7f2;--s2:#ede8df;--s3:#e0dbd2;
+  --border:rgba(120,100,60,.1);--border2:rgba(120,100,60,.18);
+  --text:#2a2418;--muted:rgba(42,36,24,.55);--dim:rgba(42,36,24,.4);
+  --accent:#2d7a4f;--accent-bg:rgba(45,122,79,.08);
+  --red-text:#b91c1c;--green-text:#2d7a4f;--green:#2d7a4f;
+  --amber-text:#92400e;--amber:#b8860b;--purple-text:#6b21a8;--purple:#7c3aed;
   --red:#dc2626;--orange-text:#c2410c;--blue-text:#1d4ed8;
 }
 html[data-theme="light"] .preset-btn.active{ color:#9a3412; background:rgba(154,52,18,.1); border-color:rgba(154,52,18,.4); }
@@ -43,9 +43,9 @@ html[data-theme="light"] #motion-active{
 .lock-btn{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.35);border-radius:var(--r-xs);padding:8px 12px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;}
 
 :root{
-  --bg:#0b0b0b;--s1:#141414;--s2:#1c1c1c;--s3:#2a2a2a;
-  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
-  --text:#f2f2f2;--muted:rgba(255,255,255,.55);--dim:rgba(255,255,255,.35);
+  --bg:#13110b;--s1:#1a1710;--s2:#201d14;--s3:#2a2720;
+  --border:rgba(255,245,220,.06);--border2:rgba(255,245,220,.12);
+  --text:rgba(255,245,220,.85);--muted:rgba(255,245,220,.5);--dim:rgba(255,245,220,.35);
   --accent:#4ade80;--accent-bg:rgba(74,222,128,.14);
   --red:#dc2626;--red-bg:rgba(220,38,38,.13);--red-text:#f87171;--red-fill:#7f1d1d;
   --amber:#d97706;--amber-fill:#78350f;--amber-text:#fbbf24;
